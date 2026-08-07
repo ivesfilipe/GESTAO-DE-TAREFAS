@@ -6,6 +6,17 @@
 set -e  # interrompe o script se qualquer comando falhar
 cd "$(dirname "$0")/.."
 
+# Sem .env nao ha como subir a aplicacao — aborta com orientacao clara
+if [ ! -f .env ]; then
+  echo "ERRO: arquivo .env nao encontrado."
+  echo "Crie o .env de producao no Gerenciador de Arquivos do cPanel"
+  echo "(base: .env.example, bloco 'Producao') e rode o deploy de novo."
+  exit 1
+fi
+
+# Hospedagem compartilhada: evita falha de memoria no composer
+export COMPOSER_MEMORY_LIMIT=-1
+
 # PHP 8.3 (EasyApache 4); cai no php do PATH se nao existir
 if [ -x /opt/cpanel/ea-php83/root/usr/bin/php ]; then
   PHP=/opt/cpanel/ea-php83/root/usr/bin/php
