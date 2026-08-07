@@ -92,6 +92,21 @@ ferramenta que talvez não exista no servidor; o script
 **Revisão futura**: Se Node.js for confirmado no servidor, o build pode
 passar a rodar no deploy e `public/build` volta ao `.gitignore`.
 
+## ADR-009 — Docroot do subdomínio apontado para `public/`
+**Status**: Aceito
+**Contexto**: O caminho `/home/medicalthermo/tarefas.medicalthermo.com`
+é simultaneamente a raiz do repositório (onde o cPanel Git Version
+Control clona o código) e o docroot do subdomínio no Apache. O Laravel
+exige que a web sirva apenas o diretório `public/` — servir a raiz do
+repositório expõe `.env`, `composer.json` e demais arquivos sensíveis.
+**Decisão**: Alterar o docroot do subdomínio no cPanel para
+`/home/medicalthermo/tarefas.medicalthermo.com/public`.
+**Motivo**: Segurança (nenhum arquivo fora de `public/` fica acessível
+via web) sem precisar de `.htaccess` de redirecionamento na raiz.
+**Alternativas descartadas**: `.htaccess` na raiz reescrevendo para
+`public/` (funciona, mas mantém arquivos sensíveis potencialmente
+expostos se a regra falhar).
+
 ---
 
 ## Como adicionar um novo ADR

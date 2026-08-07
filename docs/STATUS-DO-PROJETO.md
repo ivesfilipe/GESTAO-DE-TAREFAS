@@ -1,10 +1,10 @@
 # STATUS DO PROJETO — Sistema de Gestão de Tarefas para Liderados
 
-Última atualização: [preencher na primeira execução] por [ferramenta/agente]
+Última atualização: 2026-08-07 por OpenCode (agente de IA)
 
 ## Fase atual
-Fase 0 — Infraestrutura e esqueleto do projeto (ainda não iniciada
-tecnicamente; documentação completa)
+Fase 0 — Infraestrutura e esqueleto do projeto (em andamento:
+esqueleto pronto localmente e no GitHub; falta subir no servidor)
 
 ## Progresso da fase atual
 - [x] Levantamento de infraestrutura do servidor (cPanel, PHP 8.1,
@@ -13,13 +13,19 @@ tecnicamente; documentação completa)
 - [x] Decisão de stack tecnológica (Laravel + Livewire + MySQL)
 - [x] Documentação completa de produto, arquitetura, dados, UX,
       segurança, qualidade, DevOps, governança e operação
-- [ ] Projeto Laravel criado e rodando no servidor
-- [ ] Conexão com banco de dados validada
-- [ ] Repositório Git inicializado, primeiro commit realizado
-- [ ] Pipeline de deploy testada
+- [x] Projeto Laravel 12 criado e rodando LOCALMENTE (SQLite, testes
+      passando, assets Vite buildados) — falta rodar no servidor
+- [x] Repositório Git inicializado, primeiro commit realizado, push
+      para github.com/ivesfilipe/GESTAO-DE-TAREFAS (branch `main`)
+- [ ] Projeto Laravel rodando no servidor (aguardando acesso — ver
+      bloqueio de SSH abaixo)
+- [ ] Conexão com banco de dados de PRODUÇÃO validada (depende do
+      `.env` de produção no servidor)
+- [ ] Pipeline de deploy testada (primeiro clone + `deploy/publicar.sh`
+      no servidor)
 
 ## Fases concluídas
-*(nenhuma ainda — apenas a documentação inicial está pronta)*
+*(nenhuma ainda — Fase 0 em andamento)*
 
 ## Fases pendentes
 - [ ] Fase 0 — Infraestrutura e esqueleto do projeto
@@ -36,17 +42,30 @@ tecnicamente; documentação completa)
 - [ ] Fase 11 — Polimento, responsividade final e revisão de segurança
 
 ## Decisões técnicas tomadas nesta fase
-- Ver `06-DECISOES-DE-ARQUITETURA-ADR.md` (ADR-001 a ADR-006)
+- Ver `06-DECISOES-DE-ARQUITETURA-ADR.md` (ADR-001 a ADR-009; destaques
+  da Fase 0: ADR-007 PHP 8.3 + Laravel 12, ADR-008 assets versionados,
+  ADR-009 docroot em `public/`)
 
 ## Pendências e bloqueios conhecidos
-- Confirmar se Node.js/NPM está disponível no servidor via SSH (necessário
-  para build de assets do Tailwind/Vite) — ver `23-INFRAESTRUTURA-E-AMBIENTE.md`
+- **BLOQUEIO — SSH inacessível**: conexões recusadas em todas as portas
+  comuns (22, 2222, 22222, 2022, 8022, 9022, 9922, 65022, 21098, 7822)
+  em `br65-cp.valueserver.com.br` (187.110.165.194). Apenas cPanel
+  (2083) responde. Operador tem senha SSH fornecida pelo provedor —
+  precisa localizar no painel da ValueHost (ou no e-mail de boas-vindas)
+  o HOST e a PORTA corretos, ou solicitar a liberação do SSH ao suporte.
+- Node.js/NPM no servidor: pendência neutralizada pelo ADR-008 (assets
+  compilados localmente e versionados em `public/build`).
 - Confirmar periodicidade do backup automático (JetBackup) no cPanel
 - Senha do banco de dados e credenciais SMTP ainda precisam ser
   inseridas manualmente no `.env` de produção pelo operador humano
+- Senha SSH foi compartilhada nesta conversa — recomendado rotacioná-la
+  (docs/19, regra de exposição de segredos)
 
 ## Próximo passo recomendado
-Executar a Fase 0 (infraestrutura e esqueleto do projeto) seguindo
-`FASES-DE-IMPLANTACAO.md` e todas as regras de `27-REGRAS-DE-EXECUCAO-DO-AGENTE.md`.
+Concluir a Fase 0 no servidor assim que o acesso (SSH ou cPanel Git
+Version Control + Terminal) estiver disponível: clonar o repositório em
+`/home/medicalthermo/tarefas.medicalthermo.com`, apontar o docroot para
+`public/` (ADR-009), criar o `.env` de produção, rodar
+`deploy/publicar.sh` e validar https://tarefas.medicalthermo.com.
 Ao concluir, atualizar este arquivo antes de iniciar a Fase 1.
 
