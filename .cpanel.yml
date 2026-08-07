@@ -1,0 +1,7 @@
+---
+# Deploy automático via cPanel Git Version Control.
+# Ao clicar em "Update from Remote" / "Deploy" no cPanel, o script de
+# publicação roda automaticamente (docs/24-PIPELINE-DE-DEPLOY.md).
+deployment:
+  tasks:
+    - /bin/bash $HOME/tarefas.medicalthermo.com/deploy/publicar.sh
