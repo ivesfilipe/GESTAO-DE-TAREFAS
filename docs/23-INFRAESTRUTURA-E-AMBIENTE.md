@@ -8,7 +8,8 @@
 
 ## Stack de servidor
 - Apache 2.4.68 + PHP-FPM
-- PHP: versão 8.1 (via MultiPHP Manager)
+- PHP: versão 8.3 (via MultiPHP Manager — atualizado de 8.1 na Fase 0,
+  ver ADR-007 em `06-DECISOES-DE-ARQUITETURA-ADR.md`)
 - Banco de dados: MariaDB 10.11.18 (compatível MySQL)
 - SSL: Let's Encrypt / AutoSSL via cPanel
 

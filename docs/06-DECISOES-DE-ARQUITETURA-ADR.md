@@ -63,6 +63,35 @@ nesta fase, mas estruturar o código de forma que adicionar canal
 e-mail/WhatsApp no futuro não exija alterar a lógica de disparo.
 **Motivo**: Reduz escopo da V1 sem fechar porta de crescimento.
 
+## ADR-007 — PHP 8.3 + Laravel 12 (substitui a premissa de PHP 8.1 do ADR-001)
+**Status**: Aceito
+**Contexto**: O servidor foi levantado com PHP 8.1 (`23-INFRAESTRUTURA-E-AMBIENTE.md`),
+o que limitaria o projeto ao Laravel 10. Porém o Laravel 10 está EOL
+(fim de suporte em fev/2025) e o Composer bloqueia sua instalação por
+advisories de segurança conhecidos — incompatível com
+`18-SEGURANCA-CHECKLIST-OWASP.md`.
+**Decisão**: Operador autorizou trocar o PHP do subdomínio para 8.3 via
+MultiPHP Manager do cPanel; projeto criado com Laravel 12 (suportado).
+**Motivo**: Framework com correções de segurança ativas; mantém o
+espírito do ADR-001 ("versão estável mais recente compatível com o
+servidor").
+**Alternativas descartadas**: Manter PHP 8.1 + Laravel 10 ignorando os
+advisories (risco de segurança em produção).
+
+## ADR-008 — Assets de front-end compilados localmente e versionados
+**Status**: Aceito
+**Contexto**: O build do Vite/Tailwind exige Node.js, cuja
+disponibilidade no servidor ainda não foi confirmada (pendência
+registrada em `STATUS-DO-PROJETO.md`).
+**Decisão**: Rodar `npm run build` localmente e versionar
+`public/build` no Git (removido do `.gitignore`), conforme alternativa
+já prevista em `23-INFRAESTRUTURA-E-AMBIENTE.md`.
+**Motivo**: Deploy em hospedagem compartilhada não pode depender de
+ferramenta que talvez não exista no servidor; o script
+`deploy/publicar.sh` fica 100% PHP/Composer.
+**Revisão futura**: Se Node.js for confirmado no servidor, o build pode
+passar a rodar no deploy e `public/build` volta ao `.gitignore`.
+
 ---
 
 ## Como adicionar um novo ADR
