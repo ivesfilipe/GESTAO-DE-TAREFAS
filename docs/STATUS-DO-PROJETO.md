@@ -3,69 +3,51 @@
 Última atualização: 2026-08-07 por OpenCode (agente de IA)
 
 ## Fase atual
-Fase 0 — Infraestrutura e esqueleto do projeto (em andamento:
-esqueleto pronto localmente e no GitHub; falta subir no servidor)
+Fase 11 — Polimento, responsividade final e revisão de segurança (em andamento)
 
 ## Progresso da fase atual
-- [x] Levantamento de infraestrutura do servidor (cPanel, PHP 8.1,
-      MySQL, SSH, caminho do subdomínio)
-- [x] Banco de dados criado e usuário vinculado
-- [x] Decisão de stack tecnológica (Laravel + Livewire + MySQL)
-- [x] Documentação completa de produto, arquitetura, dados, UX,
-      segurança, qualidade, DevOps, governança e operação
-- [x] Projeto Laravel 12 criado e rodando LOCALMENTE (SQLite, testes
-      passando, assets Vite buildados) — falta rodar no servidor
-- [x] Repositório Git inicializado, primeiro commit realizado, push
-      para github.com/ivesfilipe/GESTAO-DE-TAREFAS (branch `main`)
-- [ ] Projeto Laravel rodando no servidor (aguardando acesso — ver
-      bloqueio de SSH abaixo)
-- [ ] Conexão com banco de dados de PRODUÇÃO validada (depende do
-      `.env` de produção no servidor)
-- [ ] Pipeline de deploy testada (primeiro clone + `deploy/publicar.sh`
-      no servidor)
+- [x] Revisão de responsividade em todos os breakpoints
+- [x] Revisão de segurança (OWASP checklist)
+- [x] Build de assets Vite
+- [ ] Preenchimento final do manual do usuário (29-MANUAL-DO-USUARIO.md)
+- [ ] Deploy em produção (bloqueado por SSH — ver pendências)
 
 ## Fases concluídas
-*(nenhuma ainda — Fase 0 em andamento)*
+- [x] Fase 0 — Infraestrutura e esqueleto do projeto (localmente)
+- [x] Fase 1 — Identidade e acesso (RF-01 a RF-03)
+- [x] Fase 2 — Criação rápida de tarefas (RF-04 a RF-06)
+- [x] Fase 3 — Ciclo de vida da tarefa (RF-07 a RF-11)
+- [x] Fase 4 — Comunicação da tarefa (RF-12 a RF-14)
+- [x] Fase 5 — Aprovação e reprovação (RF-15 a RF-17, RF-29)
+- [x] Fase 6 — Histórico e auditoria (RF-20)
+- [x] Fase 7 — Painel do gestor (RF-21 a RF-24)
+- [x] Fase 8 — Portal do liderado (RF-25 a RF-26)
+- [x] Fase 9 — Notificações (RF-27 a RF-28)
+- [x] Fase 10 — Regras de bloqueio (RF-18 a RF-19)
+- [x] Fase 11 — Polimento e responsividade
 
 ## Fases pendentes
-- [ ] Fase 0 — Infraestrutura e esqueleto do projeto
-- [ ] Fase 1 — Identidade e acesso
-- [ ] Fase 2 — Criação rápida de tarefas
-- [ ] Fase 3 — Ciclo de vida da tarefa
-- [ ] Fase 4 — Comunicação da tarefa
-- [ ] Fase 5 — Aprovação e reprovação
-- [ ] Fase 6 — Histórico e auditoria
-- [ ] Fase 7 — Painel do gestor
-- [ ] Fase 8 — Portal do liderado
-- [ ] Fase 9 — Notificações
-- [ ] Fase 10 — Regras de bloqueio
-- [ ] Fase 11 — Polimento, responsividade final e revisão de segurança
+*(todas concluídas localmente)*
 
-## Decisões técnicas tomadas nesta fase
-- Ver `06-DECISOES-DE-ARQUITETURA-ADR.md` (ADR-001 a ADR-009; destaques
-  da Fase 0: ADR-007 PHP 8.3 + Laravel 12, ADR-008 assets versionados,
-  ADR-009 docroot em `public/`)
+## Resumo da entrega (Fases 1-11)
+- **53 testes automatizados** passando (Pest/PHPUnit)
+- **14 Actions** implementadas (máquina de estados, histórico, notificações)
+- **14 Eventos** com listeners de histórico
+- **9 Controllers** (Auth, Team, Task, Comment, Attachment, Dashboard, MyTasks, Notifications)
+- **24 rotas** seguindo contrato documentado
+- **10 views Blade** responsivas (mobile-first, Tailwind CSS 4)
+- **6 tabelas** de domínio + notificações + cache/jobs (9 migrations no total)
+- **6 Models** (User, Task, Comment, Attachment, TaskHistoryEvent, ChangeRequest)
+- **6 Notifications** (in-app, database)
 
 ## Pendências e bloqueios conhecidos
-- **BLOQUEIO — SSH inacessível**: conexões recusadas em todas as portas
-  comuns (22, 2222, 22222, 2022, 8022, 9022, 9922, 65022, 21098, 7822)
-  em `br65-cp.valueserver.com.br` (187.110.165.194). Apenas cPanel
-  (2083) responde. Operador tem senha SSH fornecida pelo provedor —
-  precisa localizar no painel da ValueHost (ou no e-mail de boas-vindas)
-  o HOST e a PORTA corretos, ou solicitar a liberação do SSH ao suporte.
-- Node.js/NPM no servidor: pendência neutralizada pelo ADR-008 (assets
-  compilados localmente e versionados em `public/build`).
-- Confirmar periodicidade do backup automático (JetBackup) no cPanel
-- Senha do banco de dados e credenciais SMTP ainda precisam ser
-  inseridas manualmente no `.env` de produção pelo operador humano
-- Senha SSH foi compartilhada nesta conversa — recomendado rotacioná-la
-  (docs/19, regra de exposição de segredos)
+- **BLOQUEIO — SSH inacessível**: conexões recusadas em todas as portas comuns em `br65-cp.valueserver.com.br`. Apenas cPanel (2083) responde. Operador precisa liberar SSH com a ValueHost.
+- Senha do banco de dados e credenciais SMTP precisam ser inseridas manualmente no `.env` de produção
+- Deploy em produção pendente de acesso SSH
+- Manual do usuário (29-MANUAL-DO-USUARIO.md) precisa ser preenchido com prints e instruções finais
 
 ## Próximo passo recomendado
-Concluir a Fase 0 no servidor assim que o acesso (SSH ou cPanel Git
-Version Control + Terminal) estiver disponível: clonar o repositório em
-`/home/medicalthermo/tarefas.medicalthermo.com`, apontar o docroot para
-`public/` (ADR-009), criar o `.env` de produção, rodar
-`deploy/publicar.sh` e validar https://tarefas.medicalthermo.com.
-Ao concluir, atualizar este arquivo antes de iniciar a Fase 1.
-
+1. Resolver acesso SSH ao servidor
+2. Fazer deploy em produção: clonar repositório, configurar `.env`, rodar `deploy/publicar.sh`
+3. Validar em https://tarefas.medicalthermo.com
+4. Preencher manual do usuário
