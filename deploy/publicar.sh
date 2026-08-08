@@ -32,7 +32,7 @@ else
 fi
 
 echo "== Instalando dependências (produção, sem dev) =="
-$PHP $COMPOSER_BIN install --no-dev --optimize-autoloader
+$PHP $COMPOSER_BIN install --no-dev --optimize-autoloader --ignore-platform-req=php
 
 echo "== Rodando migrations =="
 $PHP artisan migrate --force
