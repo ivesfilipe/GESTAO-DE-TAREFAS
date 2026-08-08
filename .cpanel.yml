@@ -4,4 +4,4 @@
 # publicação roda automaticamente (docs/24-PIPELINE-DE-DEPLOY.md).
 deployment:
   tasks:
-    - /bin/bash $HOME/tarefas.medicalthermo.com/deploy/publicar.sh
+    - /bin/bash $HOME/home/medicalthermo/tarefas.medicalthermo.com/deploy/publicar.sh

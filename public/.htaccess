@@ -1,3 +1,7 @@
+# Forca PHP 8.3 (obrigatorio: Laravel 12 quebra no PHP 8.2 padrao da conta —
+# Container.php usa ReflectionFunction::isAnonymous(), exclusivo do PHP 8.3+)
+AddHandler application/x-httpd-ea-php83 .php
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

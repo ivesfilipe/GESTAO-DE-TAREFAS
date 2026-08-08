@@ -45,26 +45,36 @@ REPO_PATH=/home/medicalthermo/tarefas.medicalthermo.com
    cache, queue restart)
 4. Validar em `https://tarefas.medicalthermo.com`
 
-## Método 2 — Webhook do GitHub → cPanel (ideal, sem bloqueios)
+## Método 2 — Auto-deploy via cron (recomendado, sem bloqueios)
 
-Configuração única que faz deploy automático a cada push no GitHub —
-não depende de API token e não é bloqueada por WAF.
+> ⚠️ **Por que não webhook?** O PHP web do servidor tem `exec()`,
+> `shell_exec()` etc. desabilitados (`disable_functions`) — qualquer
+> endpoint PHP de deploy morre ao tentar rodar `git`. Confirmado em
+> ago/2026: 6 entregas do webhook, todas 500. O cron roda em shell
+> puro, sem essa restrição.
 
-### Configurar
+O script `deploy/auto-deploy.sh` roda a cada minuto via cron: se
+`origin/main` tiver commit novo, faz `git pull` + `deploy/publicar.sh`
+automaticamente. Não depende de API token, webhook nem WAF.
 
-1. Acesse `https://tarefas.medicalthermo.com:2083` > **Git Version
-   Control**
-2. No repositório listado, procure a opção **Webhook** ou **Deploy URL**
-3. Copie a URL gerada (formato:
-   `https://.../cpsess.../git/versionControl/...`)
-4. No GitHub, vá em **Settings > Webhooks > Add webhook**
-   - Payload URL: cole a URL copiada
-   - Content type: `application/json`
-   - Event: `Just the push event`
-   - Clique **Add webhook**
+### Configurar (uma vez)
 
-A partir daí, todo `git push origin main` dispara automaticamente o
-deploy no servidor.
+1. Acesse `https://tarefas.medicalthermo.com:2083` > **Cron Jobs**
+2. Em "Add New Cron Job", selecione "Once Per Minute" (`* * * * *`)
+   e use o comando:
+   ```
+   /bin/bash /home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com/deploy/auto-deploy.sh >> /home/medicalthermo/auto-deploy.log 2>&1
+   ```
+3. Salvar. A partir daí, todo `git push origin main` é publicado em
+   até ~1 minuto, sem nenhuma ação manual.
+4. Log das publicações: `/home/medicalthermo/auto-deploy.log`
+
+### Fallback manual (se o cron falhar)
+
+Terminal do cPanel (Avançado > Terminal):
+```bash
+cd /home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com && bash deploy/auto-deploy.sh
+```
 
 ## Método 3 — Git Version Control pelo painel (manual)
 
@@ -76,9 +86,13 @@ deploy no servidor.
 
 ## Passo a passo do deploy
 1. Código é revisado e mesclado (merge) em `main` no GitHub
-2. No servidor, via Git Version Control do cPanel (ou script SSH),
-   executa `git pull origin main` dentro de
-   `/home/medicalthermo/tarefas.medicalthermo.com`
+2. No servidor, via cron (`auto-deploy.sh`) ou Git Version Control do
+   cPanel, executa `git pull origin main` dentro de
+   `/home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com`
+   (caminho real do repositório/docroot — o cPanel o criou com o
+   prefixo `$HOME` duplicado; **não** usar
+   `/home/medicalthermo/tarefas.medicalthermo.com`, que é uma cópia
+   secundária sem uso)
 3. Script `/deploy/publicar.sh` é executado automaticamente após o
    pull, rodando nesta ordem:
    ```
