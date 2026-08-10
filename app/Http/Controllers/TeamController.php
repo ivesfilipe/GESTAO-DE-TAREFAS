@@ -51,6 +51,35 @@ class TeamController extends Controller
             ->with('invite_link', url('/convite/'.$token));
     }
 
+    /**
+     * Exclui (soft delete) um liderado — apenas se ele não tiver
+     * tarefas vinculadas (criadas por ele ou atribuídas a ele),
+     * preservando o histórico e evitando relações quebradas.
+     */
+    public function destroy(User $user)
+    {
+        Gate::authorize('manage-team');
+
+        if ($user->id === auth()->id()) {
+            return redirect()->route('team.index')
+                ->with('error', 'Você não pode excluir a si mesmo.');
+        }
+
+        $hasTasks = Task::where('assigned_to', $user->id)
+            ->orWhere('created_by', $user->id)
+            ->exists();
+
+        if ($hasTasks) {
+            return redirect()->route('team.index')
+                ->with('error', "{$user->name} possui tarefas vinculadas. Desative-o em vez de excluir.");
+        }
+
+        $user->delete();
+
+        return redirect()->route('team.index')
+            ->with('success', "{$user->name} excluído(a) da equipe.");
+    }
+
     public function toggleActive(User $user)
     {
         Gate::authorize('manage-team');

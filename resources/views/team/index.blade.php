@@ -99,8 +99,16 @@
                     </form>
                     <form method="POST" action="{{ route('team.toggle-active', $member) }}">
                         @csrf
+                        @method('PATCH')
                         <button type="submit" class="text-sm {{ $member->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }} font-medium">
                             {{ $member->is_active ? 'Desativar' : 'Ativar' }}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('Excluir {{ $member->name }}? Esta ação remove o acesso dele(a) ao sistema.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-sm text-slate-400 hover:text-red-600 font-medium">
+                            Excluir
                         </button>
                     </form>
                 </div>
@@ -146,8 +154,16 @@
                                 </form>
                                 <form method="POST" action="{{ route('team.toggle-active', $member) }}">
                                     @csrf
+                                    @method('PATCH')
                                     <button type="submit" class="{{ $member->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }} text-sm font-medium">
                                         {{ $member->is_active ? 'Desativar' : 'Ativar' }}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('Excluir {{ $member->name }}? Esta ação remove o acesso dele(a) ao sistema.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-slate-400 hover:text-red-600 text-sm font-medium">
+                                        Excluir
                                     </button>
                                 </form>
                             </div>

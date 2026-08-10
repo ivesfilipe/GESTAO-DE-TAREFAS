@@ -151,6 +151,49 @@ test('liderado nao pode gerar link de convite', function () {
         ->assertStatus(403);
 });
 
+test('gestor ativa e desativa liderado (form usa method spoofing PATCH)', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create(['is_active' => true]);
+
+    $this->actingAs($gestor)
+        ->patch("/equipe/{$liderado->id}")
+        ->assertRedirect();
+
+    expect($liderado->fresh()->is_active)->toBeFalse();
+
+    $this->actingAs($gestor)
+        ->patch("/equipe/{$liderado->id}");
+
+    expect($liderado->fresh()->is_active)->toBeTrue();
+});
+
+test('gestor exclui liderado sem tarefas', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+
+    $this->actingAs($gestor)
+        ->delete("/equipe/{$liderado->id}")
+        ->assertRedirect(route('team.index'));
+
+    $this->assertSoftDeleted('users', ['id' => $liderado->id]);
+});
+
+test('gestor nao exclui liderado com tarefas vinculadas', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    \App\Models\Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+
+    $this->actingAs($gestor)
+        ->delete("/equipe/{$liderado->id}")
+        ->assertRedirect(route('team.index'))
+        ->assertSessionHas('error');
+
+    $this->assertDatabaseHas('users', [
+        'id' => $liderado->id,
+        'deleted_at' => null,
+    ]);
+});
+
 test('gestor pode desativar liderado', function () {
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create(['is_active' => true]);
