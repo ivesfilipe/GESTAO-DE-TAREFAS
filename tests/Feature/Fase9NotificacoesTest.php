@@ -30,3 +30,19 @@ test('usuario pode marcar notificacao como lida', function () {
 
     $this->assertNotNull($notification->fresh()->read_at);
 });
+
+test('botao marcar como lida na tela usa method spoofing PATCH', function () {
+    $user = User::factory()->create();
+
+    $user->notifications()->create([
+        'id' => \Illuminate\Support\Str::uuid(),
+        'type' => 'App\Notifications\NovaTarefaNotification',
+        'data' => json_encode(['message' => 'teste']),
+    ]);
+
+    // Regressão: form POST contra rota PATCH causava 405
+    $this->actingAs($user)
+        ->get('/notificacoes')
+        ->assertOk()
+        ->assertSee('value="PATCH"', false);
+});

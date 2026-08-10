@@ -24,6 +24,7 @@
                     @if(is_null($notification->read_at))
                         <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}">
                             @csrf
+                            @method('PATCH')
                             <button type="submit" class="shrink-0 text-xs font-medium text-blue-600 hover:text-blue-700">
                                 Marcar como lida
                             </button>

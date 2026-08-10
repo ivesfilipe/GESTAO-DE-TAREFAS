@@ -276,6 +276,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
 
                             <form method="POST" action="{{ route('tasks.change-status', $task) }}">
                                 @csrf
+                                @method('PATCH')
                                 <input type="hidden" name="status" value="cancelada">
                                 <button type="submit" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors" onclick="return confirm('Tem certeza que deseja cancelar esta tarefa?')">
                                     Cancelar tarefa
@@ -288,6 +289,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                         @if($task->status === 'nova' || $task->status === 'recebida')
                             <form method="POST" action="{{ route('tasks.change-status', $task) }}">
                                 @csrf
+                                @method('PATCH')
                                 <input type="hidden" name="status" value="em_andamento">
                                 <button type="submit" class="w-full rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
                                     Iniciar
@@ -298,6 +300,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                         @if($task->status === 'em_andamento')
                             <form method="POST" action="{{ route('tasks.change-status', $task) }}">
                                 @csrf
+                                @method('PATCH')
                                 <input type="hidden" name="status" value="aguardando_aprovacao">
                                 <button type="submit" class="w-full rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-500 transition-colors">
                                     Enviar para aprovação
@@ -333,6 +336,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
         <h3 class="text-lg font-semibold text-slate-900 mb-4">Atribuir tarefa</h3>
         <form method="POST" action="{{ route('tasks.assign', $task) }}">
             @csrf
+            @method('PATCH')
             <div class="mb-4">
                 <label for="assignee_id" class="block text-sm font-medium text-slate-700">Responsável</label>
                 <select name="assigned_to" id="assignee_id" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">

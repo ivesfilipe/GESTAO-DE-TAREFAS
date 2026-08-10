@@ -129,3 +129,15 @@ test('cancelamento de tarefa usa soft delete', function () {
 
     $this->assertSoftDeleted('tasks', ['id' => $task->id]);
 });
+
+test('botoes de mudanca de status na tela usam method spoofing PATCH', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+
+    // Regressão: form POST contra rota PATCH causava 405 ao clicar em "Iniciar"
+    $this->actingAs($liderado)
+        ->get("/tarefas/{$task->id}")
+        ->assertOk()
+        ->assertSee('value="PATCH"', false);
+});
