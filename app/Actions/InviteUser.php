@@ -21,6 +21,19 @@ class InviteUser
             'invited_at' => now(),
         ]);
 
+        return [
+            'user' => $user,
+            'token' => $this->createToken($user),
+        ];
+    }
+
+    /**
+     * Gera (ou regenera) o token de definição de senha do usuário.
+     * Usado no convite inicial e no "novo link" (link expirado em 48h
+     * ou liderado que esqueceu a senha).
+     */
+    public function createToken(User $user): string
+    {
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->updateOrInsert(
@@ -28,9 +41,6 @@ class InviteUser
             ['token' => $token, 'created_at' => now()]
         );
 
-        return [
-            'user' => $user,
-            'token' => $token,
-        ];
+        return $token;
     }
 }

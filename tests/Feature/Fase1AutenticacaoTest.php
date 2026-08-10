@@ -111,6 +111,46 @@ test('gestor convida novo liderado', function () {
     ]);
 });
 
+test('convite exibe link de definicao de senha na tela', function () {
+    $gestor = User::factory()->gestor()->create();
+
+    $response = $this->actingAs($gestor)
+        ->post('/equipe', [
+            'name' => 'Novo Liderado',
+            'email' => 'liderado@exemplo.com',
+            'role' => 'liderado',
+        ]);
+
+    $response->assertSessionHas('invite_link');
+
+    $this->actingAs($gestor)
+        ->get('/equipe')
+        ->assertSee('/convite/');
+});
+
+test('gestor gera novo link para liderado existente', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+
+    $response = $this->actingAs($gestor)
+        ->post("/equipe/{$liderado->id}/convite");
+
+    $response->assertRedirect(route('team.index'));
+    $response->assertSessionHas('invite_link');
+    $this->assertDatabaseHas('password_reset_tokens', [
+        'email' => $liderado->email,
+    ]);
+});
+
+test('liderado nao pode gerar link de convite', function () {
+    $liderado = User::factory()->liderado()->create();
+    $outro = User::factory()->liderado()->create();
+
+    $this->actingAs($liderado)
+        ->post("/equipe/{$outro->id}/convite")
+        ->assertStatus(403);
+});
+
 test('gestor pode desativar liderado', function () {
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create(['is_active' => true]);

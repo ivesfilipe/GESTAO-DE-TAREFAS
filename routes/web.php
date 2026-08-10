@@ -34,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/equipe', [TeamController::class, 'index'])->name('team.index');
     Route::post('/equipe', [TeamController::class, 'store'])->name('team.store');
     Route::patch('/equipe/{user}', [TeamController::class, 'toggleActive'])->name('team.toggle-active');
+    Route::post('/equipe/{user}/convite', [TeamController::class, 'regenerateInvite'])->name('team.regenerate-invite');
 
     Route::get('/tarefas', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tarefas/nova', [TaskController::class, 'create'])->name('tasks.create');

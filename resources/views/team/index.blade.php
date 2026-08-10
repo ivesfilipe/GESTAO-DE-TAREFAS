@@ -90,7 +90,13 @@
                         {{ $member->is_active ? 'Ativo' : 'Inativo' }}
                     </span>
                 </div>
-                <div class="mt-3 flex gap-2">
+                <div class="mt-3 flex items-center gap-4">
+                    <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
+                        @csrf
+                        <button type="submit" class="text-sm text-blue-700 hover:text-blue-800 font-medium">
+                            Novo link de acesso
+                        </button>
+                    </form>
                     <form method="POST" action="{{ route('team.toggle-active', $member) }}">
                         @csrf
                         <button type="submit" class="text-sm {{ $member->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }} font-medium">
@@ -131,12 +137,20 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <form method="POST" action="{{ route('team.toggle-active', $member) }}">
-                                @csrf
-                                <button type="submit" class="{{ $member->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }} text-sm font-medium">
-                                    {{ $member->is_active ? 'Desativar' : 'Ativar' }}
-                                </button>
-                            </form>
+                            <div class="flex items-center justify-end gap-4">
+                                <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
+                                    @csrf
+                                    <button type="submit" class="text-blue-700 hover:text-blue-800 text-sm font-medium">
+                                        Novo link de acesso
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('team.toggle-active', $member) }}">
+                                    @csrf
+                                    <button type="submit" class="{{ $member->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }} text-sm font-medium">
+                                        {{ $member->is_active ? 'Desativar' : 'Ativar' }}
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty

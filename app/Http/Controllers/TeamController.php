@@ -32,8 +32,23 @@ class TeamController extends Controller
         $result = (new InviteUser())->execute(auth()->user(), $data);
 
         return redirect()->route('team.index')
-            ->with('success', 'Convite enviado.')
-            ->with('invite_token', $result['token']);
+            ->with('success', 'Convite criado.')
+            ->with('invite_link', url('/convite/'.$result['token']));
+    }
+
+    /**
+     * Gera novo link de definição de senha para um liderado existente
+     * (link expirado após 48h ou esquecimento de senha).
+     */
+    public function regenerateInvite(User $user)
+    {
+        Gate::authorize('manage-team');
+
+        $token = (new InviteUser())->createToken($user);
+
+        return redirect()->route('team.index')
+            ->with('success', "Novo link gerado para {$user->name}.")
+            ->with('invite_link', url('/convite/'.$token));
     }
 
     public function toggleActive(User $user)
