@@ -286,7 +286,18 @@ $isAssignee = Auth::id() === $task->assigned_to;
                     @endif
 
                     @if($isAssignee && !in_array($task->status, ['concluida', 'cancelada', 'bloqueada', 'reprovada', 'nao_atribuida']))
-                        @if($task->status === 'nova' || $task->status === 'recebida')
+                        @if($task->status === 'nova')
+                            <form method="POST" action="{{ route('tasks.change-status', $task) }}">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="recebida">
+                                <button type="submit" class="w-full rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+                                    Receber tarefa
+                                </button>
+                            </form>
+                        @endif
+
+                        @if($task->status === 'recebida')
                             <form method="POST" action="{{ route('tasks.change-status', $task) }}">
                                 @csrf
                                 @method('PATCH')

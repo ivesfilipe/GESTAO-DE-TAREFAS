@@ -112,7 +112,11 @@ class TaskController extends Controller
             'status' => ['required', 'in:' . implode(',', Task::statuses())],
         ]);
 
-        ChangeTaskStatus::change($task, auth()->user(), $request->status);
+        try {
+            ChangeTaskStatus::change($task, auth()->user(), $request->status);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Status atualizado.');
     }

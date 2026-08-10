@@ -21,16 +21,22 @@ test('transicao valida de status funciona', function () {
     ]);
 });
 
-test('transicao invalida de status lanca erro', function () {
+test('transicao invalida de status retorna erro amigavel', function () {
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create();
 
     $task = Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
 
     $response = $this->actingAs($liderado)
+        ->from('/tarefas')
         ->patch("/tarefas/{$task->id}/status", ['status' => 'concluida']);
 
-    $response->assertStatus(500);
+    $response->assertRedirect('/tarefas');
+    $response->assertSessionHas('error');
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->id,
+        'status' => 'nova',
+    ]);
 });
 
 test('mudanca de status gera evento de historico', function () {
@@ -140,4 +146,33 @@ test('botoes de mudanca de status na tela usam method spoofing PATCH', function 
         ->get("/tarefas/{$task->id}")
         ->assertOk()
         ->assertSee('value="PATCH"', false);
+});
+
+test('tarefa nova mostra botao Receber e nao Iniciar', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+
+    // Regressão: botão "Iniciar" (em_andamento) em tarefa "nova" gerava 500,
+    // pois a máquina de estados exige nova -> recebida -> em_andamento
+    $this->actingAs($liderado)
+        ->get("/tarefas/{$task->id}")
+        ->assertOk()
+        ->assertSee('Receber tarefa')
+        ->assertSee('name="status" value="recebida"', false)
+        ->assertDontSee('Iniciar');
+});
+
+test('tarefa recebida mostra botao Iniciar', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+
+    $task->update(['status' => 'recebida']);
+
+    $this->actingAs($liderado)
+        ->get("/tarefas/{$task->id}")
+        ->assertOk()
+        ->assertSee('Iniciar')
+        ->assertDontSee('Receber tarefa');
 });
