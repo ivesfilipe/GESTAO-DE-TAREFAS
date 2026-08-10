@@ -143,7 +143,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                     @endforelse
                 </div>
 
-                <form method="POST" action="{{ route('tasks.comments.store', $task) }}">
+                <form method="POST" action="{{ route('tasks.comments.store', $task) }}" enctype="multipart/form-data">
                     @csrf
                     <div>
                         <textarea
@@ -154,10 +154,18 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             placeholder="Adicione um comentário..."
                         ></textarea>
                     </div>
-                    <div class="mt-2 flex justify-end">
-                        <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-                            Enviar
-                        </button>
+                    <div class="mt-2 flex items-center gap-3">
+                        <label class="flex items-center gap-2 text-sm text-slate-500">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                            </svg>
+                            <input type="file" name="file" accept=".jpg,.jpeg,.png,.gif,.pdf" class="text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                        </label>
+                        <div class="ml-auto">
+                            <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+                                Enviar
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -177,7 +185,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                                     <p class="text-xs text-slate-400">{{ $attachment->file_type }} &middot; {{ number_format($attachment->file_size / 1024, 1) }} KB</p>
                                 </div>
                             </div>
-                             <a href="{{ Storage::url($attachment->file_path) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700" download>
+                             <a href="{{ Storage::disk('public')->url($attachment->file_path) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700" download>
                                 Download
                             </a>
                         </div>
@@ -191,7 +199,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                     <div class="flex items-center gap-3">
                         <input
                             type="file"
-                            name="attachment"
+                            name="file"
                             required
                             class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />

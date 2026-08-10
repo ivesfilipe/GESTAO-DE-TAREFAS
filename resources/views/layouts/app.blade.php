@@ -143,6 +143,17 @@
                     </div>
                 </div>
             @endif
+            @if($errors->any())
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
+                    <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
 
             @yield('content')
         </main>

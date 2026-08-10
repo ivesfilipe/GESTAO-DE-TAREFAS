@@ -42,6 +42,9 @@ $PHP artisan config:cache
 $PHP artisan route:cache
 $PHP artisan view:cache
 
+echo "== Link publico do storage (anexos) =="
+$PHP artisan storage:link || true
+
 echo "== Reiniciando fila =="
 $PHP artisan queue:restart
 
