@@ -1,16 +1,20 @@
 # STATUS DO PROJETO — Sistema de Gestão de Tarefas para Liderados
 
-Última atualização: 2026-08-07 por OpenCode (agente de IA)
+Última atualização: 2026-08-08 por OpenCode (agente de IA)
 
 ## Fase atual
-Fase 11 — Polimento, responsividade final e revisão de segurança (em andamento)
+**SISTEMA EM PRODUÇÃO** — https://tarefas.medicalthermo.com no ar,
+login validado, deploy contínuo via cron funcionando.
 
 ## Progresso da fase atual
 - [x] Revisão de responsividade em todos os breakpoints
 - [x] Revisão de segurança (OWASP checklist)
 - [x] Build de assets Vite
+- [x] **Deploy em produção (2026-08-08)** — incidente 404/500 resolvido;
+      ver entrada do CHANGELOG e `32-MODELO-OFICIAL-DE-DEPLOY.md`
+- [x] Deploy contínuo: cron + `deploy/auto-deploy.sh` (push → produção
+      em ~1 min, sem ação manual)
 - [ ] Preenchimento final do manual do usuário (29-MANUAL-DO-USUARIO.md)
-- [ ] Deploy em produção (bloqueado por SSH — ver pendências)
 
 ## Fases concluídas
 - [x] Fase 0 — Infraestrutura e esqueleto do projeto (localmente)
@@ -41,13 +45,19 @@ Fase 11 — Polimento, responsividade final e revisão de segurança (em andamen
 - **6 Notifications** (in-app, database)
 
 ## Pendências e bloqueios conhecidos
-- **BLOQUEIO — SSH inacessível**: conexões recusadas em todas as portas comuns em `br65-cp.valueserver.com.br`. Apenas cPanel (2083) responde. Operador precisa liberar SSH com a ValueHost.
-- Senha do banco de dados e credenciais SMTP precisam ser inseridas manualmente no `.env` de produção
-- Deploy em produção pendente de acesso SSH
-- Manual do usuário (29-MANUAL-DO-USUARIO.md) precisa ser preenchido com prints e instruções finais
+- ~~SSH inacessível~~ — **contornado em 2026-08-08**: operações de
+  servidor rodam via cPanel > Avançado > Terminal; deploy é 100%
+  automático via cron (`deploy/auto-deploy.sh`). SSH não é mais
+  necessário para operar o sistema
+- Credenciais SMTP precisam ser confirmadas no `.env` de produção
+  (envio de convites por e-mail)
+- Manual do usuário (29-MANUAL-DO-USUARIO.md) precisa ser preenchido
+  com prints e instruções finais
+- Higiene opcional: apagar a cópia secundária
+  `/home/medicalthermo/tarefas.medicalthermo.com` (sem prefixo
+  duplicado) no servidor — não é servida nem usada pelo deploy
 
 ## Próximo passo recomendado
-1. Resolver acesso SSH ao servidor
-2. Fazer deploy em produção: clonar repositório, configurar `.env`, rodar `deploy/publicar.sh`
-3. Validar em https://tarefas.medicalthermo.com
-4. Preencher manual do usuário
+1. Preencher manual do usuário (29) com prints da aplicação no ar
+2. Validar envio de e-mail de convite (SMTP) em produção
+3. Convidar os liderados pela tela Equipe e iniciar uso real

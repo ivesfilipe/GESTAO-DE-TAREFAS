@@ -95,3 +95,44 @@ Formato de cada entrada:
 - `resources/views/` (10 views + layout)
 - `routes/web.php` (24 rotas)
 - `tests/Feature/` (11 arquivos de teste, 53 testes)
+
+---
+
+## [2026-08-08] — Deploy em produção + modelo oficial de deploy
+
+### Incidente resolvido (site retornava 404 em /login e depois 500 geral)
+Causas raiz identificadas em diagnóstico (sem acesso SSH/API — via
+Terminal do cPanel e GitHub API):
+- Site servia rotas do skeleton: cache de rotas antigo nunca regenerado
+- Docroot real é o caminho duplicado
+  `/home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com`
+  (a pasta sem prefixo era cópia secundária — deploys rodavam nela por engano)
+- Webhook de deploy inviável: `exec()` desabilitado no PHP web
+  (6 entregas do GitHub, 6 erros 500)
+- `.htaccess` sem `AddHandler ...ea-php83`: conta cai no PHP 8.2 e o
+  Laravel 12 morre em `ReflectionFunction::isAnonymous()`
+- Drift de schema: migration `create_users_table` foi editada após rodar
+  em produção — bancos sem 6 colunas (role, timezone, invited_at,
+  activated_at, is_active, deleted_at)
+
+### Correções
+- `public/.htaccess`: AddHandler PHP 8.3 restaurado e **versionado**
+- `public/deploy-webhook.php` **removido** (endpoint morto)
+- Nova migration `2026_08_08_120000_add_missing_columns_to_users_table`
+  (idempotente — adiciona cada coluna só se ausente)
+- Banco de dados correto copiado para a pasta ativa; usuário gestor criado
+- `.cpanel.yml` aponta para o caminho real
+
+### Deploy contínuo (validado ao vivo: 2 pushes publicados sem tocar no servidor)
+- `deploy/auto-deploy.sh` + cron de 1 min no cPanel: se `origin/main`
+  mudou, faz pull + `publicar.sh` (shell puro, sem `exec()`)
+- Webhook do GitHub removido
+
+### Documentação
+- `docs/32-MODELO-OFICIAL-DE-DEPLOY.md` — padrão para todos os projetos
+- `docs/23` e `docs/24` corrigidos (LiteSpeed, caminho real, restrições)
+
+### Arquivos principais afetados
+- `public/.htaccess`, `deploy/auto-deploy.sh` (novo), `.cpanel.yml`
+- `database/migrations/2026_08_08_120000_add_missing_columns_to_users_table.php`
+- `docs/32-MODELO-OFICIAL-DE-DEPLOY.md` (novo), `docs/23`, `docs/24`
