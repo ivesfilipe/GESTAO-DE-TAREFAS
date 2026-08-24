@@ -19,7 +19,7 @@
                     value="{{ old('title') }}"
                     required
                     autofocus
-                    class="mt-1 block w-full rounded-lg border {{ $errors->has('title') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-blue-500 focus:ring-blue-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
+                    class="mt-1 block w-full rounded-lg border {{ $errors->has('title') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
                     placeholder="Título da tarefa"
                 />
                 @error('title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -31,7 +31,7 @@
                     name="description"
                     id="description"
                     rows="4"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="Descreva a tarefa (opcional)"
                 >{{ old('description') }}</textarea>
                 @error('description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -43,7 +43,7 @@
                     <select
                         name="assigned_to"
                         id="assigned_to"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         <option value="">Sem responsável</option>
                         @foreach($liderados ?? [] as $liderado)
@@ -60,7 +60,7 @@
                     <select
                         name="priority"
                         id="priority"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         <option value="normal" {{ old('priority') === 'normal' ? 'selected' : '' }}>Normal</option>
                         <option value="importante" {{ old('priority') === 'importante' ? 'selected' : '' }}>Importante</option>
@@ -78,7 +78,7 @@
                         id="due_at"
                         value="{{ old('due_at') }}"
                         required
-                        class="mt-1 block w-full rounded-lg border {{ $errors->has('due_at') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-blue-500 focus:ring-blue-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
+                        class="mt-1 block w-full rounded-lg border {{ $errors->has('due_at') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
                     />
                     @error('due_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
@@ -90,7 +90,7 @@
                 </a>
                 <button
                     type="submit"
-                    class="rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors"
+                    class="rounded-lg bg-brand-700 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-colors"
                 >
                     Criar Tarefa
                 </button>

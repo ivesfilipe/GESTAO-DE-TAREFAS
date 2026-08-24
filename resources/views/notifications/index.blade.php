@@ -8,11 +8,11 @@
 
     <div class="space-y-2">
         @forelse($notifications as $notification)
-            <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm {{ is_null($notification->read_at) ? 'border-l-4 border-l-blue-500 bg-blue-50/30' : '' }}">
+            <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm {{ is_null($notification->read_at) ? 'border-l-4 border-l-brand-500 bg-brand-50/30' : '' }}">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-3">
                         @if(is_null($notification->read_at))
-                            <span class="mt-1.5 flex size-2 shrink-0 rounded-full bg-blue-500"></span>
+                            <span class="mt-1.5 flex size-2 shrink-0 rounded-full bg-brand-500"></span>
                         @else
                             <span class="mt-1.5 flex size-2 shrink-0 rounded-full bg-slate-300"></span>
                         @endif
@@ -25,7 +25,7 @@
                         <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="shrink-0 text-xs font-medium text-blue-600 hover:text-blue-700">
+                            <button type="submit" class="shrink-0 text-xs font-medium text-brand-500 hover:text-brand-600">
                                 Marcar como lida
                             </button>
                         </form>

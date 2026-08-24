@@ -9,7 +9,7 @@
         <button
             type="button"
             onclick="document.getElementById('invite-form').classList.toggle('hidden')"
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition-colors"
         >
             <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -31,7 +31,7 @@
                         id="name"
                         value="{{ old('name') }}"
                         required
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                         placeholder="Nome completo"
                     />
                     @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -44,7 +44,7 @@
                         id="email"
                         value="{{ old('email') }}"
                         required
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                         placeholder="email@exemplo.com"
                     />
                     @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -52,7 +52,7 @@
             </div>
             <input type="hidden" name="role" value="liderado">
             <div class="flex gap-3">
-                <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+                <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition-colors">
                     Enviar convite
                 </button>
                 <button type="button" onclick="document.getElementById('invite-form').classList.add('hidden')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
@@ -93,7 +93,7 @@
                 <div class="mt-3 flex items-center gap-4">
                     <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
                         @csrf
-                        <button type="submit" class="text-sm text-blue-700 hover:text-blue-800 font-medium">
+                        <button type="submit" class="text-sm text-brand-600 hover:text-brand-700 font-medium">
                             Novo link de acesso
                         </button>
                     </form>
@@ -148,7 +148,7 @@
                             <div class="flex items-center justify-end gap-4">
                                 <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
                                     @csrf
-                                    <button type="submit" class="text-blue-700 hover:text-blue-800 text-sm font-medium">
+                                    <button type="submit" class="text-brand-600 hover:text-brand-700 text-sm font-medium">
                                         Novo link de acesso
                                     </button>
                                 </form>

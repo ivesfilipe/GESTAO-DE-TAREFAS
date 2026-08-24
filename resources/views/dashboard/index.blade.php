@@ -31,16 +31,16 @@
             <p class="mt-2 text-3xl font-bold {{ $tarefasUrgentes > 0 ? 'text-orange-600' : 'text-slate-900' }}">{{ $tarefasUrgentes }}</p>
         </a>
 
-        <a href="{{ route('tasks.index', ['due_today' => 1]) }}" class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+        <a href="{{ route('tasks.index', ['due_today' => 1]) }}" class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-200 transition-all">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-slate-500">Vencem Hoje</span>
-                <span class="flex size-8 items-center justify-center rounded-full bg-blue-100">
-                    <svg class="size-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="flex size-8 items-center justify-center rounded-full bg-brand-100">
+                    <svg class="size-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </span>
             </div>
-            <p class="mt-2 text-3xl font-bold text-blue-600">{{ $vencemHoje }}</p>
+            <p class="mt-2 text-3xl font-bold text-brand-500">{{ $vencemHoje }}</p>
         </a>
 
         <a href="{{ route('tasks.index', ['status' => 'aguardando_aprovacao']) }}" class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
@@ -63,7 +63,7 @@
 
         <div class="lg:hidden space-y-3 p-4">
             @forelse($visaoPorPessoa ?? [] as $item)
-                <a href="{{ route('tasks.index', ['assigned_to' => $item['user']->id]) }}" class="block rounded-lg border border-slate-200 p-4 hover:border-blue-200 hover:shadow-sm transition-all">
+                <a href="{{ route('tasks.index', ['assigned_to' => $item['user']->id]) }}" class="block rounded-lg border border-slate-200 p-4 hover:border-brand-200 hover:shadow-sm transition-all">
                     <h3 class="font-semibold text-slate-900">{{ $item['user']->name }}</h3>
                     <div class="mt-2 flex gap-4 text-sm">
                         <span class="text-slate-500">Abertas: <span class="font-semibold text-slate-900">{{ $item['abertas'] }}</span></span>

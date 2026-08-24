@@ -3,7 +3,7 @@
 @php
 $priorityBadges = [
     'normal' => 'bg-slate-300 text-slate-700',
-    'importante' => 'bg-blue-100 text-blue-700',
+    'importante' => 'bg-brand-100 text-brand-600',
     'urgente' => 'bg-orange-100 text-orange-700',
     'critica' => 'bg-red-100 text-red-700',
 ];
@@ -20,7 +20,7 @@ $statusLabels = [
 ];
 $statusBadges = [
     'nao_atribuida' => 'bg-gray-100 text-gray-600',
-    'nova' => 'bg-blue-100 text-blue-700',
+    'nova' => 'bg-brand-100 text-brand-600',
     'recebida' => 'bg-indigo-100 text-indigo-700',
     'em_andamento' => 'bg-yellow-100 text-yellow-700',
     'aguardando_aprovacao' => 'bg-purple-100 text-purple-700',
@@ -41,7 +41,7 @@ $statusBadges = [
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label for="status" class="block text-xs font-medium text-slate-500 mb-1">Status</label>
-                <select name="status" id="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">
+                <select name="status" id="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($statusLabels as $value => $label)
                         <option value="{{ $value }}" {{ request('status') === $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -50,7 +50,7 @@ $statusBadges = [
             </div>
             <div>
                 <label for="priority" class="block text-xs font-medium text-slate-500 mb-1">Prioridade</label>
-                <select name="priority" id="priority" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">
+                <select name="priority" id="priority" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Todas</option>
                     <option value="normal" {{ request('priority') === 'normal' ? 'selected' : '' }}>Normal</option>
                     <option value="importante" {{ request('priority') === 'importante' ? 'selected' : '' }}>Importante</option>
@@ -65,14 +65,14 @@ $statusBadges = [
                     name="search"
                     id="search"
                     value="{{ request('search') }}"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="Buscar por título..."
                 />
             </div>
             @if(Auth::user()->isGestor())
                 <div>
                     <label for="assigned_to" class="block text-xs font-medium text-slate-500 mb-1">Responsável</label>
-                    <select name="assigned_to" id="assigned_to" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none">
+                    <select name="assigned_to" id="assigned_to" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                         <option value="">Todos</option>
                         @foreach($teamMembers ?? [] as $member)
                             <option value="{{ $member->id }}" {{ request('assigned_to') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
@@ -82,7 +82,7 @@ $statusBadges = [
             @endif
         </div>
         <div class="mt-3 flex gap-3">
-            <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+            <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-colors">
                 Filtrar
             </button>
             <a href="{{ route('tasks.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
@@ -93,7 +93,7 @@ $statusBadges = [
 
     <div class="lg:hidden space-y-3">
         @forelse($tasks as $task)
-            <a href="{{ route('tasks.show', $task) }}" class="block rounded-xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+            <a href="{{ route('tasks.show', $task) }}" class="block rounded-xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all">
                 <div class="flex items-start justify-between gap-2">
                     <h3 class="font-semibold text-slate-900 leading-snug">{{ $task->title }}</h3>
                     <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">
@@ -164,7 +164,7 @@ $statusBadges = [
                             {{ $task->due_at?->format('d/m/Y H:i') ?? '-' }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="{{ route('tasks.show', $task) }}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver</a>
+                            <a href="{{ route('tasks.show', $task) }}" class="text-brand-500 hover:text-brand-600 text-sm font-medium">Ver</a>
                         </td>
                     </tr>
                 @empty
@@ -188,7 +188,7 @@ $statusBadges = [
 </div>
 
 @if(Auth::user()->isGestor())
-    <a href="{{ route('tasks.create') }}" class="fixed bottom-24 right-4 z-30 lg:bottom-8 lg:hidden flex items-center justify-center size-14 rounded-full bg-blue-800 text-white shadow-lg hover:bg-blue-700 transition-colors">
+    <a href="{{ route('tasks.create') }}" class="fixed bottom-24 right-4 z-30 lg:bottom-8 lg:hidden flex items-center justify-center size-14 rounded-full bg-brand-700 text-white shadow-lg hover:bg-brand-600 transition-colors">
         <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>

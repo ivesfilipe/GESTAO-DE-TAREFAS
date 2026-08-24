@@ -3,7 +3,7 @@
 @php
 $priorityBadges = [
     'normal' => 'bg-slate-300 text-slate-700',
-    'importante' => 'bg-blue-100 text-blue-700',
+    'importante' => 'bg-brand-100 text-brand-600',
     'urgente' => 'bg-orange-100 text-orange-700',
     'critica' => 'bg-red-100 text-red-700',
 ];
@@ -20,7 +20,7 @@ $statusLabels = [
 ];
 $statusBadges = [
     'nao_atribuida' => 'bg-gray-100 text-gray-600',
-    'nova' => 'bg-blue-100 text-blue-700',
+    'nova' => 'bg-brand-100 text-brand-600',
     'recebida' => 'bg-indigo-100 text-indigo-700',
     'em_andamento' => 'bg-yellow-100 text-yellow-700',
     'aguardando_aprovacao' => 'bg-purple-100 text-purple-700',
@@ -78,16 +78,16 @@ $statusBadges = [
             </div>
         </div>
 
-        <div class="rounded-xl bg-blue-50 border border-blue-200 p-6 shadow-sm">
+        <div class="rounded-xl bg-brand-50 border border-brand-200 p-6 shadow-sm">
             <h2 class="font-semibold text-slate-900 flex items-center gap-2">
-                <svg class="size-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="size-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 Hoje
             </h2>
             <div class="mt-4 space-y-3">
                 @forelse($hoje ?? [] as $task)
-                    <a href="{{ route('tasks.show', $task) }}" class="block rounded-lg bg-white border border-blue-200 p-4 hover:shadow-md transition-all">
+                    <a href="{{ route('tasks.show', $task) }}" class="block rounded-lg bg-white border border-brand-200 p-4 hover:shadow-md transition-all">
                         <div class="flex items-start justify-between gap-2">
                             <h3 class="text-sm font-semibold text-slate-900">{{ $task->title }}</h3>
                             <span class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">
@@ -109,7 +109,7 @@ $statusBadges = [
                         @endif
                     </a>
                 @empty
-                    <p class="text-sm text-blue-600 italic">Nada para hoje.</p>
+                    <p class="text-sm text-brand-500 italic">Nada para hoje.</p>
                 @endforelse
             </div>
         </div>
@@ -123,7 +123,7 @@ $statusBadges = [
             </h2>
             <div class="mt-4 space-y-3">
                 @forelse($proximas ?? [] as $task)
-                    <a href="{{ route('tasks.show', $task) }}" class="block rounded-lg border border-slate-200 p-4 hover:shadow-md hover:border-blue-200 transition-all">
+                    <a href="{{ route('tasks.show', $task) }}" class="block rounded-lg border border-slate-200 p-4 hover:shadow-md hover:border-brand-200 transition-all">
                         <div class="flex items-start justify-between gap-2">
                             <h3 class="text-sm font-semibold text-slate-900">{{ $task->title }}</h3>
                             <span class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">

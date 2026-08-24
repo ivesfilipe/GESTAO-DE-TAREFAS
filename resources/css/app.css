@@ -5,8 +5,26 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/*
+    Identidade visual MedicalThermo Engenharia (extraída de medicalthermo.com)
+    - Azul institucional (logo "Thermo"/HERZOG): #1880C0
+    - Azul-marinho (logo "Medical"/linha): #083048
+*/
 @theme {
     --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --color-primary: #1E40AF;
-    --color-primary-hover: #1E3A8A;
+
+    --color-brand-50: #EEF7FC;
+    --color-brand-100: #D8EDF9;
+    --color-brand-200: #B0DBF2;
+    --color-brand-300: #7CC3E9;
+    --color-brand-400: #43A5DB;
+    --color-brand-500: #1880C0;
+    --color-brand-600: #136BA1;
+    --color-brand-700: #105783;
+    --color-brand-800: #0D4467;
+    --color-brand-900: #083048;
+    --color-brand-950: #052032;
+
+    --color-primary: var(--color-brand-500);
+    --color-primary-hover: var(--color-brand-600);
 }
