@@ -25,7 +25,9 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.store');
+Route::post('/login', [LoginController::class, 'login'])
+    ->name('login.store')
+    ->middleware('throttle:5,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/convite/{token}', [InviteController::class, 'showSetPassword'])->name('invite.show');
 Route::post('/convite/{token}', [InviteController::class, 'setPassword'])->name('invite.store');
@@ -45,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/tarefas/{task}/status', [TaskController::class, 'changeStatus'])->name('tasks.change-status');
     Route::post('/tarefas/{task}/comentarios', [CommentController::class, 'store'])->name('tasks.comments.store');
     Route::post('/tarefas/{task}/anexos', [AttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::get('/tarefas/{task}/anexos/{attachment}', [AttachmentController::class, 'download'])->name('tasks.attachments.download');
     Route::post('/tarefas/{task}/bloquear', [TaskController::class, 'block'])->name('tasks.block');
     Route::post('/tarefas/{task}/desbloquear', [TaskController::class, 'unblock'])->name('tasks.unblock');
     Route::post('/tarefas/{task}/solicitar-conclusao', [TaskController::class, 'requestCompletion'])->name('tasks.request-completion');

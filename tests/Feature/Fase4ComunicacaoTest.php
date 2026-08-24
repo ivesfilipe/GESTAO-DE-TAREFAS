@@ -59,7 +59,7 @@ test('liderado nao acessa URL direta de tarefa de outro liderado', function () {
 });
 
 test('anexo de pdf e salvo na tarefa', function () {
-    Storage::fake('public');
+    Storage::fake('anexos');
 
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create();
@@ -79,11 +79,11 @@ test('anexo de pdf e salvo na tarefa', function () {
         'file_type' => 'application/pdf',
     ]);
 
-    Storage::disk('public')->assertExists(Attachment::first()->file_path);
+    Storage::disk('anexos')->assertExists(Attachment::first()->file_path);
 });
 
 test('comentario pode ser enviado junto com anexo', function () {
-    Storage::fake('public');
+    Storage::fake('anexos');
 
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create();

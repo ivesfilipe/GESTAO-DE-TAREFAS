@@ -31,6 +31,9 @@ class InviteUser
      * Gera (ou regenera) o token de definição de senha do usuário.
      * Usado no convite inicial e no "novo link" (link expirado em 48h
      * ou liderado que esqueceu a senha).
+     *
+     * Apenas o hash SHA-256 do token é persistido; o valor cru existe
+     * somente no link entregue ao gestor.
      */
     public function createToken(User $user): string
     {
@@ -38,7 +41,7 @@ class InviteUser
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
-            ['token' => $token, 'created_at' => now()]
+            ['token' => hash('sha256', $token), 'created_at' => now()]
         );
 
         return $token;

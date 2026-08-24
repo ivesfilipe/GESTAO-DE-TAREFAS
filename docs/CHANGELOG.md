@@ -9,6 +9,64 @@ Formato de cada entrada:
 
 ---
 
+## [2026-08-24] — Correções críticas + notificações em produção
+
+### Segurança
+- IDOR corrigido em `PATCH /tarefas/{task}/status`: exigia gate
+  `view-task` e não validava vínculo com a tarefa — qualquer usuário
+  logado podia mover ou cancelar tarefa alheia. Agora: cancelar é
+  exclusivo do gestor; demais transições, só do responsável
+- `TaskController::changeStatus()` (app/Http/Controllers)
+
+### Bugs de fluxo corrigidos
+- Botão "Desbloquear" chamava `tasks.approve` (rota errada) e gerava 500;
+  corrigido para `tasks.unblock`
+- Modal "Atribuir" sempre vazio: `show()` não repassava `$liderados`
+- Filtro por responsável na listagem sempre vazio: `index()` não
+  repassava `$teamMembers`
+
+### Notificações ativadas (eram código morto desde a Fase 9)
+- As 6 classes de notification nunca eram disparadas; a central de
+  notificações ficava sempre vazia em produção
+- Novo `NotificarPartesInteressadasListener`: dispara nova tarefa
+  (criação/atribuição), comentário (criador + responsável, nunca o autor),
+  aprovada e reprovada; ignora usuário inativo e o próprio ator da ação
+- Novos comandos agendados: `tarefas:notificar-prazos-proximos` (08:00)
+  e `tarefas:notificar-atrasadas` (08:10) em `routes/console.php`;
+  respeitam status bloqueada/concluída/cancelada e fuso do responsável
+
+### Bug latente resolvido: eventos executados em duplicidade
+- O Laravel 12 faz event discovery automático dos métodos `handle*` em
+  `app/Listeners`, somando-se aos registros manuais no
+  `AppServiceProvider`: cada evento rodava 2x desde o início — inclusive
+  em produção, gravando histórico duplicado em `task_history_events`
+  (testes antigos usavam `assertDatabaseHas` e não detectavam)
+- Corrigido com `->withEvents(discover: false)` em `bootstrap/app.php`,
+  mantendo os registros explícitos como fonte única
+
+### Testes
+- Novo arquivo `tests/Feature/Fase11CorrecoesCriticasTest.php` com
+  17 testes de regressão (IDOR, rotas, notificações, comandos agendados)
+- Suíte completa: 82 testes passando (antes: 65)
+
+### Documentação
+- `docs/23` → Cron do scheduler marcado como obrigatório para as
+  notificações de prazo
+- `docs/30` → novos diagnósticos: notificações de prazo sem chegar;
+  histórico/eventos duplicados
+
+### Arquivos principais afetados
+- `app/Http/Controllers/TaskController.php`,
+  `app/Listeners/NotificarPartesInteressadasListener.php` (novo),
+  `app/Console/Commands/NotificarPrazosProximos.php` (novo),
+  `app/Console/Commands/NotificarTarefasAtrasadas.php` (novo),
+  `app/Providers/AppServiceProvider.php`, `bootstrap/app.php`,
+  `routes/console.php`, `resources/views/tasks/show.blade.php`,
+  `tests/Feature/Fase11CorrecoesCriticasTest.php` (novo), `docs/23`,
+  `docs/30`
+
+---
+
 ## [2026-08-07] — Fases 1-11 — Sistema completo de gestão de tarefas
 
 ### Infraestrutura

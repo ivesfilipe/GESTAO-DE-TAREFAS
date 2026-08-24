@@ -16,7 +16,7 @@ class UploadAttachment
         $validMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
         $maxSize = 10485760;
 
-        if (!in_array($file->getMimeType(), $validMimeTypes, true)) {
+        if (! in_array($file->getMimeType(), $validMimeTypes, true)) {
             throw new \InvalidArgumentException(
                 'Tipo de arquivo não permitido. Use: jpg, jpeg, png, gif ou pdf.'
             );
@@ -28,7 +28,7 @@ class UploadAttachment
             );
         }
 
-        $path = $file->store('attachments', 'public');
+        $path = $file->store('attachments', 'anexos');
 
         $attachment = Attachment::create([
             'task_id' => $task->id,

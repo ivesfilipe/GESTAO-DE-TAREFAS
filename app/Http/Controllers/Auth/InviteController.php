@@ -13,10 +13,10 @@ class InviteController extends Controller
     public function showSetPassword($token)
     {
         $record = DB::table('password_reset_tokens')
-            ->where('token', $token)
+            ->where('token', hash('sha256', $token))
             ->first();
 
-        if (!$record || now()->diffInHours($record->created_at) > 48) {
+        if (! $record || now()->diffInHours($record->created_at) > 48) {
             return view('auth.set-password', [
                 'email' => null,
                 'token' => $token,
@@ -37,10 +37,10 @@ class InviteController extends Controller
         ]);
 
         $record = DB::table('password_reset_tokens')
-            ->where('token', $token)
+            ->where('token', hash('sha256', $token))
             ->first();
 
-        if (!$record || now()->diffInHours($record->created_at) > 48) {
+        if (! $record || now()->diffInHours($record->created_at) > 48) {
             return back()->withErrors([
                 'password' => 'Link expirado ou inválido.',
             ]);
@@ -48,7 +48,7 @@ class InviteController extends Controller
 
         $user = User::where('email', $request->email ?? $record->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors([
                 'email' => 'Usuário não encontrado.',
             ]);
