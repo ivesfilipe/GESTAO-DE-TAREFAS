@@ -12,6 +12,18 @@
                 <p class="mt-2 text-sm text-slate-500">Entre com suas credenciais</p>
             </div>
 
+            @if(session('error'))
+                <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="mb-6 rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
                     <ul class="list-disc pl-4 space-y-1">
