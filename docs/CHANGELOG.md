@@ -9,6 +9,42 @@ Formato de cada entrada:
 
 ---
 
+## [2026-08-24] — Identidade visual MedicalThermo + seed de demonstração
+
+### Branding
+- Paleta extraída do site oficial medicalthermo.com: navy `#083048`
+  (logo "Medical"/linha) e azul institucional `#1880C0` ("Thermo"/HERZOG)
+- Tokens `brand-50..950` no Tailwind 4 (`resources/css/app.css` via @theme)
+- Todas as views migram `blue-*` → `brand-*` (botões, badges, links,
+  estados de foco, FAB, bottom-nav)
+- Logos oficiais versionadas em `public/images/` (cor, branca, favicons
+  32/192) + `theme-color` navy
+- Sidebar com logo + label "Gestão de Tarefas"; topbar mobile com logo
+- Login e convite redesenhados: gradiente navy, logo branca, rodapé
+  institucional
+- `welcome.blade.php` (scaffold morto) removido
+
+### Dados de demonstração (DatabaseSeeder)
+- Gestor `gestor@medicalthermo.com` / senha `senha123` + 4 liderados
+  (`ana|bruno|carla|diego@medicalthermo.com` / `senha123`)
+- 23 tarefas cobrindo os 9 status, 4 prioridades, atrasadas, vence-hoje,
+  bloqueadas com motivo/dependência, reprovadas categorizadas, concluídas
+  aprovadas e 1 cancelada (soft delete)
+- 2 change requests pendentes (prazo e prioridade), 4 comentários,
+  histórico inicial
+
+### Validação
+- Screenshots Playwright: login, painel, tarefas, detalhe, minhas-tarefas
+  (desktop 1440px e mobile 390px)
+- Suíte: 88 testes passando
+
+### Arquivos principais afetados
+- `resources/css/app.css`, `resources/views/**` (todas), `public/images/*`
+  (novos), `database/seeders/DatabaseSeeder.php`,
+  `public/build/*` (rebuild)
+
+---
+
 ## [2026-08-24] — Correções críticas + notificações em produção
 
 ### Segurança
