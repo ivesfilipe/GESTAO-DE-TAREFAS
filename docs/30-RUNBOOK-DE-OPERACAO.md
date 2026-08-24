@@ -40,6 +40,27 @@ Guia de "o que fazer quando algo dá errado" em produção.
 2. Verificar pasta de spam do destinatário
 3. Reenviar convite pela tela de Gestão de Equipe
 
+## Notificações de prazo (vence em breve / atrasada) não chegam
+As notificações de "prazo próximo" e "tarefa atrasada" dependem do
+scheduler (`routes/console.php`), que roda via cron. As demais
+(nova tarefa, comentário, aprovada, reprovada) são disparadas em
+tempo real pela aplicação — se essas também não chegarem, o problema
+não é o cron.
+1. Confirmar que o Cron Job `schedule:run` está ativo no cPanel
+   (comando exato em `23-INFRAESTRUTURA-E-AMBIENTE.md` → Cron)
+2. Testar manualmente via Terminal do cPanel:
+   `/opt/cpanel/ea-php83/root/usr/bin/php artisan tarefas:notificar-prazos-proximos`
+3. Verificar se existem tarefas no critério: prazo vencendo em até 24h
+   (ou já vencida), com responsável ativo, fora de status concluída /
+   cancelada / bloqueada
+4. Verificar `storage/logs/laravel.log` para erros nos comandos
+
+## Histórico da tarefa aparece duplicado (ou eventos executados 2x)
+1. Confirmar que `bootstrap/app.php` mantém `->withEvents(discover: false)`
+2. O Laravel 12 descobre automaticamente listeners em `app/Listeners`
+   pelo método `handle*`; com o registro manual em
+   `AppServiceProvider`, sem desativar o discovery, cada evento roda 2x
+
 ## Contato de suporte
 *(preencher com quem o gestor deve acionar em caso de problema técnico
 que ultrapasse este runbook — ex: suporte da hospedagem, ou quem

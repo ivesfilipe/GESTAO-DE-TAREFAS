@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::command('tarefas:notificar-prazos-proximos')->dailyAt('08:00');
+Schedule::command('tarefas:notificar-atrasadas')->dailyAt('08:10');

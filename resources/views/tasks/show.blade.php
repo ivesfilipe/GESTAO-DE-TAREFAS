@@ -185,7 +185,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                                     <p class="text-xs text-slate-400">{{ $attachment->file_type }} &middot; {{ number_format($attachment->file_size / 1024, 1) }} KB</p>
                                 </div>
                             </div>
-                             <a href="{{ Storage::disk('public')->url($attachment->file_path) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700" download>
+                             <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700" download>
                                 Download
                             </a>
                         </div>
@@ -275,7 +275,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                         @endif
 
                         @if($task->status === 'bloqueada')
-                            <form method="POST" action="{{ route('tasks.approve', $task) }}">
+                            <form method="POST" action="{{ route('tasks.unblock', $task) }}">
                                 @csrf
                                 <button type="submit" class="w-full rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
                                     Desbloquear

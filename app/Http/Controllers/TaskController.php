@@ -40,15 +40,21 @@ class TaskController extends Controller
             }
 
             if ($request->filled('search')) {
-                $query->where('title', 'like', '%' . $request->search . '%');
+                $query->where('title', 'like', '%'.$request->search.'%');
             }
 
             $tasks = $query->latest()->paginate();
+            $teamMembers = User::where('role', 'liderado')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get();
+
+            return view('tasks.index', compact('tasks', 'teamMembers'));
         } else {
             $tasks = Task::where('assigned_to', $user->id)
-                ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-                ->when($request->filled('priority'), fn($q) => $q->where('priority', $request->priority))
-                ->when($request->filled('search'), fn($q) => $q->where('title', 'like', '%' . $request->search . '%'))
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+                ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
+                ->when($request->filled('search'), fn ($q) => $q->where('title', 'like', '%'.$request->search.'%'))
                 ->latest()
                 ->paginate();
         }
@@ -77,7 +83,7 @@ class TaskController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
-        (new CreateTask())->execute(auth()->user(), $data);
+        (new CreateTask)->execute(auth()->user(), $data);
 
         return redirect()->route('tasks.index')->with('success', 'Tarefa criada.');
     }
@@ -88,7 +94,12 @@ class TaskController extends Controller
 
         $task->load(['comments.author', 'attachments', 'historyEvents.actor', 'changeRequests']);
 
-        return view('tasks.show', compact('task'));
+        $liderados = User::where('role', 'liderado')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('tasks.show', compact('task', 'liderados'));
     }
 
     public function assign(Request $request, Task $task)
@@ -101,16 +112,28 @@ class TaskController extends Controller
 
         $newAssignee = User::find($request->assigned_to);
 
-        (new AssignTask())->execute($task, auth()->user(), $newAssignee);
+        (new AssignTask)->execute($task, auth()->user(), $newAssignee);
 
         return redirect()->back()->with('success', 'Responsável atualizado.');
     }
 
     public function changeStatus(Request $request, Task $task)
     {
+        Gate::authorize('view-task', $task);
+
         $request->validate([
-            'status' => ['required', 'in:' . implode(',', Task::statuses())],
+            'status' => ['required', 'in:'.implode(',', Task::statuses())],
         ]);
+
+        $user = auth()->user();
+
+        if ($request->status === 'cancelada') {
+            if (! $user->isGestor()) {
+                abort(403);
+            }
+        } elseif ($task->assigned_to !== $user->id) {
+            abort(403);
+        }
 
         try {
             ChangeTaskStatus::change($task, auth()->user(), $request->status);
@@ -123,7 +146,7 @@ class TaskController extends Controller
 
     public function block(Request $request, Task $task)
     {
-        if (auth()->id() !== $task->assigned_to || !auth()->user()->isLiderado()) {
+        if (auth()->id() !== $task->assigned_to || ! auth()->user()->isLiderado()) {
             abort(403);
         }
 
@@ -132,25 +155,25 @@ class TaskController extends Controller
             'blocked_on' => ['required'],
         ]);
 
-        (new BlockTask())->execute($task, auth()->user(), $request->block_reason, $request->blocked_on);
+        (new BlockTask)->execute($task, auth()->user(), $request->block_reason, $request->blocked_on);
 
         return redirect()->back()->with('success', 'Tarefa bloqueada.');
     }
 
     public function unblock(Request $request, Task $task)
     {
-        if (!auth()->user()->isGestor() && auth()->id() !== $task->assigned_to) {
+        if (! auth()->user()->isGestor() && auth()->id() !== $task->assigned_to) {
             abort(403);
         }
 
-        (new UnblockTask())->execute($task, auth()->user());
+        (new UnblockTask)->execute($task, auth()->user());
 
         return redirect()->back()->with('success', 'Tarefa desbloqueada.');
     }
 
     public function requestCompletion(Task $task)
     {
-        if (auth()->id() !== $task->assigned_to || !auth()->user()->isLiderado()) {
+        if (auth()->id() !== $task->assigned_to || ! auth()->user()->isLiderado()) {
             abort(403);
         }
 
@@ -165,7 +188,7 @@ class TaskController extends Controller
     {
         Gate::authorize('approve-task', $task);
 
-        (new ApproveTask())->execute($task, auth()->user());
+        (new ApproveTask)->execute($task, auth()->user());
 
         return redirect()->back()->with('success', 'Tarefa aprovada.');
     }
@@ -179,14 +202,14 @@ class TaskController extends Controller
             'rejection_note' => ['required'],
         ]);
 
-        (new RejectTask())->execute($task, auth()->user(), $request->rejection_category, $request->rejection_note);
+        (new RejectTask)->execute($task, auth()->user(), $request->rejection_category, $request->rejection_note);
 
         return redirect()->back()->with('success', 'Tarefa reprovada.');
     }
 
     public function requestChange(Request $request, Task $task)
     {
-        if (auth()->id() !== $task->assigned_to || !auth()->user()->isLiderado()) {
+        if (auth()->id() !== $task->assigned_to || ! auth()->user()->isLiderado()) {
             abort(403);
         }
 
@@ -197,7 +220,7 @@ class TaskController extends Controller
             'justification' => ['required'],
         ]);
 
-        (new CreateChangeRequest())->execute(
+        (new CreateChangeRequest)->execute(
             $task,
             auth()->user(),
             $request->field,
@@ -211,7 +234,7 @@ class TaskController extends Controller
 
     public function resolveChange(Request $request, Task $task, ChangeRequest $changeRequest)
     {
-        if (!auth()->user()->isGestor()) {
+        if (! auth()->user()->isGestor()) {
             abort(403);
         }
 
@@ -219,7 +242,7 @@ class TaskController extends Controller
             'status' => ['required', 'in:aprovada,recusada'],
         ]);
 
-        (new ResolveChangeRequest())->execute($changeRequest, auth()->user(), $request->status);
+        (new ResolveChangeRequest)->execute($changeRequest, auth()->user(), $request->status);
 
         return redirect()->back()->with('success', 'Solicitação resolvida.');
     }

@@ -17,6 +17,7 @@ use App\Events\TarefaCriada;
 use App\Events\TarefaDesbloqueada;
 use App\Events\TarefaReprovada;
 use App\Listeners\GravarHistoricoListener;
+use App\Listeners\NotificarPartesInteressadasListener;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
@@ -46,6 +47,12 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TarefaReprovada::class, [GravarHistoricoListener::class, 'handleTarefaReprovada']);
         Event::listen(TarefaCancelada::class, [GravarHistoricoListener::class, 'handleTarefaCancelada']);
         Event::listen(AlteracaoSolicitada::class, [GravarHistoricoListener::class, 'handleAlteracaoSolicitada']);
+
+        Event::listen(TarefaCriada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaCriada']);
+        Event::listen(TarefaAtribuida::class, [NotificarPartesInteressadasListener::class, 'handleTarefaAtribuida']);
+        Event::listen(TarefaAprovada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaAprovada']);
+        Event::listen(TarefaReprovada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaReprovada']);
+        Event::listen(ComentarioAdicionado::class, [NotificarPartesInteressadasListener::class, 'handleComentarioAdicionado']);
 
         Gate::define('view-task', function (User $user, Task $task) {
             return $user->isGestor() || $task->assigned_to === $user->id;

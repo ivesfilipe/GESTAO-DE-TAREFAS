@@ -53,6 +53,14 @@
 ## Cron
 - Scheduler do Laravel:
   `* * * * * cd /home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1`
+  - ⚠️ **Obrigatório desde ago/2026**: o scheduler executa os comandos
+    `tarefas:notificar-prazos-proximos` (08:00) e
+    `tarefas:notificar-atrasadas` (08:10), responsáveis pelas
+    notificações in-app de "prazo próximo" e "tarefa atrasada".
+    Sem esse cron ativo, essas notificações nunca são enviadas
+    (as demais notificações — nova tarefa, comentário, aprovação,
+    reprovação — são disparadas em tempo real pela aplicação e não
+    dependem do cron).
 - Auto-deploy (ver `24-PIPELINE-DE-DEPLOY.md`):
   `* * * * * /bin/bash /home/medicalthermo/home/medicalthermo/tarefas.medicalthermo.com/deploy/auto-deploy.sh >> /home/medicalthermo/auto-deploy.log 2>&1`
 
