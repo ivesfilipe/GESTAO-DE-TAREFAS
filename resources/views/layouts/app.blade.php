@@ -14,7 +14,7 @@
     @livewireStyles
     @stack('head')
 </head>
-<body class="h-full bg-slate-50 text-slate-900" @auth data-authenticated="true" data-user-id="{{ Auth::id() }}" data-reverb-key="{{ config('reverb.apps.0.key') }}" @endauth>
+<body class="h-full bg-slate-50 text-slate-900" @auth data-authenticated="true" data-user-id="{{ Auth::id() }}" data-reverb-key="{{ config('reverb.apps.apps.0.keys.key', config('reverb.apps.0.key')) }}" @endauth>
     @hasSection('auth')
         <div class="flex min-h-full flex-col justify-center bg-slate-50">
             <main class="flex-1">
