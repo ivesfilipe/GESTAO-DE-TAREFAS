@@ -20,7 +20,7 @@ class AiAssistantService
 
     public function __construct(?string $apiKey = null)
     {
-        $this->apiKey = $apiKey ?? config('services.openai.key') ?? env('OPENAI_API_KEY') ?? '';
+        $this->apiKey = $apiKey ?? (string) config('services.openai.key');
     }
 
     public function usesLlm(): bool
