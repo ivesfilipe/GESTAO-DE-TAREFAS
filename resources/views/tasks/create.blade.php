@@ -6,6 +6,24 @@
 <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-6">
     <h1 class="text-2xl font-bold text-slate-900 mb-6">Nova Tarefa</h1>
 
+    <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm mb-5">
+        <label for="nl-input" class="block text-sm font-semibold text-slate-700">
+            Criação inteligente <span class="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
+        </label>
+        <p class="mt-1 text-xs text-slate-500">
+            Escreva em português e preenchemos o formulário: <em>"Reunião com o time amanhã às 15h urgente"</em>, <em>"Backup toda segunda 08h"</em>.
+        </p>
+        <div class="mt-3 flex gap-2">
+            <input type="text" id="nl-input" placeholder="Ex.: Inspecionar compressores sexta às 10h importante"
+                   class="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"/>
+            <button type="button" id="nl-interpret" class="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 transition-colors whitespace-nowrap">
+                Interpretar
+            </button>
+        </div>
+        <div id="nl-preview" class="mt-2 hidden rounded-lg bg-violet-50 border border-violet-200 px-3 py-2 text-xs text-violet-800"></div>
+        <div id="nl-error" class="mt-2 hidden rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700"></div>
+    </div>
+
     <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
         <form method="POST" action="{{ route('tasks.store') }}" class="space-y-5">
             @csrf
@@ -116,3 +134,50 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const input = document.getElementById('nl-input');
+        const button = document.getElementById('nl-interpret');
+        const preview = document.getElementById('nl-preview');
+        const errorBox = document.getElementById('nl-error');
+
+        function run() {
+            const text = input.value.trim();
+            if (!text) return;
+            button.disabled = true;
+            button.textContent = 'Interpretando...';
+
+            window.axios.post('/tarefas/interpretar', { text })
+                .then(({ data }) => {
+                    if (!data.ok) throw new Error(data.message);
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('priority').value = data.priority;
+                    document.getElementById('due_at').value = data.due_at_local;
+                    if (data.recurrence_frequency) {
+                        document.getElementById('recurrence_frequency').value = data.recurrence_frequency;
+                    }
+                    preview.textContent = 'Preenchido: "' + data.title + '" · prazo ' + data.due_at_label + ' · prioridade ' + data.priority;
+                    preview.classList.remove('hidden');
+                    errorBox.classList.add('hidden');
+                })
+                .catch((err) => {
+                    const message = err.response?.data?.message ?? 'Não foi possível interpretar o texto.';
+                    errorBox.textContent = message;
+                    errorBox.classList.remove('hidden');
+                    preview.classList.add('hidden');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = 'Interpretar';
+                });
+        }
+
+        button.addEventListener('click', run);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); run(); }
+        });
+    })();
+</script>
+@endpush

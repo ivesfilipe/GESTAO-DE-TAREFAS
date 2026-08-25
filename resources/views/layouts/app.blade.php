@@ -9,10 +9,12 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/favicon-192.png') }}">
+    <link rel="manifest" href="/manifest.webmanifest">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     @stack('head')
 </head>
-<body class="h-full bg-slate-50 text-slate-900">
+<body class="h-full bg-slate-50 text-slate-900" @auth data-authenticated="true" data-user-id="{{ Auth::id() }}" @endauth>
     @hasSection('auth')
         <div class="flex min-h-full flex-col justify-center bg-slate-50">
             <main class="flex-1">
@@ -33,6 +35,13 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-4">
+                    <button type="button" id="palette-trigger" class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500" title="Buscar tarefas (Cmd+K)">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Buscar...
+                        <kbd class="ml-2 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold">⌘K</kbd>
+                    </button>
                     <a href="{{ route('notifications.index') }}" class="relative text-slate-500 hover:text-slate-700">
                         <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -41,9 +50,11 @@
                             $unreadCount = Auth::user()->unreadNotifications()->count();
                         @endphp
                         @if($unreadCount > 0)
-                            <span class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                            <span data-notification-badge class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                                 {{ $unreadCount > 9 ? '9+' : $unreadCount }}
                             </span>
+                        @else
+                            <span data-notification-badge class="hidden absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
                         @endif
                     </a>
                     <span class="text-sm text-slate-700 hidden sm:block">{{ Auth::user()->name }}</span>
@@ -97,6 +108,24 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                         Relatórios
+                    </a>
+                    <a href="/pulse" target="_blank" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('pulse*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Monitoramento
+                    </a>
+                    <a href="{{ route('assistant.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('assistente*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
+                        </svg>
+                        Assistente
+                    </a>
+                    <a href="{{ route('schedule.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('agenda-inteligente*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Agenda Inteligente
                     </a>
                 @else
                     <a href="{{ url('/minhas-tarefas') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('minhas-tarefas*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
@@ -185,6 +214,23 @@
         </main>
     @endif
 
+    @livewireScripts
     @stack('scripts')
+
+    @auth
+    <div id="command-palette" class="hidden fixed inset-0 z-[90] bg-slate-900/40 p-4 pt-[15vh]">
+        <div class="mx-auto w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
+            <div class="border-b border-slate-100">
+                <input id="palette-input" type="text" placeholder="Buscar tarefas por título ou descrição..." autocomplete="off"
+                       class="w-full bg-transparent px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400"/>
+            </div>
+            <div id="palette-results" class="max-h-80 divide-y divide-slate-50 overflow-y-auto py-1"></div>
+            <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-4 py-2 text-[11px] text-slate-400">
+                <span>↑↓ navegar · ↵ abrir · esc fechar</span>
+                <span>Busca global</span>
+            </div>
+        </div>
+    </div>
+    @endauth
 </body>
 </html>

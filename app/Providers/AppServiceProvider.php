@@ -16,6 +16,7 @@ use App\Events\TarefaCancelada;
 use App\Events\TarefaCriada;
 use App\Events\TarefaDesbloqueada;
 use App\Events\TarefaReprovada;
+use App\Listeners\DispatchWebhooksListener;
 use App\Listeners\GravarHistoricoListener;
 use App\Listeners\NotificarPartesInteressadasListener;
 use App\Models\Task;
@@ -23,6 +24,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pennant\Feature;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,6 +56,13 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TarefaReprovada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaReprovada']);
         Event::listen(ComentarioAdicionado::class, [NotificarPartesInteressadasListener::class, 'handleComentarioAdicionado']);
 
+        foreach ([TarefaCriada::class, TarefaAtribuida::class, StatusAlterado::class, PrazoAlterado::class, PrioridadeAlterada::class,
+            ComentarioAdicionado::class, AnexoAdicionado::class, TarefaBloqueada::class, TarefaDesbloqueada::class,
+            ConclusaoSolicitada::class, TarefaAprovada::class, TarefaReprovada::class, TarefaCancelada::class,
+            AlteracaoSolicitada::class, ] as $broadcastable) {
+            Event::listen($broadcastable, DispatchWebhooksListener::class);
+        }
+
         Gate::define('view-task', function (User $user, Task $task) {
             return $user->isGestor() || $task->assigned_to === $user->id;
         });
@@ -73,5 +82,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('reject-task', function (User $user) {
             return $user->isGestor();
         });
+
+        Gate::define('viewPulse', function (User $user) {
+            return $user->isGestor();
+        });
+
+        Feature::define('ai-assistant', fn (User $user) => $user->isGestor());
+
+        Feature::define('auto-scheduling', fn (User $user) => $user->isGestor());
     }
 }

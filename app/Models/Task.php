@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Task extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -28,6 +30,8 @@ class Task extends Model
         'recurrence_frequency',
         'recurrence_next_at',
         'recurrence_series_id',
+        'estimated_minutes',
+        'scheduled_start',
     ];
 
     protected function casts(): array
@@ -37,6 +41,7 @@ class Task extends Model
             'original_due_at' => 'datetime',
             'completed_at' => 'datetime',
             'recurrence_next_at' => 'datetime',
+            'scheduled_start' => 'datetime',
         ];
     }
 
@@ -115,6 +120,42 @@ class Task extends Model
     public function isRecurring(): bool
     {
         return $this->recurrence_frequency !== null;
+    }
+
+    public function searchableAs(): string
+    {
+        return 'tasks_index';
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->getKey(),
+            'title' => $this->title,
+            'description' => $this->description,
+            'status' => $this->status,
+            'priority' => $this->priority,
+            'created_by' => $this->created_by,
+            'assigned_to' => $this->assigned_to,
+        ];
+    }
+
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->whereNotIn('status', ['bloqueada', 'concluida', 'cancelada'])
+            ->whereNotNull('due_at')
+            ->where('due_at', '<', now());
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->isGestor()) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('assigned_to', $user->id)->orWhere('created_by', $user->id);
+        });
     }
 
     public function isOverdue(): bool

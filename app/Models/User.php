@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -22,6 +24,7 @@ class User extends Authenticatable
         'invited_at',
         'activated_at',
         'is_active',
+        'calendar_token',
     ];
 
     protected $hidden = [
@@ -38,6 +41,13 @@ class User extends Authenticatable
             'activated_at' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $user) {
+            $user->calendar_token ??= (string) Str::uuid();
+        });
     }
 
     public function isGestor(): bool
@@ -58,5 +68,10 @@ class User extends Authenticatable
     public function assignedTasks()
     {
         return $this->hasMany(Task::class, 'assigned_to');
+    }
+
+    public function webhookEndpoints()
+    {
+        return $this->hasMany(WebhookEndpoint::class);
     }
 }

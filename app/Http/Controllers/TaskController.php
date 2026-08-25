@@ -15,6 +15,7 @@ use App\Events\ConclusaoSolicitada;
 use App\Models\ChangeRequest;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\NaturalLanguageTaskParser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -73,6 +74,28 @@ class TaskController extends Controller
         return view('tasks.create', compact('liderados'));
     }
 
+    public function interpret(Request $request)
+    {
+        Gate::authorize('create-task');
+
+        $request->validate(['text' => ['required', 'string', 'max:500']]);
+
+        try {
+            $parsed = (new NaturalLanguageTaskParser)->parse($request->input('text'));
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'title' => $parsed['title'],
+            'priority' => $parsed['priority'],
+            'recurrence_frequency' => $parsed['recurrence_frequency'],
+            'due_at_local' => $parsed['due_at']->format('Y-m-d\TH:i'),
+            'due_at_label' => $parsed['due_at']->format('d/m/Y H:i'),
+        ]);
+    }
+
     public function store(Request $request)
     {
         Gate::authorize('create-task');
@@ -113,36 +136,7 @@ class TaskController extends Controller
 
     public function kanban(Request $request)
     {
-        $user = auth()->user();
-
-        $base = Task::query()
-            ->whereNotIn('status', ['cancelada'])
-            ->with(['assignee']);
-
-        if ($user->isGestor()) {
-            if ($request->filled('assigned_to')) {
-                $base->where('assigned_to', $request->assigned_to);
-            }
-        } else {
-            $base->where('assigned_to', $user->id);
-        }
-
-        $columns = [
-            'nao_atribuida' => 'Sem responsável',
-            'nova' => 'Nova',
-            'recebida' => 'Recebida',
-            'em_andamento' => 'Em andamento',
-            'bloqueada' => 'Bloqueada',
-            'aguardando_aprovacao' => 'Aguardando aprovação',
-            'reprovada' => 'Reprovada',
-            'concluida' => 'Concluída',
-        ];
-
-        $tasks = $base->orderBy('due_at')->get()->groupBy('status');
-
-        $liderados = User::where('role', 'liderado')->where('is_active', true)->orderBy('name')->get();
-
-        return view('tasks.kanban', compact('columns', 'tasks', 'liderados'));
+        return view('tasks.kanban');
     }
 
     public function assign(Request $request, Task $task)
