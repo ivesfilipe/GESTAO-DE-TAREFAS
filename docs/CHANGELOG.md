@@ -9,6 +9,53 @@ Formato de cada entrada:
 
 ---
 
+## [2026-08-25] — Kanban, Relatórios de Desempenho e Tarefas Recorrentes
+
+### Quadro Kanban
+- `GET /tarefas/quadro`: 8 colunas (Sem responsável → Concluída, incluindo
+  Bloqueada e Reprovada), contadores por coluna, filtro por responsável
+  (gestor) e visão restrita às próprias tarefas (liderado)
+- Drag-and-drop com SortableJS 1.15.6 versionado em `public/js` (sem CDN)
+- Transições validadas no cliente (mapa de estados) e no servidor; card
+  inválido volta com toast explicativo
+- Gestor arrasta "Aguardando aprovação → Concluída" para aprovar direto
+- `changeStatus` e `approve` respondem JSON (`422` amigável) para fetch
+
+### Relatórios de Desempenho (gestor)
+- `GET /relatorios` com filtros 30/90/365 dias
+- KPIs: criadas, concluídas, tempo médio de conclusão (ciclo), % entregas
+  fora do prazo e taxa de retrabalho (reprovadas ÷ revisadas)
+- Desempenho por pessoa: abertas, atrasadas (fuso do responsável),
+  concluídas com barra comparativa, ciclo médio, % fora do prazo,
+  reprovadas
+- Reprovações por motivo (4 categorias) com barras
+- SQL portável (ciclo calculado em PHP — sem TIMESTAMPDIFF, compatível
+  SQLite/MySQL)
+
+### Tarefas Recorrentes
+- Migration: `recurrence_frequency`, `recurrence_next_at`,
+  `recurrence_series_id` em tasks (índices)
+- Frequências: diária, semanal, quinzenal, mensal (cadência fixa —
+  adequado a manutenção preventiva/PMOC)
+- Comando `tarefas:gerar-recorrentes` agendado a cada 10 minutos: cria a
+  próxima instância quando a cadência vence (reusa CreateTask → histórico
+  e notificação automáticos), avança a cadência sem criar instâncias no
+  passado e encerra o ciclo na origem
+- UI: select "Repetir" no formulário, badges ↻ no quadro/lista/detalhe
+- Links "Quadro" e "Relatórios" no menu lateral (relatórios só gestor)
+
+### Observação de ambiente
+- Produção utiliza `DB_CONNECTION=sqlite` (não MariaDB como indicado em
+  docs/23) — funcional, volume baixo; doc será corrigido em oportunidade
+  futura
+
+### Validação
+- 101 testes (13 novos), Pint limpo, screenshots Playwright local +
+  produção (kanban e relatórios com dados reais da equipe)
+- Deploy via auto-deploy com migration aplicada
+
+---
+
 ## [2026-08-24] — Identidade visual MedicalThermo + seed de demonstração
 
 ### Branding
