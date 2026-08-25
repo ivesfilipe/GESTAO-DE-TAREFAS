@@ -9,16 +9,18 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Pusher = Pusher;
 
 function initEcho() {
-    const key = import.meta.env.VITE_REVERB_APP_KEY;
+    const key = document.body.dataset.reverbKey;
     if (!key || !document.body.dataset.authenticated) return;
+
+    const isHttps = window.location.protocol === 'https:';
 
     window.Echo = new Echo({
         broadcaster: 'reverb',
         key,
-        wsHost: import.meta.env.VITE_REVERB_HOST ?? window.location.hostname,
-        wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        wsHost: window.location.hostname,
+        wsPort: 8080,
+        wssPort: 8080,
+        forceTLS: isHttps,
         enabledTransports: ['ws', 'wss'],
     });
 
