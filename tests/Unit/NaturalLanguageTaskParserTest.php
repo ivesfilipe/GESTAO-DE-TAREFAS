@@ -98,6 +98,13 @@ test('sem informacao de prazo usa amanha as 17h', function () {
     expect($parsed['title'])->toBe('Organizar documentação do projeto');
 });
 
+test('preserva maiusculas e siglas do titulo original', function () {
+    $parsed = (new NaturalLanguageTaskParser)->parse('Revisar filtros do HVAC amanhã às 15h urgente', fixedNow());
+
+    expect($parsed['title'])->toBe('Revisar filtros do HVAC');
+    expect($parsed['priority'])->toBe('urgente');
+});
+
 test('texto sem titulo lanca excecao', function () {
     new NaturalLanguageTaskParser;
 

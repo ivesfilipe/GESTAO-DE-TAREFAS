@@ -37,7 +37,17 @@ $statusBadges = [
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 class="text-2xl font-bold text-slate-900">Tarefas</h1>
-        <a href="{{ route('tasks.kanban') }}" class="text-sm font-medium text-brand-600 hover:text-brand-700">Ver quadro →</a>
+        <div class="flex items-center gap-4">
+            @can('create-task')
+                <a href="{{ route('tasks.create') }}" data-testid="nova-tarefa-desktop" class="hidden lg:inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600 transition-colors">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Nova Tarefa
+                </a>
+            @endcan
+            <a href="{{ route('tasks.kanban') }}" class="text-sm font-medium text-brand-600 hover:text-brand-700">Ver quadro →</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-xl bg-white border border-slate-200 p-4 shadow-sm">

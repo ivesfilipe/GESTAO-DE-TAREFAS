@@ -8,25 +8,26 @@ use InvalidArgumentException;
 class NaturalLanguageTaskParser
 {
     private const WEEKDAYS = [
-        'domingo' => ['/\bdomingo\b/u', 0],
-        'segunda' => ['/\bsegunda(-feira)?\b/u', 1],
-        'terça' => ['/\bter[çc]a(-feira)?\b/u', 2],
-        'quarta' => ['/\bquarta(-feira)?\b/u', 3],
-        'quinta' => ['/\bquinta(-feira)?\b/u', 4],
-        'sexta' => ['/\bsexta(-feira)?\b/u', 5],
-        'sábado' => ['/\bs[áa]bado\b/u', 6],
+        'domingo' => ['/\bdomingo\b/iu', 0],
+        'segunda' => ['/\bsegunda(-feira)?\b/iu', 1],
+        'terça' => ['/\bter[çc]a(-feira)?\b/iu', 2],
+        'quarta' => ['/\bquarta(-feira)?\b/iu', 3],
+        'quinta' => ['/\bquinta(-feira)?\b/iu', 4],
+        'sexta' => ['/\bsexta(-feira)?\b/iu', 5],
+        'sábado' => ['/\bs[áa]bado\b/iu', 6],
     ];
 
     public function parse(string $input, ?CarbonImmutable $now = null): array
     {
         $now = $now ?? CarbonImmutable::now();
-        $text = mb_strtolower(trim($input));
+        $original = trim($input);
+        $text = mb_strtolower($original);
         $consumed = [];
 
         $priority = $this->extractPriority($text, $consumed);
         $recurrence = $this->extractRecurrence($text, $consumed);
         [$dueAt, $dateFragments] = $this->extractDueDate($text, $now, $consumed);
-        $title = $this->buildTitle($text, array_merge($consumed, $dateFragments));
+        $title = $this->buildTitle($original, array_merge($consumed, $dateFragments));
 
         if ($title === '') {
             throw new InvalidArgumentException('Não foi possível extrair o título da tarefa.');
@@ -86,22 +87,22 @@ class NaturalLanguageTaskParser
         if (preg_match('/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\b/u', $text, $m)) {
             $year = isset($m[3]) ? (int) $m[3] : $this->resolveYear((int) $m[1], (int) $m[2], $now);
             $date = $now->setDate($year, (int) $m[2], (int) $m[1]);
-            $fragments[] = '/\b'.$m[1].'\/'.$m[2].(isset($m[3]) ? '\/'.$m[3] : '').'\b/u';
+            $fragments[] = '/\b'.$m[1].'\/'.$m[2].(isset($m[3]) ? '\/'.$m[3] : '').'\b/iu';
         } elseif (preg_match('/\bdepois de amanh[aã]\b/u', $text)) {
             $date = $now->addDays(2)->startOfDay();
-            $fragments[] = '/\bdepois de amanh[aã](?:,)?\b/u';
+            $fragments[] = '/\bdepois de amanh[aã](?:,)?\b/iu';
         } elseif (preg_match('/\bamanh[aã]\b/u', $text)) {
             $date = $now->addDay()->startOfDay();
-            $fragments[] = '/\bamanh[aã](?:,)?\b/u';
+            $fragments[] = '/\bamanh[aã](?:,)?\b/iu';
         } elseif (preg_match('/\bhoje\b/u', $text)) {
             $date = $now->startOfDay();
-            $fragments[] = '/\bhoje\b/u';
+            $fragments[] = '/\bhoje\b/iu';
         } elseif (preg_match('/\bem (\d+) dias?\b/u', $text, $m)) {
             $date = $now->addDays((int) $m[1])->startOfDay();
-            $fragments[] = '/\bem '.$m[1].' dias?(?!\w)/u';
+            $fragments[] = '/\bem '.$m[1].' dias?(?!\w)/iu';
         } elseif (preg_match('/\bem (\d+) semanas?\b/u', $text, $m)) {
             $date = $now->addWeeks((int) $m[1])->startOfDay();
-            $fragments[] = '/\bem '.$m[1].' semanas?\b/u';
+            $fragments[] = '/\bem '.$m[1].' semanas?\b/iu';
         } else {
             $weekdayMatch = $this->matchWeekday($text);
             if ($weekdayMatch !== null) {
@@ -109,7 +110,7 @@ class NaturalLanguageTaskParser
                 $date = $this->nextWeekdayOccurrence($now, $dayNumber);
                 $fragments[] = $pattern;
                 if (preg_match('/\bproxim[oa]\b/u', $text)) {
-                    $fragments[] = '/\bproxim[oa](?:,)?\b/u';
+                    $fragments[] = '/\bproxim[oa](?:,)?\b/iu';
                 }
             }
         }
@@ -118,7 +119,7 @@ class NaturalLanguageTaskParser
             $hour = min((int) $m[1], 23);
             $minute = isset($m[2]) ? min((int) $m[2], 59) : 0;
             $time = [$hour, $minute];
-            $fragments[] = '/(?:\b(?:à|a)s\s*)?\b'.$m[1].'[:h]'.($m[2] ?? '').'(?:\s*h?)?\b/u';
+            $fragments[] = '/(?:\b(?:à|a)s\s*)?\b'.$m[1].'[:h]'.($m[2] ?? '').'(?:\s*h?)?\b/iu';
         }
 
         if ($date === null && $time !== null) {
@@ -180,7 +181,7 @@ class NaturalLanguageTaskParser
             $title = preg_replace($pattern, ' ', $title);
         }
 
-        $title = preg_replace('/\b(até|ate|para|prazo|no dia|dia)\b/u', ' ', $title);
+        $title = preg_replace('/\b(até|ate|para|prazo|no dia|dia)\b/iu', ' ', $title);
         $title = preg_replace('/\s+([,.!?;:]?)/u', '$1 ', $title);
         $title = preg_replace('/\s+([,.!?;:])/u', '$1', $title);
         $title = trim((string) preg_replace('/[\s,;\-–]+\z/', '', (string) preg_replace('/\A[\s,\-–]+/', '', (string) $title)));
