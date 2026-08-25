@@ -15,8 +15,10 @@ use App\Events\ConclusaoSolicitada;
 use App\Models\ChangeRequest;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
@@ -81,7 +83,14 @@ class TaskController extends Controller
             'priority' => ['required', 'in:normal,importante,urgente,critica'],
             'due_at' => ['required', 'date', 'after:now'],
             'assigned_to' => ['nullable', 'exists:users,id'],
+            'recurrence_frequency' => ['nullable', 'in:diaria,semanal,quinzenal,mensal'],
         ]);
+
+        if (! empty($data['recurrence_frequency'])) {
+            $data['recurrence_series_id'] = (string) Str::ulid();
+            $data['recurrence_next_at'] = Carbon::parse($data['due_at'])
+                ->add(Task::recurrenceInterval($data['recurrence_frequency']));
+        }
 
         (new CreateTask)->execute(auth()->user(), $data);
 
@@ -100,6 +109,40 @@ class TaskController extends Controller
             ->get();
 
         return view('tasks.show', compact('task', 'liderados'));
+    }
+
+    public function kanban(Request $request)
+    {
+        $user = auth()->user();
+
+        $base = Task::query()
+            ->whereNotIn('status', ['cancelada'])
+            ->with(['assignee']);
+
+        if ($user->isGestor()) {
+            if ($request->filled('assigned_to')) {
+                $base->where('assigned_to', $request->assigned_to);
+            }
+        } else {
+            $base->where('assigned_to', $user->id);
+        }
+
+        $columns = [
+            'nao_atribuida' => 'Sem responsável',
+            'nova' => 'Nova',
+            'recebida' => 'Recebida',
+            'em_andamento' => 'Em andamento',
+            'bloqueada' => 'Bloqueada',
+            'aguardando_aprovacao' => 'Aguardando aprovação',
+            'reprovada' => 'Reprovada',
+            'concluida' => 'Concluída',
+        ];
+
+        $tasks = $base->orderBy('due_at')->get()->groupBy('status');
+
+        $liderados = User::where('role', 'liderado')->where('is_active', true)->orderBy('name')->get();
+
+        return view('tasks.kanban', compact('columns', 'tasks', 'liderados'));
     }
 
     public function assign(Request $request, Task $task)
@@ -129,19 +172,32 @@ class TaskController extends Controller
 
         if ($request->status === 'cancelada') {
             if (! $user->isGestor()) {
-                abort(403);
+                return $this->statusError($request, 'Apenas o gestor pode cancelar tarefas.');
             }
         } elseif ($task->assigned_to !== $user->id) {
-            abort(403);
+            return $this->statusError($request, 'Apenas o responsável pode mover esta tarefa.');
         }
 
         try {
             ChangeTaskStatus::change($task, auth()->user(), $request->status);
         } catch (\InvalidArgumentException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return $this->statusError($request, $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['ok' => true, 'status' => $task->status]);
         }
 
         return redirect()->back()->with('success', 'Status atualizado.');
+    }
+
+    private function statusError(Request $request, string $message)
+    {
+        if ($request->wantsJson()) {
+            return response()->json(['ok' => false, 'message' => $message], 422);
+        }
+
+        return redirect()->back()->with('error', $message);
     }
 
     public function block(Request $request, Task $task)
@@ -189,6 +245,10 @@ class TaskController extends Controller
         Gate::authorize('approve-task', $task);
 
         (new ApproveTask)->execute($task, auth()->user());
+
+        if (request()->wantsJson()) {
+            return response()->json(['ok' => true, 'status' => 'concluida']);
+        }
 
         return redirect()->back()->with('success', 'Tarefa aprovada.');
     }

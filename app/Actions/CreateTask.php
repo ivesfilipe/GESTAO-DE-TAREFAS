@@ -21,6 +21,9 @@ class CreateTask
             'assigned_to' => $data['assigned_to'] ?? null,
             'created_by' => $creator->id,
             'status' => $hasAssignee ? 'nova' : 'nao_atribuida',
+            'recurrence_frequency' => $data['recurrence_frequency'] ?? null,
+            'recurrence_next_at' => $data['recurrence_next_at'] ?? null,
+            'recurrence_series_id' => $data['recurrence_series_id'] ?? null,
         ]);
 
         TarefaCriada::dispatch($task, $creator);

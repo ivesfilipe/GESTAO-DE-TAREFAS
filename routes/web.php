@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MyTasksController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/equipe/{user}', [TeamController::class, 'destroy'])->name('team.destroy');
 
     Route::get('/tarefas', [TaskController::class, 'index'])->name('tasks.index');
+    Route::get('/tarefas/quadro', [TaskController::class, 'kanban'])->name('tasks.kanban');
     Route::get('/tarefas/nova', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tarefas', [TaskController::class, 'store'])->name('tasks.store');
     Route::get('/tarefas/{task}', [TaskController::class, 'show'])->name('tasks.show');
@@ -57,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/tarefas/{task}/alteracoes/{changeRequest}', [TaskController::class, 'resolveChange'])->name('tasks.resolve-change');
 
     Route::get('/painel', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/relatorios', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/minhas-tarefas', [MyTasksController::class, 'index'])->name('my-tasks');
 
     Route::get('/notificacoes', [NotificationController::class, 'index'])->name('notifications.index');

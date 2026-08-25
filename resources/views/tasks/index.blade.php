@@ -35,7 +35,10 @@ $statusBadges = [
 
 @section('content')
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-    <h1 class="text-2xl font-bold text-slate-900 mb-6">Tarefas</h1>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 class="text-2xl font-bold text-slate-900">Tarefas</h1>
+        <a href="{{ route('tasks.kanban') }}" class="text-sm font-medium text-brand-600 hover:text-brand-700">Ver quadro →</a>
+    </div>
 
     <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -95,7 +98,7 @@ $statusBadges = [
         @forelse($tasks as $task)
             <a href="{{ route('tasks.show', $task) }}" class="block rounded-xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all">
                 <div class="flex items-start justify-between gap-2">
-                    <h3 class="font-semibold text-slate-900 leading-snug">{{ $task->title }}</h3>
+                    <h3 class="font-semibold text-slate-900 leading-snug">{{ $task->title }} @if($task->isRecurring())<span class="text-violet-600">↻</span>@endif</h3>
                     <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">
                         {{ ucfirst($task->priority) }}
                     </span>
@@ -146,7 +149,12 @@ $statusBadges = [
             <tbody class="divide-y divide-slate-100">
                 @forelse($tasks as $task)
                     <tr class="hover:bg-slate-50/50 cursor-pointer" onclick="window.location='{{ route('tasks.show', $task) }}'">
-                        <td class="px-6 py-4 font-medium text-slate-900">{{ $task->title }}</td>
+                        <td class="px-6 py-4 font-medium text-slate-900">
+                            {{ $task->title }}
+                            @if($task->isRecurring())
+                                <span class="ml-1 text-violet-600" title="Tarefa recorrente">↻</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">
                                 {{ ucfirst($task->priority) }}

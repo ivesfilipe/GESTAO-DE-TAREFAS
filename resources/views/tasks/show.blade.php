@@ -51,6 +51,14 @@ $isAssignee = Auth::id() === $task->assigned_to;
             <h1 class="text-2xl font-bold text-slate-900">{{ $task->title }}</h1>
         </div>
         <div class="flex items-center gap-2">
+            @if($task->isRecurring())
+                @php
+                    $recurrenceLabels = ['diaria' => 'Diária', 'semanal' => 'Semanal', 'quinzenal' => 'Quinzenal', 'mensal' => 'Mensal'];
+                @endphp
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-violet-100 text-violet-700" title="Próxima geração: {{ $task->recurrence_next_at?->format('d/m/Y') ?? 'após esta' }}">
+                    ↻ {{ $recurrenceLabels[$task->recurrence_frequency] ?? $task->recurrence_frequency }}
+                </span>
+            @endif
             <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {{ $priorityBadges[$task->priority] }}">
                 {{ ucfirst($task->priority) }}
             </span>

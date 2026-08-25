@@ -39,7 +39,8 @@ test('liderado nao pode cancelar tarefa nem propria', function () {
     $this->actingAs($liderado)
         ->from('/tarefas')
         ->patch("/tarefas/{$task->id}/status", ['status' => 'cancelada'])
-        ->assertForbidden();
+        ->assertRedirect('/tarefas')
+        ->assertSessionHas('error');
 
     $this->assertDatabaseHas('tasks', [
         'id' => $task->id,

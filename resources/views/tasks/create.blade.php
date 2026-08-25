@@ -37,7 +37,7 @@
                 @error('description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="assigned_to" class="block text-sm font-medium text-slate-700">Responsável</label>
                     <select
@@ -81,6 +81,23 @@
                         class="mt-1 block w-full rounded-lg border {{ $errors->has('due_at') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
                     />
                     @error('due_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="recurrence_frequency" class="block text-sm font-medium text-slate-700">Repetir</label>
+                    <select
+                        name="recurrence_frequency"
+                        id="recurrence_frequency"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    >
+                        <option value="">Não repetir</option>
+                        <option value="diaria" {{ old('recurrence_frequency') === 'diaria' ? 'selected' : '' }}>Todos os dias</option>
+                        <option value="semanal" {{ old('recurrence_frequency') === 'semanal' ? 'selected' : '' }}>Toda semana</option>
+                        <option value="quinzenal" {{ old('recurrence_frequency') === 'quinzenal' ? 'selected' : '' }}>A cada 2 semanas</option>
+                        <option value="mensal" {{ old('recurrence_frequency') === 'mensal' ? 'selected' : '' }}>Todo mês</option>
+                    </select>
+                    <p class="mt-1 text-xs text-slate-400">A próxima tarefa é criada automaticamente com o mesmo prazo/cadência.</p>
+                    @error('recurrence_frequency')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
             </div>
 

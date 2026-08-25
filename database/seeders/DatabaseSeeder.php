@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\CreateTask;
 use App\Models\ChangeRequest;
 use App\Models\Comment;
 use App\Models\Task;
@@ -9,6 +10,7 @@ use App\Models\TaskHistoryEvent;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -195,7 +197,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // --- Concluídas ---
-        $make($liderados[0], [
+        $concluida1 = $make($liderados[0], [
             'title' => 'Manutenção corretiva do ar da sala de servidores',
             'priority' => 'critica',
             'status' => 'concluida',
@@ -204,7 +206,7 @@ class DatabaseSeeder extends Seeder
             'completed_at' => now()->subDays(2),
             'approved_by' => $gestor->id,
         ]);
-        $make($liderados[1], [
+        $concluida2 = $make($liderados[1], [
             'title' => 'Treinamento da equipe sobre novo checklist PMOC',
             'priority' => 'normal',
             'status' => 'concluida',
@@ -213,7 +215,7 @@ class DatabaseSeeder extends Seeder
             'completed_at' => now()->subDays(5),
             'approved_by' => $gestor->id,
         ]);
-        $make($liderados[2], [
+        $concluida3 = $make($liderados[2], [
             'title' => 'Cotação de preços para compressores',
             'priority' => 'importante',
             'status' => 'concluida',
@@ -222,6 +224,10 @@ class DatabaseSeeder extends Seeder
             'completed_at' => now()->subHours(20),
             'approved_by' => $gestor->id,
         ]);
+
+        $concluida1->forceFill(['created_at' => now()->subDays(6)])->saveQuietly();
+        $concluida2->forceFill(['created_at' => now()->subDays(9)])->saveQuietly();
+        $concluida3->forceFill(['created_at' => now()->subDays(4)])->saveQuietly();
 
         // --- Cancelada ---
         Task::factory()->withAssignee($liderados[3])->create([
@@ -232,6 +238,27 @@ class DatabaseSeeder extends Seeder
             'due_at' => now()->addDays(5),
             'original_due_at' => now()->addDays(5),
             'deleted_at' => now(),
+        ]);
+
+        // --- Recorrentes (cadência fixa, ex.: manutenção preventiva) ---
+        (new CreateTask)->execute($gestor, [
+            'title' => 'PMOC mensal - Dasa (rotina recorrente)',
+            'description' => "Checklist completo de preventiva conforme contrato.\nRegistrar leituras e fotos no relatório.",
+            'priority' => 'importante',
+            'due_at' => now()->addDays(9)->format('Y-m-d H:i:s'),
+            'assigned_to' => $liderados[0]->id,
+            'recurrence_frequency' => 'mensal',
+            'recurrence_next_at' => now()->addDays(39)->format('Y-m-d H:i:s'),
+            'recurrence_series_id' => (string) Str::ulid(),
+        ]);
+        (new CreateTask)->execute($gestor, [
+            'title' => 'Inspeção semanal de ferramental da oficina',
+            'priority' => 'normal',
+            'due_at' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'assigned_to' => $liderados[3]->id,
+            'recurrence_frequency' => 'semanal',
+            'recurrence_next_at' => now()->addDays(9)->format('Y-m-d H:i:s'),
+            'recurrence_series_id' => (string) Str::ulid(),
         ]);
 
         // --- Solicitações de alteração pendentes ---

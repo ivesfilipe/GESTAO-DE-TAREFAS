@@ -25,6 +25,9 @@ class Task extends Model
         'blocked_on',
         'rejection_category',
         'rejection_note',
+        'recurrence_frequency',
+        'recurrence_next_at',
+        'recurrence_series_id',
     ];
 
     protected function casts(): array
@@ -33,6 +36,7 @@ class Task extends Model
             'due_at' => 'datetime',
             'original_due_at' => 'datetime',
             'completed_at' => 'datetime',
+            'recurrence_next_at' => 'datetime',
         ];
     }
 
@@ -49,6 +53,22 @@ class Task extends Model
     public static function rejectionCategories(): array
     {
         return ['nao_atende', 'escopo_mudou', 'info_incompleta', 'outro'];
+    }
+
+    public static function recurrenceFrequencies(): array
+    {
+        return ['diaria', 'semanal', 'quinzenal', 'mensal'];
+    }
+
+    public static function recurrenceInterval($frequency): ?\DateInterval
+    {
+        return match ($frequency) {
+            'diaria' => new \DateInterval('P1D'),
+            'semanal' => new \DateInterval('P7D'),
+            'quinzenal' => new \DateInterval('P14D'),
+            'mensal' => new \DateInterval('P1M'),
+            default => null,
+        };
     }
 
     public function creator()
@@ -84,6 +104,17 @@ class Task extends Model
     public function changeRequests()
     {
         return $this->hasMany(ChangeRequest::class);
+    }
+
+    public function recurrenceSiblings()
+    {
+        return $this->hasMany(Task::class, 'recurrence_series_id', 'recurrence_series_id')
+            ->whereNotNull('recurrence_series_id');
+    }
+
+    public function isRecurring(): bool
+    {
+        return $this->recurrence_frequency !== null;
     }
 
     public function isOverdue(): bool
