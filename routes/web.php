@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tarefas/quadro', [TaskController::class, 'kanban'])->name('tasks.kanban');
     Route::get('/tarefas/nova', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tarefas/interpretar', [TaskController::class, 'interpret'])->name('tasks.interpret');
+    Route::post('/tarefas/descricao', [TaskController::class, 'generateDescription'])->name('tasks.generate-description');
     Route::post('/tarefas', [TaskController::class, 'store'])->name('tasks.store');
     Route::get('/tarefas/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::patch('/tarefas/{task}/atribuir', [TaskController::class, 'assign'])->name('tasks.assign');

@@ -15,6 +15,7 @@ use App\Events\ConclusaoSolicitada;
 use App\Models\ChangeRequest;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\AiAssistantService;
 use App\Services\NaturalLanguageTaskParser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -94,6 +95,21 @@ class TaskController extends Controller
             'due_at_local' => $parsed['due_at']->format('Y-m-d\TH:i'),
             'due_at_label' => $parsed['due_at']->format('d/m/Y H:i'),
         ]);
+    }
+
+    public function generateDescription(Request $request)
+    {
+        Gate::authorize('create-task');
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'priority' => ['nullable', 'in:normal,importante,urgente,critica'],
+        ]);
+
+        $description = app(AiAssistantService::class)
+            ->generateTaskDescription($data['title'], $data['priority'] ?? null);
+
+        return response()->json(['ok' => true, 'description' => $description]);
     }
 
     public function store(Request $request)

@@ -44,7 +44,13 @@
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-slate-700">Descrição</label>
+                <div class="flex items-center justify-between">
+                    <label for="description" class="block text-sm font-medium text-slate-700">Descrição</label>
+                    <button type="button" id="nl-description"
+                            class="inline-flex items-center gap-1 rounded-full bg-violet-50 border border-violet-200 px-2.5 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-100 transition-colors">
+                        ✨ Sugerir descrição
+                    </button>
+                </div>
                 <textarea
                     name="description"
                     id="description"
@@ -143,6 +149,17 @@
         const preview = document.getElementById('nl-preview');
         const errorBox = document.getElementById('nl-error');
 
+        function fillDescription(title, priority) {
+            return window.axios.post('/tarefas/descricao', { title, priority })
+                .then(({ data }) => {
+                    if (!data.ok) return;
+                    document.getElementById('description').value = data.description;
+                    preview.textContent = 'Descrição gerada pela IA ✓ (edite à vontade)';
+                    preview.classList.remove('hidden');
+                })
+                .catch(() => {});
+        }
+
         function run() {
             const text = input.value.trim();
             if (!text) return;
@@ -158,9 +175,10 @@
                     if (data.recurrence_frequency) {
                         document.getElementById('recurrence_frequency').value = data.recurrence_frequency;
                     }
-                    preview.textContent = 'Preenchido: "' + data.title + '" · prazo ' + data.due_at_label + ' · prioridade ' + data.priority;
+                    preview.textContent = 'Preenchido: "' + data.title + '" · prazo ' + data.due_at_label + ' · prioridade ' + data.priority + ' · gerando descrição...';
                     preview.classList.remove('hidden');
                     errorBox.classList.add('hidden');
+                    return fillDescription(data.title, data.priority);
                 })
                 .catch((err) => {
                     const message = err.response?.data?.message ?? 'Não foi possível interpretar o texto.';
@@ -173,6 +191,22 @@
                     button.textContent = 'Interpretar';
                 });
         }
+
+        const descButton = document.getElementById('nl-description');
+        descButton.addEventListener('click', () => {
+            const title = document.getElementById('title').value.trim();
+            if (!title) {
+                errorBox.textContent = 'Preencha o título primeiro para gerar a descrição.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+            descButton.disabled = true;
+            descButton.textContent = '✨ Gerando...';
+            fillDescription(title, document.getElementById('priority').value).finally(() => {
+                descButton.disabled = false;
+                descButton.textContent = '✨ Sugerir descrição';
+            });
+        });
 
         button.addEventListener('click', run);
         input.addEventListener('keydown', (e) => {

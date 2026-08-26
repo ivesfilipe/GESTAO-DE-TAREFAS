@@ -98,6 +98,82 @@ class AiAssistantService
         return $this->heuristicBreakdown($task);
     }
 
+    public function generateTaskDescription(string $title, ?string $priority = null): string
+    {
+        if ($this->usesLlm()) {
+            try {
+                return $this->llmTaskDescription($title, $priority);
+            } catch (\Throwable $e) {
+                Log::warning('LLM description falhou, usando heurística', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return $this->heuristicTaskDescription($title, $priority);
+    }
+
+    private function llmTaskDescription(string $title, ?string $priority): string
+    {
+        $response = Http::withToken($this->apiKey)
+            ->timeout(25)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => config('services.openai.model', 'gpt-4o-mini'),
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Você é um diretor criativo brasileiro que escreve briefings curtos e energizantes para sua equipe. '
+                            .'Dado o título de uma tarefa, escreva uma descrição em português com: (1) o objetivo em uma frase impactante, '
+                            .'(2) o contexto ou "cena" do porquê importa agora, (3) entregáveis esperados em 2-3 itens com traços, '
+                            .'(4) critério de sucesso objetivo. Tom de cobrança respeitosa e motivadora, como um diretor que confia no time. '
+                            .'Máximo 120 palavras. Responda APENAS com o texto da descrição, sem títulos em markdown.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Tarefa: {$title}".($priority ? " (prioridade: {$priority})" : ''),
+                    ],
+                ],
+                'temperature' => 0.85,
+                'max_tokens' => 350,
+            ]);
+
+        $response->throw();
+
+        return trim((string) $response->json('choices.0.message.content'));
+    }
+
+    private function heuristicTaskDescription(string $title, ?string $priority): string
+    {
+        $urgency = match ($priority) {
+            'critica' => 'Esta é uma entrega crítica: vamos tratar como prioridade máxima do dia.',
+            'urgente' => 'O relógio corre — precisamos desta entrega com urgência, sem abrir mão da qualidade.',
+            'importante' => 'Importante: reserve foco dedicado para não deixarmos escorrer.',
+            default => 'Prazo tranquilo, mas não deixe para depois — constância vence volume.',
+        };
+
+        $openings = [
+            "Vamos colocar \"{$title}\" no papel e tirá-la do campo das ideias.",
+            "\"{$title}\" tem tudo para ser uma entrega que faça diferença real.",
+            "Hora de agir: \"{$title}\" está na mesa e o time conta com você.",
+            "Diretor falando: \"{$title}\" é a nossa próxima cena e precisa sair impecável.",
+        ];
+
+        $opening = $openings[crc32($title) % count($openings)];
+
+        return implode("\n", [
+            $opening,
+            '',
+            "Objetivo: concluir \"{$title}\" com qualidade e dentro do prazo combinado.",
+            'Contexto: esta tarefa conecta-se ao fluxo do setor — alguém downstream depende dela.',
+            '',
+            'Entregáveis:',
+            '- Resultado principal concluído e revisado',
+            '- Evidências/anexos registrados na tarefa',
+            '- Partes interessadas comunicadas',
+            '',
+            $urgency,
+            'Critério de sucesso: qualquer pessoa do time entende o resultado apenas lendo esta tarefa.',
+        ]);
+    }
+
     private function heuristicBreakdown(Task $task): array
     {
         $parts = preg_split('/\s+(?:e|então|depois)\s+/iu', $task->title.' '.($task->description ?? ''));
