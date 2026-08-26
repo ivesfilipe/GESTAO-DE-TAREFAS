@@ -10,6 +10,7 @@ class Attachment extends Model
     use SoftDeletes;
 
     public $timestamps = false;
+
     protected $fillable = ['task_id', 'comment_id', 'uploaded_by', 'file_path', 'file_name', 'file_type', 'file_size', 'created_at'];
 
     protected function casts(): array

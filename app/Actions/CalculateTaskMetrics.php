@@ -17,7 +17,7 @@ class CalculateTaskMetrics
 
     public static function overdueBy(Task $task): int
     {
-        if (!static::isOverdue($task)) {
+        if (! static::isOverdue($task)) {
             return 0;
         }
 
@@ -32,7 +32,7 @@ class CalculateTaskMetrics
         $timezone = $task->assignee?->timezone ?? 'America/Sao_Paulo';
         $now = now($timezone);
 
-        if (!$task->due_at) {
+        if (! $task->due_at) {
             return 0;
         }
 

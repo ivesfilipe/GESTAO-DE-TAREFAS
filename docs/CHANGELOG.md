@@ -9,6 +9,75 @@ Formato de cada entrada:
 
 ---
 
+## [2026-08-26] — Fase 27 Parte 2: Copiloto Inteligente do Gestor — finalização UX e deploy
+
+### Novos serviços de IA
+- `SmartDelegationService`: delegação com structured output JSON e fallback controlado para o parser.
+- `CopilotService`: chat do gestor com tool calling (`list_overdue_tasks`, `list_tasks_due_today`, `list_blocked_tasks`, `list_tasks_awaiting_approval`, `get_team_member_profile`, `search_team_knowledge`) e rascunho de cobrança.
+- `ProfileIntelligenceService`: geração/atualização do resumo inteligente do perfil profissional do liderado.
+- `TaskSuggestionService`: sugestões de tarefas a partir do perfil, responsabilidades, objetivos e métricas.
+
+### UX redesenhada
+- `/tarefas/nova` com aba “Delegar com IA” mobile-first: entrada em linguagem natural, pré-visualização do rascunho, checklist de campos e criação com confirmação humana.
+- `/assistente` com radar de risco, chat com tools e rascunho de cobrança; nunca envia mensagem automaticamente.
+- `/equipe/{user}` com perfil profissional editável, resumo IA, sugestões de tarefas, documentos e status de processamento.
+
+### Qualidade e segurança
+- 230 testes automatizados passando.
+- `MockProvider` ajustado para simular respostas de cobrança e sugestões.
+- Respostas JSON de perfil/sugestões incluem `provider` e `mock`.
+- Pint limpo e build Vite atualizado.
+
+### Deploy
+- Deploy em produção executado e validado em https://tarefas.medicalthermo.com.
+
+---
+
+## [2026-08-26] — Fase 27 Parte 1: Copiloto Inteligente do Gestor
+
+### Arquitetura multi-provider de IA
+- `config/ai.php` com providers Groq (padrão), OpenAI, Ollama e mock.
+- `AIProviderInterface`, `AIRequest`/`AIResponse`, `AIProviderManager`, `AIService`.
+- Providers Groq/OpenAI/Ollama/Mock em `app/Services/AI/Providers/`.
+- Sem fallback pago automático (`AI_FALLBACK_ENABLED=false` por padrão).
+- Modo mock quando `GROQ_API_KEY` ausente.
+
+### Segurança e governança
+- `ZeroDataRetention` bloqueia/anonimiza dados reais enquanto `GROQ_ZDR_CONFIRMED=false`.
+- `AIUsageLog` registra todas as chamadas para auditoria.
+- `TeamMemberPolicy` e Gates garantem acesso apenas ao gestor.
+
+### Memória gerencial persistente
+- Models: `TeamMemberProfile`, `TeamMemberDocument`, `TeamMemberKnowledgeChunk`.
+- `TeamKnowledgeService` com chunking local e retrieval lexical por `LIKE`.
+- `DocumentTextExtractor` para `.txt`, `.md`, `.pdf` e `.docx`.
+
+### Serviços de negócio
+- `ManagementRadarService`: resumo de risco do time.
+- `DelegationRecommendationService`: sugere assignee, tipo, critérios, evidências e prazo.
+- `TeamPerformanceService`: métricas de carga e performance por liderado.
+
+### Campos adicionais em tarefas
+- `task_type` (`demanda|compra|servico|desenvolvimento|responsabilidade|outro`).
+- `acceptance_criteria` e `expected_evidence`.
+- `CreateTask` e `UpdateTask` atualizados; formulário `/tarefas/nova` com sugestão IA.
+
+### Superfícies
+- **Delegação inteligente** em `/tarefas/nova` (rascunho com confirmação humana).
+- **Copiloto/Radar** em `/assistente` com chat, radar e foco sugerido.
+- **Perfil inteligente** em `/equipe/{user}` com métricas, documentos e análise IA.
+
+### Documentação e testes
+- ADRs `ADR-014` (multi-provider) e `ADR-015` (memória gerencial).
+- Docs em `docs/ai/`.
+- Testes unitários em `tests/Unit/Services/AI/` e feature `AiAssistantTest`, `AiDelegationTest`, `AiTeamProfileTest`.
+
+### Preservação
+- `NaturalLanguageTaskParser` intacto.
+- `AiAssistantService` mantido e delega para a nova arquitetura (compatível com `services.openai.key` legado).
+
+---
+
 ## [2026-08-25] — Kanban, Relatórios de Desempenho e Tarefas Recorrentes
 
 ### Quadro Kanban

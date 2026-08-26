@@ -24,6 +24,9 @@ class CreateTask
             'recurrence_frequency' => $data['recurrence_frequency'] ?? null,
             'recurrence_next_at' => $data['recurrence_next_at'] ?? null,
             'recurrence_series_id' => $data['recurrence_series_id'] ?? null,
+            'task_type' => $data['task_type'] ?? 'demanda',
+            'acceptance_criteria' => $data['acceptance_criteria'] ?? null,
+            'expected_evidence' => $data['expected_evidence'] ?? null,
         ]);
 
         TarefaCriada::dispatch($task, $creator);

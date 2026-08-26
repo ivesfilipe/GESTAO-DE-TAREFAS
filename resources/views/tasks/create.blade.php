@@ -7,21 +7,109 @@
     <h1 class="text-2xl font-bold text-slate-900 mb-6">Nova Tarefa</h1>
 
     <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm mb-5">
-        <label for="nl-input" class="block text-sm font-semibold text-slate-700">
-            Criação inteligente <span class="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
-        </label>
-        <p class="mt-1 text-xs text-slate-500">
-            Escreva em português e preenchemos o formulário: <em>"Reunião com o time amanhã às 15h urgente"</em>, <em>"Backup toda segunda 08h"</em>.
+        <div class="flex items-center gap-2 mb-2">
+            <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
+            <label for="ai-delegate-input" class="block text-sm font-semibold text-slate-700">Delegar com IA</label>
+        </div>
+        <p class="text-xs text-slate-500 mb-3">
+            Descreva a tarefa em linguagem natural e a IA monta um rascunho. Exemplo: <em>"Revisar contrato do fornecedor até sexta às 17h, urgente"</em>.
         </p>
-        <div class="mt-3 flex gap-2">
-            <input type="text" id="nl-input" placeholder="Ex.: Inspecionar compressores sexta às 10h importante"
-                   class="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"/>
-            <button type="button" id="nl-interpret" class="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 transition-colors whitespace-nowrap">
-                Interpretar
+
+        <div class="space-y-3">
+            <textarea
+                id="ai-delegate-input"
+                rows="3"
+                maxlength="1000"
+                class="block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none"
+                placeholder="Descreva o que precisa ser feito..."
+            ></textarea>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <select
+                    id="ai-delegate-assignee"
+                    class="sm:flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                >
+                    <option value="">Responsável (opcional)</option>
+                    @foreach($liderados ?? [] as $liderado)
+                        <option value="{{ $liderado->id }}">{{ $liderado->name }}</option>
+                    @endforeach
+                </select>
+
+                <button type="button" id="ai-delegate-btn"
+                        class="w-full sm:w-auto rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 transition-colors whitespace-nowrap">
+                    Gerar tarefa inteligente
+                </button>
+            </div>
+        </div>
+
+        <div id="ai-delegate-error" class="hidden mt-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700"></div>
+
+        <div id="ai-delegate-draft" class="hidden mt-4 rounded-xl bg-violet-50 border border-violet-200 p-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">Rascunho IA</span>
+                    <span id="draft-confidence" class="text-xs font-medium text-slate-600"></span>
+                </div>
+                <span id="draft-provider" class="text-xs text-slate-400"></span>
+            </div>
+
+            <div id="draft-fallback" class="hidden rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800"></div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400">Título</p>
+                    <p id="draft-title" class="text-sm font-medium text-slate-800"></p>
+                </div>
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400">Tipo</p>
+                    <p id="draft-type" class="text-sm font-medium text-slate-800"></p>
+                </div>
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400">Prioridade</p>
+                    <p id="draft-priority" class="text-sm font-medium text-slate-800"></p>
+                </div>
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400">Prazo sugerido</p>
+                    <p id="draft-due" class="text-sm font-medium text-slate-800"></p>
+                </div>
+                <div class="rounded-lg bg-white border border-violet-100 p-3 sm:col-span-2">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400">Responsável sugerido</p>
+                    <p id="draft-assignee" class="text-sm font-medium text-slate-800"></p>
+                    <p id="draft-assignee-reason" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+            </div>
+
+            <div class="rounded-lg bg-white border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Descrição</p>
+                <p id="draft-description" class="text-sm text-slate-700 whitespace-pre-line"></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Critérios de aceitação</p>
+                    <ul id="draft-criteria" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+                </div>
+                <div class="rounded-lg bg-white border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Evidências esperadas</p>
+                    <ul id="draft-evidence" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+                </div>
+            </div>
+
+            <div class="rounded-lg bg-white border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Checkpoints</p>
+                <ul id="draft-checkpoints" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+            </div>
+
+            <div id="draft-missing-box" class="hidden rounded-lg bg-white border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Informações faltantes</p>
+                <ul id="draft-missing" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+            </div>
+
+            <button type="button" id="ai-delegate-apply"
+                    class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors">
+                Aplicar ao formulário
             </button>
         </div>
-        <div id="nl-preview" class="mt-2 hidden rounded-lg bg-violet-50 border border-violet-200 px-3 py-2 text-xs text-violet-800"></div>
-        <div id="nl-error" class="mt-2 hidden rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700"></div>
     </div>
 
     <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
@@ -44,13 +132,7 @@
             </div>
 
             <div>
-                <div class="flex items-center justify-between">
-                    <label for="description" class="block text-sm font-medium text-slate-700">Descrição</label>
-                    <button type="button" id="nl-description"
-                            class="inline-flex items-center gap-1 rounded-full bg-violet-50 border border-violet-200 px-2.5 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-100 transition-colors">
-                        ✨ Sugerir descrição
-                    </button>
-                </div>
+                <label for="description" class="block text-sm font-medium text-slate-700">Descrição</label>
                 <textarea
                     name="description"
                     id="description"
@@ -123,6 +205,44 @@
                     <p class="mt-1 text-xs text-slate-400">A próxima tarefa é criada automaticamente com o mesmo prazo/cadência.</p>
                     @error('recurrence_frequency')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
+
+                <div>
+                    <label for="task_type" class="block text-sm font-medium text-slate-700">Tipo</label>
+                    <select
+                        name="task_type"
+                        id="task_type"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    >
+                        @foreach(\App\Models\Task::taskTypes() as $type)
+                            <option value="{{ $type }}" {{ old('task_type', 'demanda') === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
+                        @endforeach
+                    </select>
+                    @error('task_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
+            <div>
+                <label for="acceptance_criteria" class="block text-sm font-medium text-slate-700">Critérios de aceitação</label>
+                <textarea
+                    name="acceptance_criteria"
+                    id="acceptance_criteria"
+                    rows="3"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    placeholder="O que deve ser verdadeiro para considerar esta tarefa concluída?"
+                >{{ old('acceptance_criteria') }}</textarea>
+                @error('acceptance_criteria')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label for="expected_evidence" class="block text-sm font-medium text-slate-700">Evidências esperadas</label>
+                <textarea
+                    name="expected_evidence"
+                    id="expected_evidence"
+                    rows="3"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    placeholder="O que deve ser entregue/anexado como prova de conclusão?"
+                >{{ old('expected_evidence') }}</textarea>
+                @error('expected_evidence')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -144,73 +264,130 @@
 @push('scripts')
 <script>
     (function () {
-        const input = document.getElementById('nl-input');
-        const button = document.getElementById('nl-interpret');
-        const preview = document.getElementById('nl-preview');
-        const errorBox = document.getElementById('nl-error');
+        const input = document.getElementById('ai-delegate-input');
+        const assigneeSelect = document.getElementById('ai-delegate-assignee');
+        const btn = document.getElementById('ai-delegate-btn');
+        const draftBox = document.getElementById('ai-delegate-draft');
+        const errorBox = document.getElementById('ai-delegate-error');
+        const applyBtn = document.getElementById('ai-delegate-apply');
 
-        function fillDescription(title, priority) {
-            return window.axios.post('/tarefas/descricao', { title, priority })
-                .then(({ data }) => {
-                    if (!data.ok) return;
-                    document.getElementById('description').value = data.description;
-                    preview.textContent = 'Descrição gerada pela IA ✓ (edite à vontade)';
-                    preview.classList.remove('hidden');
-                })
-                .catch(() => {});
+        let currentDraft = null;
+
+        function formatDateTimeLocal(iso) {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return '';
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
 
-        function run() {
+        function renderList(elementId, items) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '';
+            (items || []).forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                el.appendChild(li);
+            });
+        }
+
+        function showDraft(draft) {
+            currentDraft = draft;
+
+            document.getElementById('draft-title').textContent = draft.title || '—';
+            document.getElementById('draft-type').textContent = draft.task_type ? draft.task_type.charAt(0).toUpperCase() + draft.task_type.slice(1) : '—';
+            document.getElementById('draft-priority').textContent = draft.priority ? draft.priority.charAt(0).toUpperCase() + draft.priority.slice(1) : '—';
+            document.getElementById('draft-due').textContent = draft.due_at
+                ? new Date(draft.due_at).toLocaleString('pt-BR')
+                : '—';
+            document.getElementById('draft-assignee').textContent = draft.recommended_assignee_name || 'Sem sugestão';
+            document.getElementById('draft-assignee-reason').textContent = draft.assignee_reason || '';
+            document.getElementById('draft-description').textContent = draft.description || '';
+            document.getElementById('draft-confidence').textContent = draft.confidence ? `Confiança: ${draft.confidence}` : '';
+            document.getElementById('draft-provider').textContent = draft.ai_mock ? `${draft.ai_provider} (simulação)` : draft.ai_provider;
+
+            renderList('draft-criteria', draft.acceptance_criteria);
+            renderList('draft-evidence', draft.expected_evidence);
+            renderList('draft-checkpoints', draft.checkpoints);
+
+            const missingBox = document.getElementById('draft-missing-box');
+            if (draft.missing_information && draft.missing_information.length) {
+                missingBox.classList.remove('hidden');
+                renderList('draft-missing', draft.missing_information);
+            } else {
+                missingBox.classList.add('hidden');
+            }
+
+            const fallback = document.getElementById('draft-fallback');
+            if (draft.fallback_message) {
+                fallback.textContent = draft.fallback_message;
+                fallback.classList.remove('hidden');
+            } else {
+                fallback.classList.add('hidden');
+            }
+
+            draftBox.classList.remove('hidden');
+        }
+
+        btn.addEventListener('click', () => {
             const text = input.value.trim();
-            if (!text) return;
-            button.disabled = true;
-            button.textContent = 'Interpretando...';
-
-            window.axios.post('/tarefas/interpretar', { text })
-                .then(({ data }) => {
-                    if (!data.ok) throw new Error(data.message);
-                    document.getElementById('title').value = data.title;
-                    document.getElementById('priority').value = data.priority;
-                    document.getElementById('due_at').value = data.due_at_local;
-                    if (data.recurrence_frequency) {
-                        document.getElementById('recurrence_frequency').value = data.recurrence_frequency;
-                    }
-                    preview.textContent = 'Preenchido: "' + data.title + '" · prazo ' + data.due_at_label + ' · prioridade ' + data.priority + ' · gerando descrição...';
-                    preview.classList.remove('hidden');
-                    errorBox.classList.add('hidden');
-                    return fillDescription(data.title, data.priority);
-                })
-                .catch((err) => {
-                    const message = err.response?.data?.message ?? 'Não foi possível interpretar o texto.';
-                    errorBox.textContent = message;
-                    errorBox.classList.remove('hidden');
-                    preview.classList.add('hidden');
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.textContent = 'Interpretar';
-                });
-        }
-
-        const descButton = document.getElementById('nl-description');
-        descButton.addEventListener('click', () => {
-            const title = document.getElementById('title').value.trim();
-            if (!title) {
-                errorBox.textContent = 'Preencha o título primeiro para gerar a descrição.';
+            if (!text) {
+                errorBox.textContent = 'Descreva a tarefa primeiro.';
                 errorBox.classList.remove('hidden');
                 return;
             }
-            descButton.disabled = true;
-            descButton.textContent = '✨ Gerando...';
-            fillDescription(title, document.getElementById('priority').value).finally(() => {
-                descButton.disabled = false;
-                descButton.textContent = '✨ Sugerir descrição';
-            });
+
+            btn.disabled = true;
+            btn.textContent = 'Gerando...';
+            errorBox.classList.add('hidden');
+
+            window.axios.post('{{ route('tasks.smart-delegate') }}', {
+                input: text,
+                assigned_to: assigneeSelect.value || null,
+            })
+                .then(({ data }) => {
+                    if (!data.ok) throw new Error(data.message);
+                    showDraft(data.draft);
+                })
+                .catch((err) => {
+                    errorBox.textContent = err.response?.data?.message ?? 'Não foi possível gerar o rascunho.';
+                    errorBox.classList.remove('hidden');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Gerar tarefa inteligente';
+                });
         });
 
-        button.addEventListener('click', run);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); run(); }
+        applyBtn.addEventListener('click', () => {
+            if (!currentDraft) return;
+
+            document.getElementById('title').value = currentDraft.title || '';
+            document.getElementById('description').value = currentDraft.description || '';
+            document.getElementById('task_type').value = currentDraft.task_type || 'demanda';
+            document.getElementById('priority').value = currentDraft.priority || 'normal';
+
+            if (currentDraft.due_at) {
+                document.getElementById('due_at').value = formatDateTimeLocal(currentDraft.due_at);
+            }
+
+            if (currentDraft.recurrence_frequency) {
+                document.getElementById('recurrence_frequency').value = currentDraft.recurrence_frequency;
+            }
+
+            if (currentDraft.recommended_assignee_id) {
+                document.getElementById('assigned_to').value = currentDraft.recommended_assignee_id;
+            }
+
+            if (currentDraft.acceptance_criteria && currentDraft.acceptance_criteria.length) {
+                document.getElementById('acceptance_criteria').value = currentDraft.acceptance_criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
+            }
+
+            if (currentDraft.expected_evidence && currentDraft.expected_evidence.length) {
+                document.getElementById('expected_evidence').value = currentDraft.expected_evidence.map((e, i) => `${i + 1}. ${e}`).join('\n');
+            }
+
+            draftBox.classList.add('hidden');
+            window.scrollTo({ top: document.getElementById('title').offsetTop - 100, behavior: 'smooth' });
         });
     })();
 </script>

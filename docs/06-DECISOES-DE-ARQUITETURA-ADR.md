@@ -109,6 +109,22 @@ expostos se a regra falhar).
 
 ---
 
+## ADR-014 — Arquitetura Multi-Provider de IA com Groq como Padrão
+**Status**: Aceito  
+**Contexto**: O assistente de IA estava acoplado à OpenAI; precisávamos de vendor flexibility, custo controlado e conformidade com retenção de dados.  
+**Decisão**: Criar camada de abstração em `app/Services/AI/` com interface, DTOs, manager e providers (Groq padrão, OpenAI e Ollama opcionais). Nenhum fallback pago automático. Modo mock quando chave ausente. Camada `ZeroDataRetention` bloqueia/anonimiza dados reais até confirmação.  
+**Motivo**: Reduz lock-in, custo e risco de vazamento; permite testes e execução local.  
+**Arquivos**: `docs/adr/ADR-014-ai-multi-provider.md`, `config/ai.php`, `app/Services/AI/`.
+
+## ADR-015 — Memória Gerencial Persistente com Retrieval Lexical Local
+**Status**: Aceito  
+**Contexto**: O copiloto precisa lembrar perfis, documentos e conhecimentos sobre liderados.  
+**Decisão**: Models `TeamMemberProfile`, `TeamMemberDocument`, `TeamMemberKnowledgeChunk` e `AIUsageLog`; chunking local; retrieval lexical por `LIKE` no banco relacional.  
+**Motivo**: Sem infra externa, compatível com SQLite/MySQL, suficiente para o volume esperado.  
+**Arquivos**: `docs/adr/ADR-015-team-knowledge-memory.md`, `app/Services/AI/TeamKnowledgeService.php`.
+
+---
+
 ## Como adicionar um novo ADR
 Ao tomar qualquer decisão técnica não coberta nesta documentação
 durante a construção, o agente deve adicionar uma nova entrada aqui,

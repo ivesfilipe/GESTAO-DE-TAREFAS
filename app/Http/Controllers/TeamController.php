@@ -29,7 +29,7 @@ class TeamController extends Controller
             'role' => ['required', 'in:liderado,gestor'],
         ]);
 
-        $result = (new InviteUser())->execute(auth()->user(), $data);
+        $result = (new InviteUser)->execute(auth()->user(), $data);
 
         return redirect()->route('team.index')
             ->with('success', 'Convite criado.')
@@ -44,7 +44,7 @@ class TeamController extends Controller
     {
         Gate::authorize('manage-team');
 
-        $token = (new InviteUser())->createToken($user);
+        $token = (new InviteUser)->createToken($user);
 
         return redirect()->route('team.index')
             ->with('success', "Novo link gerado para {$user->name}.")
@@ -84,9 +84,9 @@ class TeamController extends Controller
     {
         Gate::authorize('manage-team');
 
-        $user->update(['is_active' => !$user->is_active]);
+        $user->update(['is_active' => ! $user->is_active]);
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             $openTasksCount = Task::where('assigned_to', $user->id)
                 ->whereNotIn('status', ['concluida', 'cancelada'])
                 ->count();

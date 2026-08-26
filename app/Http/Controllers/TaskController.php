@@ -15,6 +15,7 @@ use App\Events\ConclusaoSolicitada;
 use App\Models\ChangeRequest;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\AI\SmartDelegationService;
 use App\Services\AiAssistantService;
 use App\Services\NaturalLanguageTaskParser;
 use Carbon\Carbon;
@@ -112,6 +113,55 @@ class TaskController extends Controller
         return response()->json(['ok' => true, 'description' => $description]);
     }
 
+    public function smartDelegate(Request $request, SmartDelegationService $service)
+    {
+        Gate::authorize('create-task');
+
+        $data = $request->validate([
+            'input' => ['required', 'string', 'max:1000'],
+            'assigned_to' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $selectedAssignee = ! empty($data['assigned_to'])
+            ? User::where('role', 'liderado')->where('id', $data['assigned_to'])->first()
+            : null;
+
+        try {
+            $draft = $service->draft(
+                $request->user(),
+                $data['input'],
+                $selectedAssignee,
+            );
+        } catch (\Throwable $e) {
+            $parser = new NaturalLanguageTaskParser;
+            $parsed = $parser->parse($data['input']);
+
+            return response()->json([
+                'ok' => true,
+                'draft' => [
+                    'title' => $parsed['title'],
+                    'task_type' => 'demanda',
+                    'priority' => $parsed['priority'],
+                    'due_at' => $parsed['due_at']->format('Y-m-d\TH:i'),
+                    'due_at_label' => $parsed['due_at']->format('d/m/Y H:i'),
+                    'recommended_assignee_id' => $selectedAssignee?->id,
+                    'recommended_assignee_name' => $selectedAssignee?->name,
+                    'description' => '',
+                    'acceptance_criteria' => [],
+                    'expected_evidence' => [],
+                    'checkpoints' => [],
+                    'missing_information' => [],
+                    'confidence' => 'baixa',
+                    'recurrence_frequency' => $parsed['recurrence_frequency'],
+                    'parser_fallback' => true,
+                    'fallback_message' => 'IA temporariamente indisponível. Os dados interpretados foram mantidos. Você pode concluir a tarefa manualmente.',
+                ],
+            ]);
+        }
+
+        return response()->json(['ok' => true, 'draft' => $draft]);
+    }
+
     public function store(Request $request)
     {
         Gate::authorize('create-task');
@@ -123,6 +173,9 @@ class TaskController extends Controller
             'due_at' => ['required', 'date', 'after:now'],
             'assigned_to' => ['nullable', 'exists:users,id'],
             'recurrence_frequency' => ['nullable', 'in:diaria,semanal,quinzenal,mensal'],
+            'task_type' => ['nullable', 'in:'.implode(',', Task::taskTypes())],
+            'acceptance_criteria' => ['nullable'],
+            'expected_evidence' => ['nullable'],
         ]);
 
         if (! empty($data['recurrence_frequency'])) {

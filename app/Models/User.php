@@ -74,4 +74,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(WebhookEndpoint::class);
     }
+
+    public function teamProfile()
+    {
+        return $this->hasOne(TeamMemberProfile::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(TeamMemberDocument::class);
+    }
+
+    public function chunks()
+    {
+        return $this->hasMany(TeamMemberKnowledgeChunk::class);
+    }
 }

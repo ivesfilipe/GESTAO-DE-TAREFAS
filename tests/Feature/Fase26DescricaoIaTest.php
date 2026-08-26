@@ -24,6 +24,7 @@ test('gera descricao heuristica sem api key citando o titulo', function () {
 });
 
 test('gera descricao via llm quando api key presente', function () {
+    config(['ai.default' => 'openai']);
     config(['services.openai.key' => 'chave-teste']);
     Http::fake([
         'api.openai.com/*' => Http::response([
@@ -57,6 +58,7 @@ test('titulo obrigatorio', function () {
 });
 
 test('fallback heuristico quando llm falha', function () {
+    config(['ai.default' => 'openai']);
     config(['services.openai.key' => 'chave-teste']);
     Http::fake(['api.openai.com/*' => Http::response(['error' => ['message' => 'rate limited']], 429)]);
 

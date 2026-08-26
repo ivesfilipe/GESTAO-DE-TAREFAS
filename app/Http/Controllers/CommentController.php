@@ -19,10 +19,10 @@ class CommentController extends Controller
             'file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,pdf', 'max:10240'],
         ]);
 
-        $comment = (new AddComment())->execute($task, auth()->user(), $request->body);
+        $comment = (new AddComment)->execute($task, auth()->user(), $request->body);
 
         if ($request->hasFile('file')) {
-            (new UploadAttachment())->execute($task, auth()->user(), $request->file('file'), $comment);
+            (new UploadAttachment)->execute($task, auth()->user(), $request->file('file'), $comment);
         }
 
         return redirect()->back()->with('success', 'Comentário adicionado.');

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TaskHistoryEvent extends Model
 {
     public $timestamps = false;
+
     protected $fillable = ['task_id', 'actor_id', 'event_type', 'payload', 'created_at'];
 
     protected function casts(): array

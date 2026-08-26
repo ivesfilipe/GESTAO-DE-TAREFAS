@@ -61,8 +61,8 @@ test('gestor acessa pagina do assistente com feature ativa', function () {
 
     $this->actingAs($gestor)->get('/assistente')
         ->assertOk()
-        ->assertSee('Assistente')
-        ->assertSee('Foco sugerido agora');
+        ->assertSee('Copiloto do Gestor')
+        ->assertSee('Cobranças sugeridas');
 });
 
 test('liderado nao acessa assistente', function () {

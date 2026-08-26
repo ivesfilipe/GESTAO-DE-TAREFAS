@@ -1,5 +1,8 @@
 <?php
 
-uses(Tests\TestCase::class)->in('Feature', 'Unit');
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Illuminate\Foundation\Testing\RefreshDatabase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Unit');
+
+uses(RefreshDatabase::class)->in('Feature');

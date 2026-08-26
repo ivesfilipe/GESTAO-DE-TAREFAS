@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Task;
+use App\Models\TaskHistoryEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -73,7 +74,7 @@ test('historico eh imutavel - tabela nao permite update', function () {
             'due_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
         ]);
 
-    $event = \App\Models\TaskHistoryEvent::first();
+    $event = TaskHistoryEvent::first();
     expect($event->getAttributes())->toHaveKey('event_type');
     expect($event->event_type)->toBeString();
 });

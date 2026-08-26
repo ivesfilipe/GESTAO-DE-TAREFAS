@@ -32,6 +32,9 @@ class Task extends Model
         'recurrence_series_id',
         'estimated_minutes',
         'scheduled_start',
+        'task_type',
+        'acceptance_criteria',
+        'expected_evidence',
     ];
 
     protected function casts(): array
@@ -63,6 +66,11 @@ class Task extends Model
     public static function recurrenceFrequencies(): array
     {
         return ['diaria', 'semanal', 'quinzenal', 'mensal'];
+    }
+
+    public static function taskTypes(): array
+    {
+        return ['demanda', 'compra', 'servico', 'desenvolvimento', 'responsabilidade', 'outro'];
     }
 
     public static function recurrenceInterval($frequency): ?\DateInterval

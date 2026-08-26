@@ -1,19 +1,25 @@
 # STATUS DO PROJETO — Sistema de Gestão de Tarefas para Liderados
 
-Última atualização: 2026-08-08 por OpenCode (agente de IA)
+Última atualização: 2026-08-26 por OpenCode (agente de IA)
 
 ## Fase atual
-**SISTEMA EM PRODUÇÃO** — https://tarefas.medicalthermo.com no ar,
-login validado, deploy contínuo via cron funcionando.
+**FASE 27 — COPILOTO INTELIGENTE DO GESTOR ENTREGUE EM PRODUÇÃO** —
+https://tarefas.medicalthermo.com no ar com delegação inteligente,
+chat do copiloto e perfil inteligente do liderado.
 
 ## Progresso da fase atual
-- [x] Revisão de responsividade em todos os breakpoints
-- [x] Revisão de segurança (OWASP checklist)
-- [x] Build de assets Vite
-- [x] **Deploy em produção (2026-08-08)** — incidente 404/500 resolvido;
-      ver entrada do CHANGELOG e `32-MODELO-OFICIAL-DE-DEPLOY.md`
-- [x] Deploy contínuo: cron + `deploy/auto-deploy.sh` (push → produção
-      em ~1 min, sem ação manual)
+- [x] Parte 1: arquitetura multi-provider, ZDR, memória gerencial e campos de IA
+- [x] Revisão pós-Parte 1: correção de vazamento de chunks, `smalot/pdfparser`,
+      remoção de fallback OpenAI legado, simplificação de policy
+- [x] Parte 2:
+  - [x] `SmartDelegationService` com structured output e UX mobile-first em `/tarefas/nova`
+  - [x] `CopilotService` com radar, chat com tools e rascunho de cobrança em `/assistente`
+  - [x] `ProfileIntelligenceService` e `TaskSuggestionService` em `/equipe/{user}`
+  - [x] Documentos com status de processamento
+  - [x] 230 testes automatizados passando
+  - [x] Pint limpo e build Vite atualizado
+  - [x] Documentação atualizada (`docs/CHANGELOG.md`, `docs/STATUS-DO-PROJETO.md`, `docs/ai/*`)
+  - [x] **Deploy em produção (2026-08-26)**
 - [ ] Preenchimento final do manual do usuário (29-MANUAL-DO-USUARIO.md)
 
 ## Fases concluídas
@@ -29,20 +35,15 @@ login validado, deploy contínuo via cron funcionando.
 - [x] Fase 9 — Notificações (RF-27 a RF-28)
 - [x] Fase 10 — Regras de bloqueio (RF-18 a RF-19)
 - [x] Fase 11 — Polimento e responsividade
+- [x] Fase 27 — Copiloto Inteligente do Gestor
 
-## Fases pendentes
-*(todas concluídas localmente)*
-
-## Resumo da entrega (Fases 1-11)
-- **53 testes automatizados** passando (Pest/PHPUnit)
-- **14 Actions** implementadas (máquina de estados, histórico, notificações)
-- **14 Eventos** com listeners de histórico
-- **9 Controllers** (Auth, Team, Task, Comment, Attachment, Dashboard, MyTasks, Notifications)
-- **24 rotas** seguindo contrato documentado
-- **10 views Blade** responsivas (mobile-first, Tailwind CSS 4)
-- **6 tabelas** de domínio + notificações + cache/jobs (9 migrations no total)
-- **6 Models** (User, Task, Comment, Attachment, TaskHistoryEvent, ChangeRequest)
-- **6 Notifications** (in-app, database)
+## Resumo da entrega
+- **230 testes automatizados** passando (Pest/PHPUnit)
+- **Camada multi-provider de IA**: Groq (padrão), OpenAI, Ollama, Mock
+- **Governança**: Zero Data Retention, `AIUsageLog`, gates de gestor
+- **Memória gerencial**: perfis, documentos e chunks por liderado
+- **Novas superfícies**: delegação inteligente, copiloto com tools, perfil inteligente
+- **Deploy contínuo**: cron + `deploy/auto-deploy.sh` (push → produção em ~1 min)
 
 ## Pendências e bloqueios conhecidos
 - ~~SSH inacessível~~ — **contornado em 2026-08-08**: operações de

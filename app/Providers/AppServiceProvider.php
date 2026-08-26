@@ -20,7 +20,9 @@ use App\Listeners\DispatchWebhooksListener;
 use App\Listeners\GravarHistoricoListener;
 use App\Listeners\NotificarPartesInteressadasListener;
 use App\Models\Task;
+use App\Models\TeamMemberDocument;
 use App\Models\User;
+use App\Policies\TeamMemberPolicy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -84,6 +86,13 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('viewPulse', function (User $user) {
+            return $user->isGestor();
+        });
+
+        Gate::policy(User::class, TeamMemberPolicy::class);
+        Gate::define('view-team-profile', [TeamMemberPolicy::class, 'viewProfile']);
+        Gate::define('manage-team-documents', [TeamMemberPolicy::class, 'manageDocuments']);
+        Gate::define('delete-team-document', function (User $user, TeamMemberDocument $document) {
             return $user->isGestor();
         });
 

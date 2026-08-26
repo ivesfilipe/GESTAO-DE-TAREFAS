@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use App\Services\AI\AIService;
+use App\Services\AI\Prompts\ManagementPrompts;
+use App\Services\AI\Safety\ZeroDataRetention;
+use App\Services\AI\Tools\AITools;
 use Illuminate\Support\Facades\Log;
 
 class AiAssistantService
@@ -16,16 +19,16 @@ class AiAssistantService
         'normal' => 10,
     ];
 
-    private ?string $apiKey;
+    private AIService $ai;
 
-    public function __construct(?string $apiKey = null)
+    public function __construct(?AIService $ai = null)
     {
-        $this->apiKey = $apiKey ?? (string) config('services.openai.key');
+        $this->ai = $ai ?? app(AIService::class);
     }
 
     public function usesLlm(): bool
     {
-        return ! empty($this->apiKey);
+        return ! $this->ai->isMock();
     }
 
     public function dailySummary(User $user): array
@@ -87,12 +90,26 @@ class AiAssistantService
 
     public function breakdownSuggestions(Task $task): array
     {
-        if ($this->usesLlm()) {
-            try {
-                return $this->llmBreakdown($task);
-            } catch (\Throwable $e) {
-                Log::warning('LLM breakdown falhou, usando heurística', ['error' => $e->getMessage()]);
+        if ($this->ai->isMock()) {
+            return $this->heuristicBreakdown($task);
+        }
+
+        try {
+            $response = $this->ai->ask(
+                system: ManagementPrompts::taskBreakdown(),
+                user: "Tarefa: {$task->title}\nDescrição: ".($task->description ?? ''),
+                temperature: 0.3,
+                maxTokens: 500,
+                entities: $this->entitiesForTask($task),
+            );
+
+            $steps = AITools::extractStringArray($response->content);
+
+            if (! empty($steps)) {
+                return $steps;
             }
+        } catch (\Throwable $e) {
+            Log::warning('LLM breakdown falhou, usando heurística', ['error' => $e->getMessage()]);
         }
 
         return $this->heuristicBreakdown($task);
@@ -100,44 +117,24 @@ class AiAssistantService
 
     public function generateTaskDescription(string $title, ?string $priority = null): string
     {
-        if ($this->usesLlm()) {
-            try {
-                return $this->llmTaskDescription($title, $priority);
-            } catch (\Throwable $e) {
-                Log::warning('LLM description falhou, usando heurística', ['error' => $e->getMessage()]);
-            }
+        if ($this->ai->isMock()) {
+            return $this->heuristicTaskDescription($title, $priority);
+        }
+
+        try {
+            $response = $this->ai->ask(
+                system: ManagementPrompts::taskDescription(),
+                user: "Tarefa: {$title}".($priority ? " (prioridade: {$priority})" : ''),
+                temperature: 0.85,
+                maxTokens: 400,
+            );
+
+            return trim($response->content);
+        } catch (\Throwable $e) {
+            Log::warning('LLM description falhou, usando heurística', ['error' => $e->getMessage()]);
         }
 
         return $this->heuristicTaskDescription($title, $priority);
-    }
-
-    private function llmTaskDescription(string $title, ?string $priority): string
-    {
-        $response = Http::withToken($this->apiKey)
-            ->timeout(25)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.model', 'gpt-4o-mini'),
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Você é um diretor criativo brasileiro que escreve briefings curtos e energizantes para sua equipe. '
-                            .'Dado o título de uma tarefa, escreva uma descrição em português com: (1) o objetivo em uma frase impactante, '
-                            .'(2) o contexto ou "cena" do porquê importa agora, (3) entregáveis esperados em 2-3 itens com traços, '
-                            .'(4) critério de sucesso objetivo. Tom de cobrança respeitosa e motivadora, como um diretor que confia no time. '
-                            .'Máximo 120 palavras. Responda APENAS com o texto da descrição, sem títulos em markdown.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Tarefa: {$title}".($priority ? " (prioridade: {$priority})" : ''),
-                    ],
-                ],
-                'temperature' => 0.85,
-                'max_tokens' => 350,
-            ]);
-
-        $response->throw();
-
-        return trim((string) $response->json('choices.0.message.content'));
     }
 
     private function heuristicTaskDescription(string $title, ?string $priority): string
@@ -193,29 +190,6 @@ class AiAssistantService
         ];
     }
 
-    private function llmBreakdown(Task $task): array
-    {
-        $response = Http::withToken($this->apiKey)
-            ->timeout(20)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.model', 'gpt-4o-mini'),
-                'messages' => [
-                    ['role' => 'system', 'content' => 'Você divide tarefas em subtarefas objetivas. Responda apenas com um array JSON de strings em português.'],
-                    ['role' => 'user', 'content' => "Tarefa: {$task->title}\nDescrição: {$task->description}"],
-                ],
-                'temperature' => 0.3,
-            ]);
-
-        $response->throw();
-
-        $content = $response->json('choices.0.message.content');
-
-        return collect(json_decode($content, true))
-            ->filter(fn ($v) => is_string($v))
-            ->values()
-            ->all();
-    }
-
     private function scoreTask(Task $task): float
     {
         $score = self::PRIORITY_WEIGHTS[$task->priority] ?? 10;
@@ -268,14 +242,37 @@ class AiAssistantService
 
     private function buildNarrative(User $user, array $summary): string
     {
-        if ($this->usesLlm()) {
-            try {
-                return $this->llmNarrative($user, $summary);
-            } catch (\Throwable $e) {
-                Log::warning('LLM narrative falhou', ['error' => $e->getMessage()]);
-            }
+        if ($this->ai->isMock()) {
+            return $this->heuristicNarrative($user, $summary);
         }
 
+        try {
+            $payload = [
+                'overdue' => $summary['overdue'],
+                'due_today' => $summary['due_today'],
+                'due_this_week' => $summary['due_this_week'],
+                'blocked' => $summary['blocked'],
+                'awaiting_approval' => $summary['awaiting_approval'],
+                'completed_this_week' => $summary['completed_this_week'],
+            ];
+
+            $response = $this->ai->ask(
+                system: 'Você é um assistente de produtividade. Resuma a situação das tarefas em uma frase motivadora e prática em português.',
+                user: json_encode($payload),
+                temperature: 0.5,
+                maxTokens: 200,
+            );
+
+            return trim($response->content);
+        } catch (\Throwable $e) {
+            Log::warning('LLM narrative falhou', ['error' => $e->getMessage()]);
+        }
+
+        return $this->heuristicNarrative($user, $summary);
+    }
+
+    private function heuristicNarrative(User $user, array $summary): string
+    {
         $parts = [];
 
         if ($summary['overdue'] > 0) {
@@ -297,30 +294,15 @@ class AiAssistantService
         return implode(' ', $parts);
     }
 
-    private function llmNarrative(User $user, array $summary): string
-    {
-        unset($summary['narrative']);
-
-        $response = Http::withToken($this->apiKey)
-            ->timeout(20)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.model', 'gpt-4o-mini'),
-                'messages' => [
-                    ['role' => 'system', 'content' => 'Você é um assistente de produtividade. Resuma a situação das tarefas em uma frase motivadora e prática em português.'],
-                    ['role' => 'user', 'content' => json_encode($summary)],
-                ],
-                'temperature' => 0.5,
-            ]);
-
-        $response->throw();
-
-        return trim($response->json('choices.0.message.content'));
-    }
-
     private function scopeFor(User $user)
     {
         return Task::query()
             ->whereNotIn('status', ['cancelada'])
             ->when(! $user->isGestor(), fn ($q) => $q->where('assigned_to', $user->id));
+    }
+
+    private function entitiesForTask(Task $task): array
+    {
+        return app(ZeroDataRetention::class)->entitiesFromTask($task);
     }
 }

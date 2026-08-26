@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -18,7 +18,7 @@ test('usuario pode marcar notificacao como lida', function () {
     $user = User::factory()->create();
 
     $user->notifications()->create([
-        'id' => \Illuminate\Support\Str::uuid(),
+        'id' => Str::uuid(),
         'type' => 'App\Notifications\NovaTarefaNotification',
         'data' => json_encode(['message' => 'teste']),
     ]);
@@ -35,7 +35,7 @@ test('botao marcar como lida na tela usa method spoofing PATCH', function () {
     $user = User::factory()->create();
 
     $user->notifications()->create([
-        'id' => \Illuminate\Support\Str::uuid(),
+        'id' => Str::uuid(),
         'type' => 'App\Notifications\NovaTarefaNotification',
         'data' => json_encode(['message' => 'teste']),
     ]);

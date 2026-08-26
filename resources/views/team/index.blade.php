@@ -91,6 +91,9 @@
                     </span>
                 </div>
                 <div class="mt-3 flex items-center gap-4">
+                    <a href="{{ route('team.profile', $member) }}" class="text-sm text-brand-600 hover:text-brand-700 font-medium">
+                        Ver perfil de gestão
+                    </a>
                     <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
                         @csrf
                         <button type="submit" class="text-sm text-brand-600 hover:text-brand-700 font-medium">
@@ -146,6 +149,9 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-4">
+                                <a href="{{ route('team.profile', $member) }}" class="text-brand-600 hover:text-brand-700 text-sm font-medium">
+                                    Ver perfil de gestão
+                                </a>
                                 <form method="POST" action="{{ route('team.regenerate-invite', $member) }}">
                                     @csrf
                                     <button type="submit" class="text-brand-600 hover:text-brand-700 text-sm font-medium">

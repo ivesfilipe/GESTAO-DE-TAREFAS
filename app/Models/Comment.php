@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     public $timestamps = false;
+
     protected $fillable = ['task_id', 'author_id', 'body', 'created_at'];
 
     protected function casts(): array

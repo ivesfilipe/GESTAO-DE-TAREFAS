@@ -12,7 +12,7 @@ class RejectTask
     {
         $validCategories = Task::rejectionCategories();
 
-        if (!in_array($category, $validCategories, true)) {
+        if (! in_array($category, $validCategories, true)) {
             throw new \InvalidArgumentException(
                 "Categoria de rejeição inválida: '{$category}'"
             );

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -181,7 +182,7 @@ test('gestor exclui liderado sem tarefas', function () {
 test('gestor nao exclui liderado com tarefas vinculadas', function () {
     $gestor = User::factory()->gestor()->create();
     $liderado = User::factory()->liderado()->create();
-    \App\Models\Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+    Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
 
     $this->actingAs($gestor)
         ->delete("/equipe/{$liderado->id}")

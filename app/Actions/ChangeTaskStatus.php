@@ -24,7 +24,7 @@ class ChangeTaskStatus
 
         if ($newStatus !== 'cancelada') {
             $allowed = self::TRANSITIONS[$oldStatus] ?? [];
-            if (!in_array($newStatus, $allowed, true)) {
+            if (! in_array($newStatus, $allowed, true)) {
                 throw new \InvalidArgumentException(
                     "Transição inválida: '{$oldStatus}' -> '{$newStatus}'"
                 );
