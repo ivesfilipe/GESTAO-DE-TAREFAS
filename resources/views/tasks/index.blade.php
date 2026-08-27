@@ -2,7 +2,7 @@
 
 @php
 $priorityBadges = [
-    'normal' => 'bg-slate-300 text-slate-700',
+    'normal' => 'bg-slate-300 text-slate-700 dark:text-slate-300',
     'importante' => 'bg-brand-100 text-brand-600',
     'urgente' => 'bg-orange-100 text-orange-700',
     'critica' => 'bg-red-100 text-red-700',
@@ -36,7 +36,7 @@ $statusBadges = [
 @section('content')
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 class="text-2xl font-bold text-slate-900">Tarefas</h1>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Tarefas</h1>
         <div class="flex items-center gap-4">
             @can('create-task')
                 <a href="{{ route('tasks.create') }}" data-testid="nova-tarefa-desktop" class="hidden lg:inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600 transition-colors">
@@ -50,11 +50,11 @@ $statusBadges = [
         </div>
     </div>
 
-    <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-2xl bg-white/85 backdrop-blur border border-slate-200/60 p-5 shadow-sm animate-entrance">
+    <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-2xl bg-white dark:bg-white/[0.05] backdrop-blur/85 backdrop-blur border border-slate-200 dark:border-white/10/60 p-5 shadow-sm animate-entrance">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label for="status" class="block text-xs font-medium text-slate-500 mb-1">Status</label>
-                <select name="status" id="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <label for="status" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Status</label>
+                <select name="status" id="status" class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($statusLabels as $value => $label)
                         <option value="{{ $value }}" {{ request('status') === $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -62,8 +62,8 @@ $statusBadges = [
                 </select>
             </div>
             <div>
-                <label for="priority" class="block text-xs font-medium text-slate-500 mb-1">Prioridade</label>
-                <select name="priority" id="priority" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <label for="priority" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Prioridade</label>
+                <select name="priority" id="priority" class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Todas</option>
                     <option value="normal" {{ request('priority') === 'normal' ? 'selected' : '' }}>Normal</option>
                     <option value="importante" {{ request('priority') === 'importante' ? 'selected' : '' }}>Importante</option>
@@ -72,20 +72,20 @@ $statusBadges = [
                 </select>
             </div>
             <div>
-                <label for="search" class="block text-xs font-medium text-slate-500 mb-1">Busca</label>
+                <label for="search" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Busca</label>
                 <input
                     type="text"
                     name="search"
                     id="search"
                     value="{{ request('search') }}"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="Buscar por título..."
                 />
             </div>
             @if(Auth::user()->isGestor())
                 <div>
-                    <label for="assigned_to" class="block text-xs font-medium text-slate-500 mb-1">Responsável</label>
-                    <select name="assigned_to" id="assigned_to" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                    <label for="assigned_to" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Responsável</label>
+                    <select name="assigned_to" id="assigned_to" class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                         <option value="">Todos</option>
                         @foreach($teamMembers ?? [] as $member)
                             <option value="{{ $member->id }}" {{ request('assigned_to') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
@@ -98,7 +98,7 @@ $statusBadges = [
             <button type="submit" class="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                 Filtrar
             </button>
-            <a href="{{ route('tasks.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:shadow-sm transition-all">
+            <a href="{{ route('tasks.index') }}" class="rounded-xl border border-slate-200 bg-white dark:bg-white/[0.05] backdrop-blur px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] hover:shadow-sm transition-all">
                 Limpar
             </a>
         </div>
@@ -106,9 +106,9 @@ $statusBadges = [
 
     <div class="lg:hidden space-y-3">
         @forelse($tasks as $task)
-            <a href="{{ route('tasks.show', $task) }}" class="block rounded-xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all">
+            <a href="{{ route('tasks.show', $task) }}" class="block rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all">
                 <div class="flex items-start justify-between gap-2">
-                    <h3 class="font-semibold text-slate-900 leading-snug">{{ $task->title }} @if($task->isRecurring())<span class="text-violet-600">↻</span>@endif</h3>
+                    <h3 class="font-semibold text-slate-900 dark:text-white leading-snug">{{ $task->title }} @if($task->isRecurring())<span class="text-violet-600">↻</span>@endif</h3>
                     <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $priorityBadges[$task->priority] }}">
                         {{ ucfirst($task->priority) }}
                     </span>
@@ -118,11 +118,11 @@ $statusBadges = [
                         {{ $statusLabels[$task->status] }}
                     </span>
                     @if($task->assignee)
-                        <span class="text-xs text-slate-500">{{ $task->assignee->name }}</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ $task->assignee->name }}</span>
                     @endif
                 </div>
                 @if($task->due_at)
-                    <div class="mt-2 flex items-center gap-1 text-xs {{ $task->isOverdue() ? 'text-red-600' : 'text-slate-500' }}">
+                    <div class="mt-2 flex items-center gap-1 text-xs {{ $task->isOverdue() ? 'text-red-600' : 'text-slate-500 dark:text-slate-400' }}">
                         <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
@@ -134,32 +134,32 @@ $statusBadges = [
                 @endif
             </a>
         @empty
-            <div class="rounded-xl bg-white border border-slate-200 p-12 text-center shadow-sm">
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-12 text-center shadow-sm">
                 <svg class="mx-auto size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <h3 class="mt-3 text-sm font-medium text-slate-900">Nenhuma tarefa encontrada</h3>
-                <p class="mt-1 text-sm text-slate-500">Ajuste os filtros ou crie uma nova tarefa.</p>
+                <h3 class="mt-3 text-sm font-medium text-slate-900 dark:text-white">Nenhuma tarefa encontrada</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ajuste os filtros ou crie uma nova tarefa.</p>
             </div>
         @endforelse
     </div>
 
-    <div class="hidden lg:block rounded-2xl bg-white/90 backdrop-blur border border-slate-200/60 shadow-sm overflow-hidden animate-entrance stagger-1">
+    <div class="hidden lg:block rounded-2xl bg-white dark:bg-white/[0.05] backdrop-blur/90 backdrop-blur border border-slate-200 dark:border-white/10/60 shadow-sm overflow-hidden animate-entrance stagger-1">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-200 bg-slate-50">
-                    <th class="px-6 py-3 text-left font-medium text-slate-500">Título</th>
-                    <th class="px-6 py-3 text-left font-medium text-slate-500">Prioridade</th>
-                    <th class="px-6 py-3 text-left font-medium text-slate-500">Status</th>
-                    <th class="px-6 py-3 text-left font-medium text-slate-500">Responsável</th>
-                    <th class="px-6 py-3 text-left font-medium text-slate-500">Prazo</th>
-                    <th class="px-6 py-3 text-right font-medium text-slate-500">Ações</th>
+                <tr class="border-b border-slate-200 bg-slate-50 dark:bg-white/[0.04]">
+                    <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Título</th>
+                    <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Prioridade</th>
+                    <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Status</th>
+                    <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Responsável</th>
+                    <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Prazo</th>
+                    <th class="px-6 py-3 text-right font-medium text-slate-500 dark:text-slate-400">Ações</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
                 @forelse($tasks as $task)
-                    <tr class="hover:bg-slate-50/50 cursor-pointer" onclick="window.location='{{ route('tasks.show', $task) }}'">
-                        <td class="px-6 py-4 font-medium text-slate-900">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.04]/50 cursor-pointer" onclick="window.location='{{ route('tasks.show', $task) }}'">
+                        <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
                             {{ $task->title }}
                             @if($task->isRecurring())
                                 <span class="ml-1 text-violet-600" title="Tarefa recorrente">↻</span>
@@ -175,10 +175,10 @@ $statusBadges = [
                                 {{ $statusLabels[$task->status] }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-slate-500">
+                        <td class="px-6 py-4 text-slate-500 dark:text-slate-400">
                             {{ $task->assignee?->name ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 {{ $task->isOverdue() ? 'text-red-600 font-medium' : 'text-slate-500' }}">
+                        <td class="px-6 py-4 {{ $task->isOverdue() ? 'text-red-600 font-medium' : 'text-slate-500 dark:text-slate-400' }}">
                             {{ $task->due_at?->format('d/m/Y H:i') ?? '-' }}
                         </td>
                         <td class="px-6 py-4 text-right">
@@ -191,8 +191,8 @@ $statusBadges = [
                             <svg class="mx-auto size-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <h3 class="mt-3 text-sm font-medium text-slate-900">Nenhuma tarefa encontrada</h3>
-                            <p class="mt-1 text-sm text-slate-500">Ajuste os filtros ou crie uma nova tarefa.</p>
+                            <h3 class="mt-3 text-sm font-medium text-slate-900 dark:text-white">Nenhuma tarefa encontrada</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ajuste os filtros ou crie uma nova tarefa.</p>
                         </td>
                     </tr>
                 @endforelse

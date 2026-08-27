@@ -5,7 +5,7 @@ $weekLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 $monthNames = [1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril', 5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto', 9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'];
 $gridStart = $month->copy()->startOfMonth()->startOfWeek(\Carbon\CarbonInterface::MONDAY);
 $priorityBadges = [
-    'normal' => 'bg-slate-300 text-slate-700',
+    'normal' => 'bg-slate-300 text-slate-700 dark:text-slate-300',
     'importante' => 'bg-brand-100 text-brand-700',
     'urgente' => 'bg-orange-100 text-orange-700',
     'critica' => 'bg-red-100 text-red-700',
@@ -17,22 +17,22 @@ $priorityBadges = [
 @section('content')
 <div class="mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 class="text-2xl font-bold text-slate-900">{{ $monthNames[$month->month] }} de {{ $month->year }}</h1>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ $monthNames[$month->month] }} de {{ $month->year }}</h1>
         <div class="flex items-center gap-3">
-            <a href="{{ url('/calendario?mes='.$previousMonth->format('Y-m')) }}" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">←</a>
-            <a href="{{ url('/calendario') }}" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">Hoje</a>
-            <a href="{{ url('/calendario?mes='.$nextMonth->format('Y-m')) }}" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">→</a>
+            <a href="{{ url('/calendario?mes='.$previousMonth->format('Y-m')) }}" class="rounded-lg border border-slate-300 bg-white dark:bg-white/[0.05] backdrop-blur px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/[0.04]">←</a>
+            <a href="{{ url('/calendario') }}" class="rounded-lg border border-slate-300 bg-white dark:bg-white/[0.05] backdrop-blur px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/[0.04]">Hoje</a>
+            <a href="{{ url('/calendario?mes='.$nextMonth->format('Y-m')) }}" class="rounded-lg border border-slate-300 bg-white dark:bg-white/[0.05] backdrop-blur px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/[0.04]">→</a>
             <button type="button" onclick="navigator.clipboard.writeText('{{ $feedUrl }}'); this.textContent='URL copiada!'; setTimeout(() => this.textContent='Copiar feed iCal', 2000)"
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    class="rounded-lg border border-slate-300 bg-white dark:bg-white/[0.05] backdrop-blur px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]">
                 Copiar feed iCal
             </button>
         </div>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-white/[0.05] backdrop-blur shadow-sm">
+        <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50 dark:bg-white/[0.04]">
             @foreach($weekLabels as $label)
-                <div class="px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $label }}</div>
+                <div class="px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $label }}</div>
             @endforeach
         </div>
 
@@ -43,8 +43,8 @@ $priorityBadges = [
                     $isToday = $day->isToday();
                     $dayTasks = $tasksByDay->get($day->format('Y-m-d'), collect());
                 @endphp
-                <div class="min-h-28 border-b border-r border-slate-100 p-1.5 {{ $isCurrentMonth ? '' : 'bg-slate-50/60' }}">
-                    <span class="inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold {{ $isToday ? 'bg-brand-700 text-white' : ($isCurrentMonth ? 'text-slate-600' : 'text-slate-300') }}">
+                <div class="min-h-28 border-b border-r border-slate-100 dark:border-white/5 p-1.5 {{ $isCurrentMonth ? '' : 'bg-slate-50 dark:bg-white/[0.04]/60' }}">
+                    <span class="inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold {{ $isToday ? 'bg-brand-700 text-white' : ($isCurrentMonth ? 'text-slate-600 dark:text-slate-400' : 'text-slate-300') }}">
                         {{ $day->format('j') }}
                     </span>
                     <div class="mt-1 space-y-1">
@@ -57,7 +57,7 @@ $priorityBadges = [
                             </a>
                         @endforeach
                         @if($dayTasks->count() > 4)
-                            <p class="px-1.5 text-[10px] font-semibold text-slate-400">+{{ $dayTasks->count() - 4 }} tarefas</p>
+                            <p class="px-1.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500">+{{ $dayTasks->count() - 4 }} tarefas</p>
                         @endif
                     </div>
                 </div>
@@ -65,7 +65,7 @@ $priorityBadges = [
         </div>
     </div>
 
-    <p class="mt-3 text-xs text-slate-400">
+    <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">
         Feed iCal: use o botão "Copiar feed iCal" e cole no Google Agenda, Outlook ou Apple Calendar para sincronizar suas tarefas automaticamente.
     </p>
 </div>

@@ -202,10 +202,13 @@
         @endauth
 
         <main class="relative pt-16 pb-20 lg:pl-64 min-h-screen bg-slate-50 dark:bg-[#020a14] transition-colors duration-300">
-            {{-- subtle page aurora --}}
-            <div class="pointer-events-none absolute inset-0 overflow-hidden dark:opacity-60">
-                <div class="absolute -top-32 -right-32 size-[560px] rounded-full bg-gradient-to-br from-brand-100/40 via-brand-50/20 dark:from-brand-900/20 dark:via-brand-800/10 to-transparent blur-3xl"></div>
+            {{-- page aurora — more colorful like login --}}
+            <div class="pointer-events-none absolute inset-0 overflow-hidden">
+                <div class="absolute -top-32 -right-32 size-[560px] rounded-full bg-gradient-to-br from-brand-100/40 via-brand-50/20 dark:from-brand-600/12 dark:via-brand-800/8 to-transparent blur-3xl"></div>
                 <div class="absolute top-96 -left-32 size-[480px] rounded-full bg-gradient-to-br from-slate-100/60 dark:from-slate-800/20 to-transparent blur-3xl"></div>
+                <div class="absolute top-[40%] right-[15%] hidden dark:block size-[640px] rounded-full bg-gradient-to-br from-violet-600/8 via-transparent to-transparent blur-[70px]"></div>
+                <div class="absolute bottom-0 left-[20%] hidden dark:block size-[560px] rounded-full bg-gradient-to-t from-brand-600/8 via-transparent to-transparent blur-[70px]"></div>
+                <div class="absolute inset-0 hidden dark:block opacity-[0.03]" style="background-image: linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 32px 32px;"></div>
             </div>
             <div class="relative">
             @if(session('success'))

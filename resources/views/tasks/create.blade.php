@@ -4,14 +4,14 @@
 
 @section('content')
 <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-6">
-    <h1 class="text-2xl font-bold text-slate-900 mb-6">Nova Tarefa</h1>
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Nova Tarefa</h1>
 
-    <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm mb-5">
+    <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm mb-5">
         <div class="flex items-center gap-2 mb-2">
             <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
-            <label for="ai-delegate-input" class="block text-sm font-semibold text-slate-700">Delegar com IA</label>
+            <label for="ai-delegate-input" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Delegar com IA</label>
         </div>
-        <p class="text-xs text-slate-500 mb-3">
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
             Descreva a tarefa em linguagem natural e a IA monta um rascunho. Exemplo: <em>"Revisar contrato do fornecedor até sexta às 17h, urgente"</em>.
         </p>
 
@@ -20,14 +20,14 @@
                 id="ai-delegate-input"
                 rows="3"
                 maxlength="1000"
-                class="block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none"
+                class="block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none"
                 placeholder="Descreva o que precisa ser feito..."
             ></textarea>
 
             <div class="flex flex-col sm:flex-row gap-3">
                 <select
                     id="ai-delegate-assignee"
-                    class="sm:flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    class="sm:flex-1 rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                 >
                     <option value="">Responsável (opcional)</option>
                     @foreach($liderados ?? [] as $liderado)
@@ -48,61 +48,61 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">Rascunho IA</span>
-                    <span id="draft-confidence" class="text-xs font-medium text-slate-600"></span>
+                    <span id="draft-confidence" class="text-xs font-medium text-slate-600 dark:text-slate-400"></span>
                 </div>
-                <span id="draft-provider" class="text-xs text-slate-400"></span>
+                <span id="draft-provider" class="text-xs text-slate-400 dark:text-slate-500"></span>
             </div>
 
             <div id="draft-fallback" class="hidden rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800"></div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400">Título</p>
-                    <p id="draft-title" class="text-sm font-medium text-slate-800"></p>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500">Título</p>
+                    <p id="draft-title" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
                 </div>
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400">Tipo</p>
-                    <p id="draft-type" class="text-sm font-medium text-slate-800"></p>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500">Tipo</p>
+                    <p id="draft-type" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
                 </div>
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400">Prioridade</p>
-                    <p id="draft-priority" class="text-sm font-medium text-slate-800"></p>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500">Prioridade</p>
+                    <p id="draft-priority" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
                 </div>
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400">Prazo sugerido</p>
-                    <p id="draft-due" class="text-sm font-medium text-slate-800"></p>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500">Prazo sugerido</p>
+                    <p id="draft-due" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
                 </div>
-                <div class="rounded-lg bg-white border border-violet-100 p-3 sm:col-span-2">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400">Responsável sugerido</p>
-                    <p id="draft-assignee" class="text-sm font-medium text-slate-800"></p>
-                    <p id="draft-assignee-reason" class="text-xs text-slate-500 mt-1"></p>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3 sm:col-span-2">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500">Responsável sugerido</p>
+                    <p id="draft-assignee" class="text-sm font-medium text-slate-800 dark:text-slate-100"></p>
+                    <p id="draft-assignee-reason" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></p>
                 </div>
             </div>
 
-            <div class="rounded-lg bg-white border border-violet-100 p-3">
-                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Descrição</p>
-                <p id="draft-description" class="text-sm text-slate-700 whitespace-pre-line"></p>
+            <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Descrição</p>
+                <p id="draft-description" class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line"></p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Critérios de aceitação</p>
-                    <ul id="draft-criteria" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Critérios de aceitação</p>
+                    <ul id="draft-criteria" class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 space-y-1"></ul>
                 </div>
-                <div class="rounded-lg bg-white border border-violet-100 p-3">
-                    <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Evidências esperadas</p>
-                    <ul id="draft-evidence" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+                <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                    <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Evidências esperadas</p>
+                    <ul id="draft-evidence" class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 space-y-1"></ul>
                 </div>
             </div>
 
-            <div class="rounded-lg bg-white border border-violet-100 p-3">
-                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Checkpoints</p>
-                <ul id="draft-checkpoints" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+            <div class="rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Checkpoints</p>
+                <ul id="draft-checkpoints" class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 space-y-1"></ul>
             </div>
 
-            <div id="draft-missing-box" class="hidden rounded-lg bg-white border border-violet-100 p-3">
-                <p class="text-[11px] uppercase font-semibold text-slate-400 mb-1">Informações faltantes</p>
-                <ul id="draft-missing" class="list-disc list-inside text-sm text-slate-700 space-y-1"></ul>
+            <div id="draft-missing-box" class="hidden rounded-lg bg-white dark:bg-white/[0.05] backdrop-blur border border-violet-100 p-3">
+                <p class="text-[11px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Informações faltantes</p>
+                <ul id="draft-missing" class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 space-y-1"></ul>
             </div>
 
             <button type="button" id="ai-delegate-apply"
@@ -112,12 +112,12 @@
         </div>
     </div>
 
-    <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
+    <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm">
         <form method="POST" action="{{ route('tasks.store') }}" class="space-y-5">
             @csrf
 
             <div>
-                <label for="title" class="block text-sm font-medium text-slate-700">Título <span class="text-red-500">*</span></label>
+                <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Título <span class="text-red-500">*</span></label>
                 <input
                     type="text"
                     name="title"
@@ -125,19 +125,19 @@
                     value="{{ old('title') }}"
                     required
                     autofocus
-                    class="mt-1 block w-full rounded-lg border {{ $errors->has('title') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
+                    class="mt-1 block w-full rounded-lg border {{ $errors->has('title') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 dark:border-white/10 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:ring-2"
                     placeholder="Título da tarefa"
                 />
                 @error('title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-slate-700">Descrição</label>
+                <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Descrição</label>
                 <textarea
                     name="description"
                     id="description"
                     rows="4"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="Descreva a tarefa (opcional)"
                 >{{ old('description') }}</textarea>
                 @error('description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -145,11 +145,11 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="assigned_to" class="block text-sm font-medium text-slate-700">Responsável</label>
+                    <label for="assigned_to" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Responsável</label>
                     <select
                         name="assigned_to"
                         id="assigned_to"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         <option value="">Sem responsável</option>
                         @foreach($liderados ?? [] as $liderado)
@@ -162,11 +162,11 @@
                 </div>
 
                 <div>
-                    <label for="priority" class="block text-sm font-medium text-slate-700">Prioridade</label>
+                    <label for="priority" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Prioridade</label>
                     <select
                         name="priority"
                         id="priority"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         <option value="normal" {{ old('priority') === 'normal' ? 'selected' : '' }}>Normal</option>
                         <option value="importante" {{ old('priority') === 'importante' ? 'selected' : '' }}>Importante</option>
@@ -177,24 +177,24 @@
                 </div>
 
                 <div>
-                    <label for="due_at" class="block text-sm font-medium text-slate-700">Prazo <span class="text-red-500">*</span></label>
+                    <label for="due_at" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Prazo <span class="text-red-500">*</span></label>
                     <input
                         type="datetime-local"
                         name="due_at"
                         id="due_at"
                         value="{{ old('due_at') }}"
                         required
-                        class="mt-1 block w-full rounded-lg border {{ $errors->has('due_at') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2"
+                        class="mt-1 block w-full rounded-lg border {{ $errors->has('due_at') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 dark:border-white/10 focus:border-brand-500 focus:ring-brand-500/20' }} px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:ring-2"
                     />
                     @error('due_at')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label for="recurrence_frequency" class="block text-sm font-medium text-slate-700">Repetir</label>
+                    <label for="recurrence_frequency" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Repetir</label>
                     <select
                         name="recurrence_frequency"
                         id="recurrence_frequency"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         <option value="">Não repetir</option>
                         <option value="diaria" {{ old('recurrence_frequency') === 'diaria' ? 'selected' : '' }}>Todos os dias</option>
@@ -202,16 +202,16 @@
                         <option value="quinzenal" {{ old('recurrence_frequency') === 'quinzenal' ? 'selected' : '' }}>A cada 2 semanas</option>
                         <option value="mensal" {{ old('recurrence_frequency') === 'mensal' ? 'selected' : '' }}>Todo mês</option>
                     </select>
-                    <p class="mt-1 text-xs text-slate-400">A próxima tarefa é criada automaticamente com o mesmo prazo/cadência.</p>
+                    <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">A próxima tarefa é criada automaticamente com o mesmo prazo/cadência.</p>
                     @error('recurrence_frequency')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label for="task_type" class="block text-sm font-medium text-slate-700">Tipo</label>
+                    <label for="task_type" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Tipo</label>
                     <select
                         name="task_type"
                         id="task_type"
-                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                        class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     >
                         @foreach(\App\Models\Task::taskTypes() as $type)
                             <option value="{{ $type }}" {{ old('task_type', 'demanda') === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
@@ -222,31 +222,31 @@
             </div>
 
             <div>
-                <label for="acceptance_criteria" class="block text-sm font-medium text-slate-700">Critérios de aceitação</label>
+                <label for="acceptance_criteria" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Critérios de aceitação</label>
                 <textarea
                     name="acceptance_criteria"
                     id="acceptance_criteria"
                     rows="3"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="O que deve ser verdadeiro para considerar esta tarefa concluída?"
                 >{{ old('acceptance_criteria') }}</textarea>
                 @error('acceptance_criteria')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label for="expected_evidence" class="block text-sm font-medium text-slate-700">Evidências esperadas</label>
+                <label for="expected_evidence" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Evidências esperadas</label>
                 <textarea
                     name="expected_evidence"
                     id="expected_evidence"
                     rows="3"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
                     placeholder="O que deve ser entregue/anexado como prova de conclusão?"
                 >{{ old('expected_evidence') }}</textarea>
                 @error('expected_evidence')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                <a href="{{ route('tasks.index') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+                <a href="{{ route('tasks.index') }}" class="rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">
                     Cancelar
                 </a>
                 <button

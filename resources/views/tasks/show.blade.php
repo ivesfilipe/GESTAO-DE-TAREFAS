@@ -2,7 +2,7 @@
 
 @php
 $priorityBadges = [
-    'normal' => 'bg-slate-300 text-slate-700',
+    'normal' => 'bg-slate-300 text-slate-700 dark:text-slate-300',
     'importante' => 'bg-brand-100 text-brand-600',
     'urgente' => 'bg-orange-100 text-orange-700',
     'critica' => 'bg-red-100 text-red-700',
@@ -46,9 +46,9 @@ $isAssignee = Auth::id() === $task->assigned_to;
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-2">
-                <a href="{{ route('tasks.index') }}" class="text-sm text-slate-500 hover:text-slate-700">&larr; Tarefas</a>
+                <a href="{{ route('tasks.index') }}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-300">&larr; Tarefas</a>
             </div>
-            <h1 class="text-2xl font-bold text-slate-900">{{ $task->title }}</h1>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ $task->title }}</h1>
         </div>
         <div class="flex items-center gap-2">
             @if($task->isRecurring())
@@ -81,44 +81,44 @@ $isAssignee = Auth::id() === $task->assigned_to;
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
-            <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
-                <h2 class="text-sm font-semibold text-slate-900 mb-4">Detalhes</h2>
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Detalhes</h2>
 
                 @if($task->description)
-                    <div class="mb-4 text-sm text-slate-700 whitespace-pre-wrap">{{ $task->description }}</div>
+                    <div class="mb-4 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{ $task->description }}</div>
                 @else
-                    <p class="mb-4 text-sm text-slate-400 italic">Sem descrição.</p>
+                    <p class="mb-4 text-sm text-slate-400 dark:text-slate-500 italic">Sem descrição.</p>
                 @endif
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
-                        <span class="text-slate-500">Criado por:</span>
-                        <span class="ml-1 text-slate-900 font-medium">{{ $task->creator?->name ?? '-' }}</span>
+                        <span class="text-slate-500 dark:text-slate-400">Criado por:</span>
+                        <span class="ml-1 text-slate-900 dark:text-white font-medium">{{ $task->creator?->name ?? '-' }}</span>
                     </div>
                     <div>
-                        <span class="text-slate-500">Responsável:</span>
-                        <span class="ml-1 text-slate-900 font-medium">{{ $task->assignee?->name ?? 'Não atribuído' }}</span>
+                        <span class="text-slate-500 dark:text-slate-400">Responsável:</span>
+                        <span class="ml-1 text-slate-900 dark:text-white font-medium">{{ $task->assignee?->name ?? 'Não atribuído' }}</span>
                     </div>
                     <div>
-                        <span class="text-slate-500">Prazo:</span>
-                        <span class="ml-1 text-slate-900 font-medium {{ $task->isOverdue() ? 'text-red-600' : '' }}">
+                        <span class="text-slate-500 dark:text-slate-400">Prazo:</span>
+                        <span class="ml-1 text-slate-900 dark:text-white font-medium {{ $task->isOverdue() ? 'text-red-600' : '' }}">
                             {{ $task->due_at?->format('d/m/Y H:i') ?? '-' }}
                         </span>
                     </div>
                     <div>
-                        <span class="text-slate-500">Criado em:</span>
-                        <span class="ml-1 text-slate-900 font-medium">{{ $task->created_at->format('d/m/Y H:i') }}</span>
+                        <span class="text-slate-500 dark:text-slate-400">Criado em:</span>
+                        <span class="ml-1 text-slate-900 dark:text-white font-medium">{{ $task->created_at->format('d/m/Y H:i') }}</span>
                     </div>
                     @if($task->block_reason)
                         <div class="sm:col-span-2">
-                            <span class="text-slate-500">Motivo do bloqueio:</span>
-                            <p class="mt-1 text-slate-700">{{ $task->block_reason }}</p>
+                            <span class="text-slate-500 dark:text-slate-400">Motivo do bloqueio:</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">{{ $task->block_reason }}</p>
                         </div>
                     @endif
                     @if($task->rejection_note)
                         <div class="sm:col-span-2">
-                            <span class="text-slate-500">Motivo da reprovação:</span>
-                            <p class="mt-1 text-slate-700">{{ $task->rejection_note }}</p>
+                            <span class="text-slate-500 dark:text-slate-400">Motivo da reprovação:</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">{{ $task->rejection_note }}</p>
                             @if($task->rejection_category)
                                 <span class="mt-1 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
                                     {{ $rejectionCategoryLabels[$task->rejection_category] ?? $task->rejection_category }}
@@ -129,8 +129,8 @@ $isAssignee = Auth::id() === $task->assigned_to;
                 </div>
             </div>
 
-            <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
-                <h2 class="text-sm font-semibold text-slate-900 mb-4">Comentários</h2>
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Comentários</h2>
 
                 <div class="space-y-4 mb-6">
                     @forelse($task->comments as $comment)
@@ -140,14 +140,14 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm font-medium text-slate-900">{{ $comment->author?->name ?? 'Desconhecido' }}</span>
-                                    <span class="text-xs text-slate-400">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                                    <span class="text-sm font-medium text-slate-900 dark:text-white">{{ $comment->author?->name ?? 'Desconhecido' }}</span>
+                                    <span class="text-xs text-slate-400 dark:text-slate-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
                                 </div>
-                                <p class="mt-1 text-sm text-slate-700 whitespace-pre-wrap">{{ $comment->body }}</p>
+                                <p class="mt-1 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{ $comment->body }}</p>
                             </div>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400 italic">Nenhum comentário ainda.</p>
+                        <p class="text-sm text-slate-400 dark:text-slate-500 italic">Nenhum comentário ainda.</p>
                     @endforelse
                 </div>
 
@@ -158,16 +158,16 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             name="body"
                             rows="3"
                             required
-                            class="block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none"
+                            class="block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none"
                             placeholder="Adicione um comentário..."
                         ></textarea>
                     </div>
                     <div class="mt-2 flex items-center gap-3">
-                        <label class="flex items-center gap-2 text-sm text-slate-500">
+                        <label class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                             <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                             </svg>
-                            <input type="file" name="file" accept=".jpg,.jpeg,.png,.gif,.pdf" class="text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100" />
+                            <input type="file" name="file" accept=".jpg,.jpeg,.png,.gif,.pdf" class="text-sm text-slate-500 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100" />
                         </label>
                         <div class="ml-auto">
                             <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-colors">
@@ -178,19 +178,19 @@ $isAssignee = Auth::id() === $task->assigned_to;
                 </form>
             </div>
 
-            <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
-                <h2 class="text-sm font-semibold text-slate-900 mb-4">Anexos</h2>
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Anexos</h2>
 
                 <div class="space-y-2 mb-6">
                     @forelse($task->attachments as $attachment)
-                        <div class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                        <div class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="size-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                                 </svg>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-900">{{ $attachment->file_name }}</p>
-                                    <p class="text-xs text-slate-400">{{ $attachment->file_type }} &middot; {{ number_format($attachment->file_size / 1024, 1) }} KB</p>
+                                    <p class="text-sm font-medium text-slate-900 dark:text-white">{{ $attachment->file_name }}</p>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ $attachment->file_type }} &middot; {{ number_format($attachment->file_size / 1024, 1) }} KB</p>
                                 </div>
                             </div>
                              <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="text-sm font-medium text-brand-500 hover:text-brand-600" download>
@@ -198,7 +198,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             </a>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400 italic">Nenhum anexo.</p>
+                        <p class="text-sm text-slate-400 dark:text-slate-500 italic">Nenhum anexo.</p>
                     @endforelse
                 </div>
 
@@ -209,41 +209,41 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             type="file"
                             name="file"
                             required
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100"
+                            class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100"
                         />
-                        <button type="submit" class="shrink-0 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition-colors">
+                        <button type="submit" class="shrink-0 rounded-lg bg-slate-100 dark:bg-white/[0.06] px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors">
                             Anexar
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
-                <h2 class="text-sm font-semibold text-slate-900 mb-4">Histórico</h2>
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Histórico</h2>
 
                 <div class="relative">
                     <div class="absolute left-[11px] top-0 bottom-0 w-px bg-slate-200"></div>
                     <div class="space-y-4">
                         @forelse($task->historyEvents as $event)
                             <div class="relative flex gap-4 pl-8">
-                                <div class="absolute left-0 flex size-6 items-center justify-center rounded-full border-2 border-white bg-slate-100">
-                                    <svg class="size-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="absolute left-0 flex size-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 dark:bg-white/[0.06]">
+                                    <svg class="size-3 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-sm text-slate-700">
+                                    <p class="text-sm text-slate-700 dark:text-slate-300">
                                         <span class="font-medium">{{ $event->actor?->name ?? 'Sistema' }}</span>
                                         {{ $event->event_type }}
                                     </p>
                                     @if($event->payload)
-                                        <p class="mt-0.5 text-xs text-slate-400">{{ json_encode($event->payload) }}</p>
+                                        <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{{ json_encode($event->payload) }}</p>
                                     @endif
-                                    <p class="mt-0.5 text-xs text-slate-400">{{ $event->created_at->format('d/m/Y H:i') }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{{ $event->created_at->format('d/m/Y H:i') }}</p>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-sm text-slate-400 italic">Nenhum evento registrado.</p>
+                            <p class="text-sm text-slate-400 dark:text-slate-500 italic">Nenhum evento registrado.</p>
                         @endforelse
                     </div>
                 </div>
@@ -251,8 +251,8 @@ $isAssignee = Auth::id() === $task->assigned_to;
         </div>
 
         <div class="lg:col-span-1">
-            <div class="rounded-xl bg-white border border-slate-200 p-6 shadow-sm sticky top-20">
-                <h2 class="text-sm font-semibold text-slate-900 mb-4">Ações</h2>
+            <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 p-6 shadow-sm sticky top-20">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Ações</h2>
 
                 <div class="space-y-2">
                     @if($isGestor)
@@ -294,7 +294,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="cancelada">
-                                <button type="submit" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors" onclick="return confirm('Tem certeza que deseja cancelar esta tarefa?')">
+                                <button type="submit" class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors" onclick="return confirm('Tem certeza que deseja cancelar esta tarefa?')">
                                     Cancelar tarefa
                                 </button>
                             </form>
@@ -346,7 +346,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                             <button
                                 type="button"
                                 onclick="document.getElementById('modal-change-request').classList.remove('hidden')"
-                                class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                class="w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
                             >
                                 Solicitar alteração
                             </button>
@@ -359,14 +359,14 @@ $isAssignee = Auth::id() === $task->assigned_to;
 </div>
 
 <div id="modal-assign" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h3 class="text-lg font-semibold text-slate-900 mb-4">Atribuir tarefa</h3>
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur p-6 shadow-xl">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Atribuir tarefa</h3>
         <form method="POST" action="{{ route('tasks.assign', $task) }}">
             @csrf
             @method('PATCH')
             <div class="mb-4">
-                <label for="assignee_id" class="block text-sm font-medium text-slate-700">Responsável</label>
-                <select name="assigned_to" id="assignee_id" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <label for="assignee_id" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Responsável</label>
+                <select name="assigned_to" id="assignee_id" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Selecione...</option>
                     @foreach($liderados ?? [] as $liderado)
                         <option value="{{ $liderado->id }}">{{ $liderado->name }}</option>
@@ -374,7 +374,7 @@ $isAssignee = Auth::id() === $task->assigned_to;
                 </select>
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')" class="rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]">
                     Cancelar
                 </button>
                 <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">
@@ -386,13 +386,13 @@ $isAssignee = Auth::id() === $task->assigned_to;
 </div>
 
 <div id="modal-reject" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h3 class="text-lg font-semibold text-slate-900 mb-4">Reprovar tarefa</h3>
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur p-6 shadow-xl">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Reprovar tarefa</h3>
         <form method="POST" action="{{ route('tasks.reject', $task) }}">
             @csrf
             <div class="mb-4">
-                <label for="rejection_category" class="block text-sm font-medium text-slate-700">Categoria</label>
-                <select name="rejection_category" id="rejection_category" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <label for="rejection_category" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Categoria</label>
+                <select name="rejection_category" id="rejection_category" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="">Selecione...</option>
                     @foreach($rejectionCategoryLabels as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
@@ -400,11 +400,11 @@ $isAssignee = Auth::id() === $task->assigned_to;
                 </select>
             </div>
             <div class="mb-4">
-                <label for="rejection_note" class="block text-sm font-medium text-slate-700">Motivo</label>
-                <textarea name="rejection_note" id="rejection_note" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Descreva o motivo da reprovação..."></textarea>
+                <label for="rejection_note" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Motivo</label>
+                <textarea name="rejection_note" id="rejection_note" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Descreva o motivo da reprovação..."></textarea>
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('modal-reject').classList.add('hidden')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <button type="button" onclick="document.getElementById('modal-reject').classList.add('hidden')" class="rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]">
                     Cancelar
                 </button>
                 <button type="submit" class="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-500">
@@ -416,20 +416,20 @@ $isAssignee = Auth::id() === $task->assigned_to;
 </div>
 
 <div id="modal-block" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h3 class="text-lg font-semibold text-slate-900 mb-4">Bloquear tarefa</h3>
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur p-6 shadow-xl">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Bloquear tarefa</h3>
         <form method="POST" action="{{ route('tasks.block', $task) }}">
             @csrf
             <div class="mb-4">
-                <label for="block_reason" class="block text-sm font-medium text-slate-700">Motivo</label>
-                <textarea name="block_reason" id="block_reason" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Descreva o motivo do bloqueio..."></textarea>
+                <label for="block_reason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Motivo</label>
+                <textarea name="block_reason" id="block_reason" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Descreva o motivo do bloqueio..."></textarea>
             </div>
             <div class="mb-4">
-                <label for="blocked_on" class="block text-sm font-medium text-slate-700">De quem depende</label>
-                <input type="text" name="blocked_on" id="blocked_on" class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Nome da pessoa ou equipe" />
+                <label for="blocked_on" class="block text-sm font-medium text-slate-700 dark:text-slate-300">De quem depende</label>
+                <input type="text" name="blocked_on" id="blocked_on" class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Nome da pessoa ou equipe" />
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('modal-block').classList.add('hidden')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <button type="button" onclick="document.getElementById('modal-block').classList.add('hidden')" class="rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]">
                     Cancelar
                 </button>
                 <button type="submit" class="rounded-lg bg-yellow-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-yellow-500">
@@ -441,32 +441,32 @@ $isAssignee = Auth::id() === $task->assigned_to;
 </div>
 
 <div id="modal-change-request" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h3 class="text-lg font-semibold text-slate-900 mb-4">Solicitar alteração</h3>
+    <div class="w-full max-w-md rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur p-6 shadow-xl">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Solicitar alteração</h3>
         <form method="POST" action="{{ route('tasks.request-change', $task) }}">
             @csrf
             <div class="mb-4">
-                <label for="change_field" class="block text-sm font-medium text-slate-700">Campo</label>
-                <select name="field" id="change_field" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <label for="change_field" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Campo</label>
+                <select name="field" id="change_field" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none">
                     <option value="due_at">Prazo</option>
                     <option value="priority">Prioridade</option>
                 </select>
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-slate-700">Valor atual</label>
-                <input type="text" readonly id="current_value_display" class="mt-1 block w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500" />
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Valor atual</label>
+                <input type="text" readonly id="current_value_display" class="mt-1 block w-full rounded-lg border border-slate-200 bg-slate-50 dark:bg-white/[0.04] px-4 py-2.5 text-sm text-slate-500 dark:text-slate-400" />
                 <input type="hidden" name="current_value" id="current_value_hidden" />
             </div>
             <div class="mb-4">
-                <label for="requested_value" class="block text-sm font-medium text-slate-700">Valor solicitado</label>
-                <input type="text" name="requested_value" id="requested_value" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Novo valor..." />
+                <label for="requested_value" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Valor solicitado</label>
+                <input type="text" name="requested_value" id="requested_value" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Novo valor..." />
             </div>
             <div class="mb-4">
-                <label for="justification" class="block text-sm font-medium text-slate-700">Justificativa</label>
-                <textarea name="justification" id="justification" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Justifique a alteração..."></textarea>
+                <label for="justification" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Justificativa</label>
+                <textarea name="justification" id="justification" rows="3" required class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none" placeholder="Justifique a alteração..."></textarea>
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('modal-change-request').classList.add('hidden')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <button type="button" onclick="document.getElementById('modal-change-request').classList.add('hidden')" class="rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]">
                     Cancelar
                 </button>
                 <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">
