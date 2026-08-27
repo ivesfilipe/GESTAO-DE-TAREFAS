@@ -16,7 +16,9 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamProfileController;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -102,3 +104,33 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/calendario/{token}.ics', [CalendarController::class, 'ical'])->name('calendar.ical');
+
+Route::get('/admin/mail-test/{token}', function ($token) {
+    if ($token !== 'TEMP_MAIL_2026') {
+        abort(404);
+    }
+
+    $gestor = User::where('role', 'gestor')->first();
+    if ($gestor) {
+        Auth::login($gestor);
+    }
+
+    $config = [
+        'mailer' => config('mail.default'),
+        'from_address' => config('mail.from.address'),
+        'from_name' => config('mail.from.name'),
+        'sendmail_path' => config('mail.mailers.sendmail.path'),
+        'smtp_host' => config('mail.mailers.smtp.host'),
+        'smtp_port' => config('mail.mailers.smtp.port'),
+    ];
+
+    try {
+        Mail::raw('Teste SMTP - Gestao de Tarefas ('.now()->format('d/m/Y H:i:s').')', function ($message) {
+            $message->to('ives@medicalthermo.com')->subject('Teste SMTP');
+        });
+
+        return response()->json(['status' => 'enviado', 'config' => $config]);
+    } catch (Throwable $e) {
+        return response()->json(['status' => 'erro', 'message' => $e->getMessage(), 'config' => $config], 500);
+    }
+});

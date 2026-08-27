@@ -51,8 +51,23 @@ else
   echo "ZDR ja ativado anteriormente."
 fi
 
+echo "== Configurando envio de e-mail =="
+if ! grep -q "^MAIL_MAILER=" .env || grep -q "^MAIL_MAILER=log" .env || [ -z "$(grep '^MAIL_MAILER=' .env | cut -d= -f2 | tr -d '[:space:]')" ]; then
+  sed -i '/^MAIL_MAILER=/d' .env
+  sed -i '/^MAIL_FROM_ADDRESS=/d' .env
+  sed -i '/^MAIL_FROM_NAME=/d' .env
+  {
+    echo "MAIL_MAILER=sendmail"
+    echo "MAIL_FROM_ADDRESS=ives@medicalthermo.com"
+    echo "MAIL_FROM_NAME=\"Gestao de Tarefas\""
+  } >> .env
+  echo "Configuracao de e-mail ajustada para sendmail."
+else
+  echo "Configuracao de e-mail ja existe."
+fi
+
 echo "== Testando SMTP (one-time) =="
-SMTP_FLAG="storage/app/.smtp_test_done_v2"
+SMTP_FLAG="storage/app/.smtp_test_done_v3"
 if [ ! -f "$SMTP_FLAG" ]; then
   $PHP artisan tinker --execute="try { Illuminate\Support\Facades\Mail::raw('Teste SMTP - Gestao de Tarefas', function (\$message) { \$message->to('ives@medicalthermo.com')->subject('Teste SMTP'); }); echo 'E-mail de teste enviado para ives@medicalthermo.com\n'; } catch (Throwable \$e) { echo 'ERRO SMTP: '.\$e->getMessage().'\n'; }" > storage/logs/smtp-test.log 2>&1 || true
   touch "$SMTP_FLAG"
