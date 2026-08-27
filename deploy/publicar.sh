@@ -37,6 +37,30 @@ $PHP $COMPOSER_BIN install --no-dev --optimize-autoloader --ignore-platform-req=
 echo "== Rodando migrations =="
 $PHP artisan migrate --force
 
+echo "== Ativacao do ZDR (one-time) =="
+ZDR_FLAG="storage/app/.zdr_activated"
+if [ ! -f "$ZDR_FLAG" ]; then
+  if grep -q "^GROQ_ZDR_CONFIRMED=" .env; then
+    sed -i 's/^GROQ_ZDR_CONFIRMED=.*/GROQ_ZDR_CONFIRMED=true/' .env
+  else
+    echo "GROQ_ZDR_CONFIRMED=true" >> .env
+  fi
+  touch "$ZDR_FLAG"
+  echo "GROQ_ZDR_CONFIRMED=true aplicado no .env de producao."
+else
+  echo "ZDR ja ativado anteriormente."
+fi
+
+echo "== Testando SMTP (one-time) =="
+SMTP_FLAG="storage/app/.smtp_test_done"
+if [ ! -f "$SMTP_FLAG" ]; then
+  $PHP artisan tinker --execute="try { Illuminate\Support\Facades\Mail::raw('Teste SMTP - Gestao de Tarefas', function (\$message) { \$message->to('gestor@medicalthermo.com')->subject('Teste SMTP'); }); echo 'E-mail de teste enviado para gestor@medicalthermo.com\n'; } catch (Throwable \$e) { echo 'ERRO SMTP: '.\$e->getMessage().'\n'; }" > storage/logs/smtp-test.log 2>&1 || true
+  touch "$SMTP_FLAG"
+  echo "Teste SMTP realizado. Verifique a caixa de entrada de gestor@medicalthermo.com e o arquivo storage/logs/smtp-test.log."
+else
+  echo "Teste SMTP ja foi realizado."
+fi
+
 echo "== Atualizando caches =="
 $PHP artisan config:cache
 $PHP artisan route:cache
