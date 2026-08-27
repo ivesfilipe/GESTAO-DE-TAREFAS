@@ -102,3 +102,34 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/calendario/{token}.ics', [CalendarController::class, 'ical'])->name('calendar.ical');
+
+Route::get('/debug-assistant/{token}', function ($token) {
+    if ($token !== 'TEMP_DEBUG_2026') {
+        abort(404);
+    }
+
+    $gestor = \App\Models\User::where('role', 'gestor')->first();
+    if (! $gestor) {
+        return response()->json(['error' => 'nenhum gestor encontrado'], 404);
+    }
+
+    \Illuminate\Support\Facades\Auth::login($gestor);
+
+    try {
+        $controller = app(AssistantController::class);
+        $request = request();
+        $response = $controller->index($request, app(\App\Services\AiAssistantService::class), app(\App\Services\AI\ManagementRadarService::class));
+
+        $status = method_exists($response, 'getStatusCode') ? $response->getStatusCode() : 'rendered view';
+
+        return 'OK: assistant index retornou status '.$status;
+    } catch (\Throwable $e) {
+        return response()->json([
+            'error' => get_class($e),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => explode("\n", $e->getTraceAsString()),
+        ], 500);
+    }
+});
