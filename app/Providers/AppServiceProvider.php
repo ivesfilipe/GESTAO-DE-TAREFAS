@@ -17,6 +17,7 @@ use App\Events\TarefaCriada;
 use App\Events\TarefaDesbloqueada;
 use App\Events\TarefaReprovada;
 use App\Listeners\DispatchWebhooksListener;
+use App\Listeners\EnviarEmailDeAtribuicaoListener;
 use App\Listeners\GravarHistoricoListener;
 use App\Listeners\NotificarPartesInteressadasListener;
 use App\Models\Task;
@@ -54,6 +55,9 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(TarefaCriada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaCriada']);
         Event::listen(TarefaAtribuida::class, [NotificarPartesInteressadasListener::class, 'handleTarefaAtribuida']);
+
+        Event::listen(TarefaCriada::class, [EnviarEmailDeAtribuicaoListener::class, 'handleTarefaCriada']);
+        Event::listen(TarefaAtribuida::class, [EnviarEmailDeAtribuicaoListener::class, 'handleTarefaAtribuida']);
         Event::listen(TarefaAprovada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaAprovada']);
         Event::listen(TarefaReprovada::class, [NotificarPartesInteressadasListener::class, 'handleTarefaReprovada']);
         Event::listen(ComentarioAdicionado::class, [NotificarPartesInteressadasListener::class, 'handleComentarioAdicionado']);
