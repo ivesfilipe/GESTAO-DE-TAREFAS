@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gestao-tarefas-v1';
+const CACHE_VERSION = 'gestao-tarefas-v2';
 const OFFLINE_URL = '/offline.html';
 
 const ESSENTIAL_URLS = [OFFLINE_URL, '/manifest.webmanifest'];
@@ -25,6 +25,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
+    if (url.pathname.startsWith('/livewire/')) return;
     if (url.pathname.startsWith('/build/') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
         event.respondWith(cacheFirst(request));
         return;
