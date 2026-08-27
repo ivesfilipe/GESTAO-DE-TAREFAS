@@ -2,6 +2,7 @@
 
 namespace App\Services\AI;
 
+use App\Models\CompanyKnowledgeChunk;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\AI\Prompts\ManagementPrompts;
@@ -16,6 +17,8 @@ class CopilotService
 
     private TeamKnowledgeService $knowledge;
 
+    private CompanyKnowledgeService $company;
+
     private ZeroDataRetention $zdr;
 
     private int $maxIterations;
@@ -25,45 +28,50 @@ class CopilotService
         ?TeamPerformanceService $performance = null,
         ?TeamKnowledgeService $knowledge = null,
         ?ZeroDataRetention $zdr = null,
+        ?CompanyKnowledgeService $company = null,
     ) {
         $this->ai = $ai ?? app(AIService::class);
         $this->performance = $performance ?? new TeamPerformanceService;
         $this->knowledge = $knowledge ?? new TeamKnowledgeService;
         $this->zdr = $zdr ?? new ZeroDataRetention;
+        $this->company = $company ?? new CompanyKnowledgeService;
         $this->maxIterations = (int) config('ai.max_tool_iterations', 3);
     }
 
     /**
      * Responde uma pergunta do gestor usando tools para buscar dados reais.
      *
+     * @param  list<int>  $documentIds
      * @return array<string, mixed>
      */
-    public function answer(User $gestor, string $question): array
+    public function answer(User $gestor, string $question, array $documentIds = []): array
     {
+        if ($this->ai->isMock()) {
+            return $this->answerFromTools($gestor, $question, $documentIds);
+        }
+
+        $questionWithDocuments = $question.$this->documentContext($documentIds);
         $messages = [
             ['role' => 'system', 'content' => ManagementPrompts::copilot()],
-            ['role' => 'user', 'content' => $question],
+            ['role' => 'user', 'content' => $questionWithDocuments],
         ];
 
         $iteration = 0;
+        $collectedTasks = [];
 
         while ($iteration < $this->maxIterations) {
             $response = $this->ai->ask(
                 system: $messages[0]['content'],
-                user: $this->messagesToString($messages),
+                user: $questionWithDocuments,
                 temperature: 0.3,
                 maxTokens: 900,
                 entities: $this->entitiesForContext(),
                 tools: $this->toolDefinitions(),
+                messages: $messages,
             );
 
             if ($response->toolCalls === []) {
-                return [
-                    'answer' => $response->content,
-                    'provider' => $this->ai->provider()->name(),
-                    'mock' => $this->ai->isMock(),
-                    'iterations' => $iteration,
-                ];
+                return $this->payload($response->content, $collectedTasks, $question, $iteration);
             }
 
             $messages[] = [
@@ -74,6 +82,7 @@ class CopilotService
 
             foreach ($response->toolCalls as $call) {
                 $result = $this->executeTool($gestor, $call['name'], $call['arguments'] ?? []);
+                $collectedTasks = array_merge($collectedTasks, $this->extractTasksFromToolResult($result));
                 $messages[] = [
                     'role' => 'tool',
                     'tool_call_id' => $call['id'] ?? '',
@@ -85,12 +94,12 @@ class CopilotService
             $iteration++;
         }
 
-        return [
-            'answer' => 'Não consegui obter todas as informações necessárias. Tente reformular a pergunta.',
-            'provider' => $this->ai->provider()->name(),
-            'mock' => $this->ai->isMock(),
-            'iterations' => $iteration,
-        ];
+        return $this->payload(
+            'Não consegui obter todas as informações necessárias. Tente reformular a pergunta.',
+            $collectedTasks,
+            $question,
+            $iteration,
+        );
     }
 
     /**
@@ -112,7 +121,7 @@ PROMPT;
 
         $response = $this->ai->ask(
             system: $system,
-            user: $context,
+            user: "Pedido: gerar cobrança.\n\n{$context}",
             temperature: 0.4,
             maxTokens: 500,
             entities: $assignee ? $this->zdr->entitiesFromUser($assignee) : [],
@@ -213,6 +222,36 @@ PROMPT;
                     ],
                 ],
             ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'search_tasks',
+                    'description' => 'Busca tarefas por título ou descrição.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'query' => ['type' => 'string', 'description' => 'Trecho do título ou descrição'],
+                            'limit' => ['type' => 'integer', 'description' => 'Máximo de resultados'],
+                        ],
+                        'required' => ['query'],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'search_company_knowledge',
+                    'description' => 'Busca na base de conhecimento da empresa (documentos enviados no chat).',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'query' => ['type' => 'string', 'description' => 'Tema da busca'],
+                            'limit' => ['type' => 'integer', 'description' => 'Máximo de chunks'],
+                        ],
+                        'required' => ['query'],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -233,6 +272,11 @@ PROMPT;
                     $arguments['member_name'] ?? '',
                     $arguments['query'] ?? '',
                     $arguments['limit'] ?? 3,
+                ),
+                'search_tasks' => $this->toolSearchTasks($arguments['query'] ?? '', $arguments['limit'] ?? 10),
+                'search_company_knowledge' => $this->toolSearchCompanyKnowledge(
+                    $arguments['query'] ?? '',
+                    $arguments['limit'] ?? 5,
                 ),
                 default => ['error' => 'Tool desconhecida'],
             };
@@ -350,6 +394,207 @@ PROMPT;
                 'document_name' => $chunk->document?->name,
                 'content' => mb_substr($chunk->content, 0, 300),
             ])->all(),
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function toolSearchTasks(string $query, int $limit): array
+    {
+        $query = trim($query);
+
+        if ($query === '') {
+            return [];
+        }
+
+        return Task::query()
+            ->with('assignee')
+            ->whereNotIn('status', ['concluida', 'cancelada'])
+            ->where(function ($builder) use ($query) {
+                $builder->where('title', 'like', "%{$query}%")
+                    ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->limit($limit)
+            ->get()
+            ->map(fn (Task $task) => $this->presentTask($task))
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function toolSearchCompanyKnowledge(string $query, int $limit): array
+    {
+        $chunks = $this->company->retrieve($query, $limit);
+
+        return [
+            'results' => $chunks->map(fn (CompanyKnowledgeChunk $chunk) => [
+                'document_name' => $chunk->document?->name,
+                'content' => mb_substr($chunk->content, 0, 300),
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @param  list<int>  $documentIds
+     * @return array<string, mixed>
+     */
+    private function answerFromTools(User $gestor, string $question, array $documentIds = []): array
+    {
+        $q = mb_strtolower($question);
+        $tasks = [];
+        $lines = [];
+
+        if (str_contains($q, 'atrasad')) {
+            $tasks = $this->hydrateTasks($this->toolOverdueTasks(15));
+            $lines[] = $tasks === [] ? 'Não há tarefas atrasadas.' : 'Tarefas atrasadas:';
+        } elseif (str_contains($q, 'bloque')) {
+            $tasks = $this->hydrateTasks($this->toolBlockedTasks(15));
+            $lines[] = $tasks === [] ? 'Não há tarefas bloqueadas.' : 'Tarefas bloqueadas:';
+        } elseif (str_contains($q, 'aprov')) {
+            $tasks = $this->hydrateTasks($this->toolAwaitingApproval(15));
+            $lines[] = $tasks === [] ? 'Nenhuma tarefa aguardando aprovação.' : 'Tarefas aguardando aprovação:';
+        } elseif (preg_match('/hoje|vencem hoje|vence hoje/u', $q)) {
+            $tasks = $this->hydrateTasks($this->toolTasksDueToday(15));
+            $lines[] = $tasks === [] ? 'Nenhuma tarefa vence hoje.' : 'Tarefas que vencem hoje:';
+        } else {
+            $taskQuery = preg_replace('/^(?:abre|abrir|mostra|mostre)(?:\s+a)?\s+tarefa\s+/iu', '', trim($question)) ?? $question;
+            $tasks = $this->toolSearchTasks($taskQuery, 10);
+            if ($tasks !== []) {
+                $lines[] = 'Encontrei estas tarefas:';
+            } else {
+                $overdue = $this->hydrateTasks($this->toolOverdueTasks(5));
+                $today = $this->hydrateTasks($this->toolTasksDueToday(5));
+                $tasks = array_values(array_merge($overdue, $today));
+                $lines[] = 'Resumo rápido do time:';
+                if ($tasks === []) {
+                    $lines[] = 'Nenhuma tarefa atrasada ou vencendo hoje.';
+                }
+            }
+        }
+
+        foreach ($tasks as $task) {
+            $due = $task['due_at'] ? " · prazo {$task['due_at']}" : '';
+            $who = $task['assignee'] ? " · {$task['assignee']}" : '';
+            $lines[] = "- #{$task['id']} {$task['title']} ({$task['status']}{$who}{$due})";
+        }
+
+        $knowledge = $this->company->retrieveByDocuments($documentIds);
+        if ($knowledge->isEmpty()) {
+            $knowledge = $this->company->retrieve($question, 3);
+        }
+
+        if ($knowledge->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = 'Com base nos documentos da empresa:';
+            foreach ($knowledge as $chunk) {
+                $lines[] = mb_substr($chunk->content, 0, 240);
+            }
+        }
+
+        $answer = trim(implode("\n", $lines));
+
+        return $this->payload(
+            $answer !== '' ? $answer : 'Não encontrei informações para essa pergunta.',
+            $tasks,
+            $question,
+            0,
+        );
+    }
+
+    /**
+     * @param  list<int>  $documentIds
+     */
+    private function documentContext(array $documentIds): string
+    {
+        $chunks = $this->company->retrieveByDocuments($documentIds, 3);
+
+        if ($chunks->isEmpty()) {
+            return '';
+        }
+
+        $context = $chunks
+            ->map(fn (CompanyKnowledgeChunk $chunk) => "Documento: {$chunk->document?->name}\n".mb_substr($chunk->content, 0, 500))
+            ->implode("\n\n");
+
+        return "\n\nContexto dos arquivos anexados nesta conversa:\n{$context}";
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $raw
+     * @return list<array<string, mixed>>
+     */
+    private function hydrateTasks(array $raw): array
+    {
+        $ids = collect($raw)->pluck('id')->filter()->all();
+
+        if ($ids === []) {
+            return [];
+        }
+
+        return Task::with('assignee')
+            ->whereIn('id', $ids)
+            ->get()
+            ->map(fn (Task $task) => $this->presentTask($task))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentTask(Task $task): array
+    {
+        return [
+            'id' => $task->id,
+            'title' => $task->title,
+            'status' => $task->status,
+            'priority' => $task->priority,
+            'due_at' => $task->due_at?->format('d/m/Y H:i'),
+            'assignee' => $task->assignee?->name,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>|list<array<string, mixed>>  $result
+     * @return list<array<string, mixed>>
+     */
+    private function extractTasksFromToolResult(array $result): array
+    {
+        if ($result === [] || isset($result['error'])) {
+            return [];
+        }
+
+        if (isset($result['id'], $result['title'])) {
+            return $this->hydrateTasks([$result]);
+        }
+
+        $items = $result['tasks'] ?? $result['results'] ?? $result;
+
+        if (! array_is_list($items)) {
+            return [];
+        }
+
+        return $this->hydrateTasks(array_filter($items, fn ($item) => is_array($item) && isset($item['id'])));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $tasks
+     * @return array<string, mixed>
+     */
+    private function payload(string $answer, array $tasks, string $question, int $iteration): array
+    {
+        $unique = collect($tasks)->unique('id')->values()->all();
+        $wantsOpen = (bool) preg_match('/\b(abrir|abre|mostra|mostre)\b/u', mb_strtolower($question));
+
+        return [
+            'answer' => $answer,
+            'tasks' => $unique,
+            'open_task_id' => ($wantsOpen && count($unique) === 1) ? $unique[0]['id'] : null,
+            'provider' => $this->ai->provider()->name(),
+            'mock' => $this->ai->isMock(),
+            'iterations' => $iteration,
         ];
     }
 

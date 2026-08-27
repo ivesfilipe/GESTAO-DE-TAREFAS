@@ -37,7 +37,10 @@ class AIService
      *
      * @param  array<string, mixed>  $entities  Entidades para anonimização (User, Task, etc.)
      */
-    public function ask(string $system, string $user, ?float $temperature = null, ?int $maxTokens = null, array $entities = [], ?array $responseFormat = null, array $tools = []): AIResponse
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     */
+    public function ask(string $system, string $user, ?float $temperature = null, ?int $maxTokens = null, array $entities = [], ?array $responseFormat = null, array $tools = [], array $messages = []): AIResponse
     {
         if (! $this->zdr->isConfirmed()) {
             $combined = $system.' '.$user;
@@ -47,6 +50,13 @@ class AIService
 
             $system = $this->zdr->anonymize($system, $entities);
             $user = $this->zdr->anonymize($user, $entities);
+            $messages = array_map(function (array $message) use ($entities) {
+                if (isset($message['content']) && is_string($message['content'])) {
+                    $message['content'] = $this->zdr->anonymize($message['content'], $entities);
+                }
+
+                return $message;
+            }, $messages);
         }
 
         $request = new AIRequest(
@@ -57,6 +67,7 @@ class AIService
             metadata: ['provider' => $this->provider->name()],
             responseFormat: $responseFormat,
             tools: $tools,
+            messages: $messages,
         );
 
         $startedAt = now();

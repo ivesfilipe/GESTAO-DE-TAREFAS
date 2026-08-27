@@ -100,3 +100,95 @@ test('copiloto carrega mesmo com tarefa sem responsavel e liderado ocioso', func
         ->assertOk()
         ->assertSee('Oportunidades de delegação');
 });
+
+test('pergunta inocente no mock nao vira rascunho de cobranca', function () {
+    $gestor = User::factory()->gestor()->create();
+
+    $response = $this->actingAs($gestor)->postJson('/assistente/perguntar', [
+        'question' => 'Qual o maior risco do time hoje?',
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('ok', true)
+        ->assertJsonMissing(['answer' => 'Rascunho de cobrança']);
+
+    expect($response->json('answer'))->not->toContain('Rascunho de cobrança');
+});
+
+test('pergunta por tarefas atrasadas devolve tasks com id', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->vencida()->create([
+        'created_by' => $gestor->id,
+        'title' => 'Orçamento de preventiva',
+    ]);
+
+    $response = $this->actingAs($gestor)->postJson('/assistente/perguntar', [
+        'question' => 'Quais tarefas estão atrasadas?',
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('ok', true);
+
+    $ids = collect($response->json('tasks'))->pluck('id');
+    expect($ids)->toContain($task->id);
+});
+
+test('abrir tarefa unica preenche open_task_id', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->create([
+        'created_by' => $gestor->id,
+        'title' => 'Posicao do orcamento XYZ',
+    ]);
+
+    $response = $this->actingAs($gestor)->postJson('/assistente/perguntar', [
+        'question' => 'Abre a tarefa Posicao do orcamento XYZ',
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('open_task_id', $task->id);
+});
+
+test('gestor ve resumo da tarefa e liderado so a propria', function () {
+    $gestor = User::factory()->gestor()->create();
+    $liderado = User::factory()->liderado()->create();
+    $outro = User::factory()->liderado()->create();
+    $task = Task::factory()->withAssignee($liderado)->create(['created_by' => $gestor->id]);
+
+    $this->actingAs($gestor)
+        ->getJson('/tarefas/'.$task->id.'/resumo')
+        ->assertOk()
+        ->assertJsonPath('id', $task->id)
+        ->assertJsonPath('title', $task->title);
+
+    $this->actingAs($liderado)
+        ->getJson('/tarefas/'.$task->id.'/resumo')
+        ->assertOk();
+
+    $this->actingAs($outro)
+        ->getJson('/tarefas/'.$task->id.'/resumo')
+        ->assertForbidden();
+});
+
+test('resumo de tarefa cancelada retorna 404', function () {
+    $gestor = User::factory()->gestor()->create();
+    $task = Task::factory()->create([
+        'created_by' => $gestor->id,
+        'status' => 'cancelada',
+    ]);
+
+    $this->actingAs($gestor)
+        ->getJson('/tarefas/'.$task->id.'/resumo')
+        ->assertNotFound();
+});
+
+test('painel exibe atalho do copiloto', function () {
+    $gestor = User::factory()->gestor()->create();
+
+    $this->actingAs($gestor)
+        ->get('/painel')
+        ->assertOk()
+        ->assertSee('Pergunte ao Copiloto')
+        ->assertSee('Abrir chat');
+});

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\AI\AIService;
+use App\Services\AI\CompanyKnowledgeService;
 use App\Services\AI\CopilotService;
 use App\Services\AI\ManagementRadarService;
 use App\Services\AiAssistantService;
@@ -40,15 +41,23 @@ class AssistantController extends Controller
         Gate::authorize('create-task');
 
         $data = $request->validate([
-            'question' => ['required', 'string', 'max:1000'],
+            'question' => ['required', 'string', 'max:2000'],
+            'document_ids' => ['sometimes', 'array'],
+            'document_ids.*' => ['integer'],
         ]);
 
         try {
-            $result = $copilot->answer($request->user(), $data['question']);
+            $result = $copilot->answer(
+                $request->user(),
+                $data['question'],
+                $data['document_ids'] ?? [],
+            );
 
             return response()->json([
                 'ok' => true,
                 'answer' => $result['answer'],
+                'tasks' => $result['tasks'] ?? [],
+                'open_task_id' => $result['open_task_id'] ?? null,
                 'provider' => $result['provider'],
                 'mock' => $result['mock'],
             ]);
@@ -56,10 +65,31 @@ class AssistantController extends Controller
             return response()->json([
                 'ok' => false,
                 'answer' => 'IA temporariamente indisponível. Tente novamente em instantes.',
+                'tasks' => [],
+                'open_task_id' => null,
                 'provider' => app(AIService::class)->provider()->name(),
                 'mock' => app(AIService::class)->isMock(),
             ], 200);
         }
+    }
+
+    public function storeAttachment(Request $request, CompanyKnowledgeService $company)
+    {
+        Gate::authorize('create-task');
+
+        $request->validate([
+            'file' => ['required', 'file', 'max:10240', 'mimes:pdf,docx,xlsx,csv,txt,md,jpg,jpeg,png,webp'],
+        ]);
+
+        $document = $company->storeDocument($request->user(), $request->file('file'));
+
+        return response()->json([
+            'ok' => $document->processing_status !== 'erro',
+            'document_id' => $document->id,
+            'filename' => $document->name,
+            'status' => $document->processing_status,
+            'preview' => mb_substr((string) $document->extracted_text, 0, 240),
+        ]);
     }
 
     public function suggestCollection(Request $request, CopilotService $copilot)

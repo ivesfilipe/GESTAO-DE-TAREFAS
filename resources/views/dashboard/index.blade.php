@@ -89,6 +89,25 @@
         </a>
     </div>
 
+    <div class="mb-8 rounded-2xl bg-white/85 dark:bg-slate-900/60 backdrop-blur border border-slate-200/60 dark:border-white/10 shadow-sm overflow-hidden animate-entrance">
+        <div class="px-6 py-4 border-b border-slate-200/60 dark:border-white/5 flex items-center justify-between gap-3">
+            <div>
+                <h2 class="text-[15px] font-semibold text-slate-900 dark:text-white">Pergunte ao Copiloto</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Atalho rápido · anexos só no chat completo</p>
+            </div>
+            <a href="{{ route('assistant.index') }}" class="text-xs font-semibold text-brand-600 hover:text-brand-500 whitespace-nowrap">Abrir chat</a>
+        </div>
+        <div class="p-4">
+            <form id="dashboard-copilot-form" class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="dashboard-copilot-question"
+                       class="flex-1 rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                       placeholder="Ex.: quais tarefas estão atrasadas?" maxlength="2000"/>
+                <button type="submit" class="rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">Perguntar</button>
+            </form>
+            <p id="dashboard-copilot-answer" class="hidden mt-3 text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap"></p>
+        </div>
+    </div>
+
     <div class="rounded-2xl bg-white/85 dark:bg-slate-900/60 backdrop-blur border border-slate-200/60 dark:border-white/10 shadow-sm overflow-hidden animate-entrance stagger-5">
         <div class="border-b border-slate-200/60 dark:border-white/5 px-6 py-4 bg-gradient-to-r from-slate-50/80 via-white to-white dark:from-white/[0.04] dark:via-white/[0.02] dark:to-transparent">
             <div class="flex items-center gap-3">
@@ -180,3 +199,25 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const form = document.getElementById('dashboard-copilot-form');
+        const input = document.getElementById('dashboard-copilot-question');
+        const answer = document.getElementById('dashboard-copilot-answer');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const question = input.value.trim();
+            if (!question) return;
+            answer.classList.remove('hidden');
+            answer.textContent = '...';
+            window.axios.post('/assistente/perguntar', { question })
+                .then(({ data }) => { answer.textContent = data.answer; })
+                .catch(() => { answer.textContent = 'Não foi possível obter resposta.'; });
+        });
+    })();
+</script>
+@endpush

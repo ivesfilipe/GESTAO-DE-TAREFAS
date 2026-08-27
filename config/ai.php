@@ -53,6 +53,7 @@ return [
             'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
             'api_key' => env('GROQ_API_KEY'),
             'model' => env('GROQ_MODEL', 'openai/gpt-oss-120b'),
+            'vision_model' => env('GROQ_VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
             'timeout' => env('GROQ_TIMEOUT', 30),
             'max_tokens' => env('GROQ_MAX_TOKENS', 1024),
             'temperature' => env('GROQ_TEMPERATURE', 0.5),

@@ -49,10 +49,12 @@ abstract class OpenAICompatibleProvider implements AIProviderInterface
     {
         $payload = [
             'model' => $this->model,
-            'messages' => [
-                ['role' => 'system', 'content' => $request->system],
-                ['role' => 'user', 'content' => $request->user],
-            ],
+            'messages' => $request->messages !== []
+                ? $request->messages
+                : [
+                    ['role' => 'system', 'content' => $request->system],
+                    ['role' => 'user', 'content' => $request->user],
+                ],
         ];
 
         if ($request->maxTokens !== null) {

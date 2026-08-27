@@ -32,9 +32,10 @@ class MockProvider implements AIProviderInterface
 
     private function generateContent(AIRequest $request): string
     {
+        $lowerUser = mb_strtolower($request->user);
         $lower = mb_strtolower($request->user.' '.$request->system);
 
-        if (str_contains($lower, 'cobrança') || str_contains($lower, 'cobranca') || str_contains($lower, 'mensagem de cobrança')) {
+        if (str_contains($lowerUser, 'cobrança') || str_contains($lowerUser, 'cobranca') || str_contains($lowerUser, 'mensagem de cobrança')) {
             $taskTitle = $this->extractTaskTitle($request->user.' '.$request->system);
 
             return "Rascunho de cobrança (modo simulação):\n\nPreciso de uma posição sobre: {$taskTitle}\n\nO prazo registrado está próximo e ainda não há atualização conclusiva na tarefa.\n\nMe retorne com:\n- status atual;\n- eventual pendência;\n- previsão de conclusão.\n\nEste rascunho não foi enviado automaticamente.";

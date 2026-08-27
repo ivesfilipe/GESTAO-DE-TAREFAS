@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use RuntimeException;
 use Smalot\PdfParser\Parser;
 
@@ -23,9 +24,10 @@ class DocumentTextExtractor
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
         return match ($extension) {
-            'txt', 'md' => $this->extractText($path),
+            'txt', 'md', 'csv' => $this->extractText($path),
             'pdf' => $this->extractPdf($path),
             'docx' => $this->extractDocx($path),
+            'xlsx' => $this->extractXlsx($path),
             default => throw new RuntimeException("Extensão não suportada: {$extension}"),
         };
     }
@@ -79,6 +81,32 @@ class DocumentTextExtractor
         $text = strip_tags(str_replace(['<w:p>', '<w:br/>', '<w:t/>'], ["\n\n", "\n", ' '], $xml));
 
         return $this->clean($text);
+    }
+
+    private function extractXlsx(string $path): string
+    {
+        if (! class_exists(IOFactory::class)) {
+            throw new RuntimeException('Extrator de Excel não disponível. Instale phpoffice/phpspreadsheet.');
+        }
+
+        $spreadsheet = IOFactory::load(Storage::path($path));
+        $parts = [];
+
+        foreach ($spreadsheet->getAllSheets() as $sheet) {
+            $parts[] = '[Aba: '.$sheet->getTitle().']';
+            foreach ($sheet->toArray(null, true, true, false) as $row) {
+                $line = implode("\t", array_map(fn ($cell) => is_scalar($cell) ? (string) $cell : '', $row));
+                if (trim($line) !== '') {
+                    $parts[] = $line;
+                }
+            }
+        }
+
+        $spreadsheet->disconnectWorksheets();
+
+        $text = $this->clean(implode("\n", $parts));
+
+        return mb_substr($text, 0, 50000);
     }
 
     private function clean(string $text): string

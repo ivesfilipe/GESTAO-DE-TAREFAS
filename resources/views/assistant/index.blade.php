@@ -52,6 +52,9 @@
         </div>
     </div>
 
+    <details class="mb-6 rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm">
+        <summary class="cursor-pointer px-5 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Radar, cobranças e delegação</summary>
+        <div class="px-5 pb-5">
     <div class="grid lg:grid-cols-3 gap-6 mb-6">
         <div class="lg:col-span-2 rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
@@ -164,37 +167,55 @@
         </div>
     </div>
 
-    <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden mb-6">
-        <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center gap-2">
-            <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
-            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Pergunte ao Copiloto</h2>
         </div>
-        <div class="p-5">
-            <div id="chat-messages" class="mb-4 max-h-80 overflow-y-auto space-y-3">
+    </details>
+
+    <div class="grid lg:grid-cols-5 gap-4 mb-6">
+        <div class="lg:col-span-3 rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[28rem]">
+            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center gap-2">
+                <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">IA</span>
+                <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Pergunte ao Copiloto</h2>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 p-5">
                 <div class="rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-100 dark:border-white/5 p-3 text-sm text-slate-600 dark:text-slate-400">
-                    Olá! Sou o Copiloto do Gestor. Posso ajudar com análise de risco, sugestões de delegação e visão da equipe. O que deseja saber?
+                    Olá! Sou o Copiloto do Gestor. Pergunte sobre tarefas, anexe PDF, Word, Excel ou imagem, e clique nos cards para abrir a tarefa ao lado.
                 </div>
             </div>
-
-            <div class="flex flex-wrap gap-2 mb-3">
-                @foreach(['Quais tarefas estão atrasadas?', 'Quem está com mais carga?', 'Sugira cobrança para tarefas críticas', 'Resuma o radar do time'] as $example)
-                    <button type="button" class="chat-example rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-200 transition-colors">
-                        {{ $example }}
+            <div class="p-4 border-t border-slate-100 dark:border-white/5">
+                <div id="chat-attachments" class="hidden mb-2 text-xs text-slate-500 dark:text-slate-400"></div>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @foreach(['Quais tarefas estão atrasadas?', 'Quem está com mais carga?', 'Resuma o radar do time'] as $example)
+                        <button type="button" class="chat-example rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-200 transition-colors">
+                            {{ $example }}
+                        </button>
+                    @endforeach
+                </div>
+                <form id="chat-form" class="flex gap-2 items-end">
+                    @csrf
+                    <label class="shrink-0 cursor-pointer rounded-lg border border-slate-300 dark:border-white/10 p-2.5 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/[0.04]" title="Anexar arquivo">
+                        <input type="file" id="chat-file" class="hidden" accept=".pdf,.docx,.xlsx,.csv,.txt,.md,.jpg,.jpeg,.png,.webp"/>
+                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                    </label>
+                    <input type="text" id="chat-question"
+                           class="flex-1 min-w-0 rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                           placeholder="Pergunte ou anexe um arquivo..." maxlength="2000"/>
+                    <button type="submit" id="chat-submit"
+                            class="rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition-colors whitespace-nowrap">
+                        Enviar
                     </button>
-                @endforeach
+                </form>
+                <p id="chat-error" class="hidden mt-2 text-xs text-red-700"></p>
             </div>
+        </div>
 
-            <form id="chat-form" class="flex flex-col sm:flex-row gap-2">
-                @csrf
-                <input type="text" id="chat-question"
-                       class="flex-1 rounded-lg border border-slate-300 dark:border-white/10 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-                       placeholder="Ex.: qual o maior risco do time hoje?" maxlength="1000"/>
-                <button type="submit" id="chat-submit"
-                        class="rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition-colors whitespace-nowrap">
-                    Perguntar
-                </button>
-            </form>
-            <p id="chat-error" class="hidden mt-2 text-xs text-red-700"></p>
+        <div id="task-panel" class="lg:col-span-2 rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[16rem]">
+            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Tarefa</h2>
+                <button type="button" id="task-panel-close" class="lg:hidden text-slate-400">Fechar</button>
+            </div>
+            <div id="task-panel-body" class="p-5 text-sm text-slate-500 dark:text-slate-400">
+                Clique em uma tarefa da conversa para ver os detalhes aqui.
+            </div>
         </div>
     </div>
 
@@ -224,14 +245,96 @@
         const messages = document.getElementById('chat-messages');
         const errorBox = document.getElementById('chat-error');
         const submitBtn = document.getElementById('chat-submit');
+        const fileInput = document.getElementById('chat-file');
+        const attachBox = document.getElementById('chat-attachments');
+        const panelBody = document.getElementById('task-panel-body');
+        const documentIds = [];
 
         function appendMessage(text, isUser) {
             const div = document.createElement('div');
-            div.className = `rounded-lg border p-3 text-sm ${isUser ? 'bg-brand-50 border-brand-100 text-slate-800 dark:text-slate-100 ml-8' : 'bg-slate-50 dark:bg-white/[0.04] border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 mr-8'}`;
+            div.className = `rounded-lg border p-3 text-sm whitespace-pre-wrap ${isUser ? 'bg-brand-50 border-brand-100 text-slate-800 dark:text-slate-100 ml-8' : 'bg-slate-50 dark:bg-white/[0.04] border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 mr-8'}`;
             div.textContent = text;
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
+            return div;
         }
+
+        function appendTaskCards(tasks) {
+            if (!tasks || !tasks.length) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'space-y-2 mr-8';
+            tasks.forEach((task) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full text-left rounded-lg border border-slate-200 dark:border-white/10 p-3 hover:border-brand-400 transition-colors';
+                const title = document.createElement('p');
+                title.className = 'text-sm font-semibold text-slate-800 dark:text-slate-100';
+                title.textContent = task.title;
+                const meta = document.createElement('p');
+                meta.className = 'text-xs text-slate-500 dark:text-slate-400 mt-1';
+                meta.textContent = [task.status, task.assignee, task.due_at].filter(Boolean).join(' · ');
+                btn.appendChild(title);
+                btn.appendChild(meta);
+                btn.addEventListener('click', () => openTask(task.id));
+                wrap.appendChild(btn);
+            });
+            messages.appendChild(wrap);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function openTask(id) {
+            window.axios.get(`/tarefas/${id}/resumo`)
+                .then(({ data }) => {
+                    panelBody.replaceChildren();
+                    const title = document.createElement('p');
+                    title.className = 'text-base font-semibold text-slate-900 dark:text-white';
+                    title.textContent = data.title;
+                    const meta = document.createElement('p');
+                    meta.className = 'mt-2 text-xs text-slate-500 dark:text-slate-400';
+                    meta.textContent = [data.status, data.priority, data.assignee].filter(Boolean).join(' · ');
+                    panelBody.appendChild(title);
+                    panelBody.appendChild(meta);
+                    if (data.due_at) {
+                        const due = document.createElement('p');
+                        due.className = 'mt-1 text-xs text-slate-500';
+                        due.textContent = 'Prazo: ' + data.due_at;
+                        panelBody.appendChild(due);
+                    }
+                    if (data.description) {
+                        const desc = document.createElement('p');
+                        desc.className = 'mt-3 text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap';
+                        desc.textContent = data.description;
+                        panelBody.appendChild(desc);
+                    }
+                    const link = document.createElement('a');
+                    link.href = data.url;
+                    link.className = 'inline-flex mt-4 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white';
+                    link.textContent = 'Abrir tarefa';
+                    panelBody.appendChild(link);
+                })
+                .catch(() => {
+                    panelBody.textContent = 'Não foi possível carregar a tarefa.';
+                });
+        }
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const body = new FormData();
+            body.append('file', file);
+            attachBox.classList.remove('hidden');
+            attachBox.textContent = 'Enviando ' + file.name + '...';
+            window.axios.post('/assistente/anexos', body)
+                .then(({ data }) => {
+                    if (data.document_id) documentIds.push(data.document_id);
+                    attachBox.textContent = data.filename + ' (' + data.status + ')';
+                    appendMessage('Arquivo anexado à base da empresa: ' + data.filename, true);
+                })
+                .catch((err) => {
+                    attachBox.textContent = err.response?.data?.message ?? 'Falha ao anexar.';
+                })
+                .finally(() => { fileInput.value = ''; });
+        });
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -244,9 +347,11 @@
             submitBtn.textContent = '...';
             errorBox.classList.add('hidden');
 
-            window.axios.post('/assistente/perguntar', { question })
+            window.axios.post('/assistente/perguntar', { question, document_ids: documentIds })
                 .then(({ data }) => {
                     appendMessage(data.answer, false);
+                    appendTaskCards(data.tasks || []);
+                    if (data.open_task_id) openTask(data.open_task_id);
                 })
                 .catch((err) => {
                     errorBox.textContent = err.response?.data?.message ?? 'Não foi possível obter resposta.';
@@ -254,7 +359,7 @@
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Perguntar';
+                    submitBtn.textContent = 'Enviar';
                 });
         });
 
@@ -263,6 +368,10 @@
                 input.value = btn.textContent.trim();
                 form.dispatchEvent(new Event('submit'));
             });
+        });
+
+        document.getElementById('task-panel-close').addEventListener('click', () => {
+            panelBody.textContent = 'Clique em uma tarefa da conversa para ver os detalhes aqui.';
         });
     })();
 

@@ -9,6 +9,9 @@ class AIRequest
      * @param  string  $user  Mensagem do usuário (já sanitizada se necessário)
      * @param  array<string, mixed>  $metadata  Dados para auditoria (não enviados ao provider)
      */
+    /**
+     * @param  list<array<string, mixed>>  $messages  Histórico multi-turno (opcional)
+     */
     public function __construct(
         public string $system,
         public string $user,
@@ -17,6 +20,7 @@ class AIRequest
         public array $metadata = [],
         public ?array $responseFormat = null,
         public array $tools = [],
+        public array $messages = [],
     ) {}
 
     public function withMetadata(array $metadata): self
@@ -29,6 +33,7 @@ class AIRequest
             array_merge($this->metadata, $metadata),
             $this->responseFormat,
             $this->tools,
+            $this->messages,
         );
     }
 }

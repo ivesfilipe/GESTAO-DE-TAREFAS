@@ -203,6 +203,26 @@ class TaskController extends Controller
         return view('tasks.show', compact('task', 'liderados'));
     }
 
+    public function summary(Task $task)
+    {
+        abort_if($task->status === 'cancelada', 404);
+
+        Gate::authorize('view-task', $task);
+
+        $task->load('assignee');
+
+        return response()->json([
+            'id' => $task->id,
+            'title' => $task->title,
+            'status' => $task->status,
+            'priority' => $task->priority,
+            'due_at' => $task->due_at?->format('d/m/Y H:i'),
+            'assignee' => $task->assignee?->name,
+            'description' => $task->description,
+            'url' => route('tasks.show', $task),
+        ]);
+    }
+
     public function kanban(Request $request)
     {
         return view('tasks.kanban');

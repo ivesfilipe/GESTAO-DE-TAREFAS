@@ -68,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tarefas/descricao', [TaskController::class, 'generateDescription'])->name('tasks.generate-description');
     Route::post('/tarefas/delegar-com-ia', [TaskController::class, 'smartDelegate'])->name('tasks.smart-delegate');
     Route::post('/tarefas', [TaskController::class, 'store'])->name('tasks.store');
+    Route::get('/tarefas/{task}/resumo', [TaskController::class, 'summary'])->name('tasks.summary');
     Route::get('/tarefas/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::patch('/tarefas/{task}/atribuir', [TaskController::class, 'assign'])->name('tasks.assign');
     Route::patch('/tarefas/{task}/status', [TaskController::class, 'changeStatus'])->name('tasks.change-status');
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('can:create-task')->get('/assistente', [AssistantController::class, 'index'])->name('assistant.index');
     Route::middleware('can:create-task')->post('/assistente/perguntar', [AssistantController::class, 'ask'])->name('assistant.ask');
     Route::middleware('can:create-task')->post('/assistente/cobranca', [AssistantController::class, 'suggestCollection'])->name('assistant.collection');
+    Route::middleware('can:create-task')->post('/assistente/anexos', [AssistantController::class, 'storeAttachment'])->name('assistant.attachments.store');
     Route::get('/agenda-inteligente', [ScheduleController::class, 'index'])->name('schedule.index');
     Route::post('/agenda-inteligente/regenerar', [ScheduleController::class, 'regenerate'])->name('schedule.regenerate');
     Route::post('/agenda-inteligente/aplicar', [ScheduleController::class, 'apply'])->name('schedule.apply');
