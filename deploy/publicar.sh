@@ -38,7 +38,7 @@ echo "== Rodando migrations =="
 $PHP artisan migrate --force
 
 echo "== Ativacao do ZDR (one-time) =="
-ZDR_FLAG="storage/app/.zdr_activated"
+ZDR_FLAG="storage/app/.zdr_activated_v2"
 if [ ! -f "$ZDR_FLAG" ]; then
   if grep -q "^GROQ_ZDR_CONFIRMED=" .env; then
     sed -i 's/^GROQ_ZDR_CONFIRMED=.*/GROQ_ZDR_CONFIRMED=true/' .env
@@ -52,11 +52,11 @@ else
 fi
 
 echo "== Testando SMTP (one-time) =="
-SMTP_FLAG="storage/app/.smtp_test_done"
+SMTP_FLAG="storage/app/.smtp_test_done_v2"
 if [ ! -f "$SMTP_FLAG" ]; then
-  $PHP artisan tinker --execute="try { Illuminate\Support\Facades\Mail::raw('Teste SMTP - Gestao de Tarefas', function (\$message) { \$message->to('gestor@medicalthermo.com')->subject('Teste SMTP'); }); echo 'E-mail de teste enviado para gestor@medicalthermo.com\n'; } catch (Throwable \$e) { echo 'ERRO SMTP: '.\$e->getMessage().'\n'; }" > storage/logs/smtp-test.log 2>&1 || true
+  $PHP artisan tinker --execute="try { Illuminate\Support\Facades\Mail::raw('Teste SMTP - Gestao de Tarefas', function (\$message) { \$message->to('ives@medicalthermo.com')->subject('Teste SMTP'); }); echo 'E-mail de teste enviado para ives@medicalthermo.com\n'; } catch (Throwable \$e) { echo 'ERRO SMTP: '.\$e->getMessage().'\n'; }" > storage/logs/smtp-test.log 2>&1 || true
   touch "$SMTP_FLAG"
-  echo "Teste SMTP realizado. Verifique a caixa de entrada de gestor@medicalthermo.com e o arquivo storage/logs/smtp-test.log."
+  echo "Teste SMTP realizado. Verifique a caixa de entrada de ives@medicalthermo.com e o arquivo storage/logs/smtp-test.log."
 else
   echo "Teste SMTP ja foi realizado."
 fi

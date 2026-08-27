@@ -16,6 +16,9 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamProfileController;
+use App\Models\User;
+use App\Services\AI\ManagementRadarService;
+use App\Services\AiAssistantService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -108,22 +111,22 @@ Route::get('/debug-assistant/{token}', function ($token) {
         abort(404);
     }
 
-    $gestor = \App\Models\User::where('role', 'gestor')->first();
+    $gestor = User::where('role', 'gestor')->first();
     if (! $gestor) {
         return response()->json(['error' => 'nenhum gestor encontrado'], 404);
     }
 
-    \Illuminate\Support\Facades\Auth::login($gestor);
+    Auth::login($gestor);
 
     try {
         $controller = app(AssistantController::class);
         $request = request();
-        $response = $controller->index($request, app(\App\Services\AiAssistantService::class), app(\App\Services\AI\ManagementRadarService::class));
+        $response = $controller->index($request, app(AiAssistantService::class), app(ManagementRadarService::class));
 
         $status = method_exists($response, 'getStatusCode') ? $response->getStatusCode() : 'rendered view';
 
         return 'OK: assistant index retornou status '.$status;
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         return response()->json([
             'error' => get_class($e),
             'message' => $e->getMessage(),

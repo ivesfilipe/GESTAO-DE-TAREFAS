@@ -144,7 +144,8 @@ class AssistantController extends Controller
                 'task_id' => $task->id,
                 'title' => $task->title,
                 'reason' => 'Sem responsável',
-            ]);
+            ])
+            ->toBase();
 
         $lowLoad = User::where('role', 'liderado')
             ->where('is_active', true)
@@ -157,8 +158,9 @@ class AssistantController extends Controller
                 'title' => $u->name,
                 'reason' => 'Sem tarefas ativas',
                 'active_tasks' => 0,
-            ]);
+            ])
+            ->toBase();
 
-        return $unassigned->merge($lowLoad)->values()->take($limit)->all();
+        return $unassigned->merge($lowLoad)->take($limit)->values()->all();
     }
 }

@@ -89,3 +89,14 @@ test('chat do copiloto responde no modo mock sem api externa', function () {
         ->assertJsonPath('ok', true)
         ->assertJsonPath('mock', true);
 });
+
+test('copiloto carrega mesmo com tarefa sem responsavel e liderado ocioso', function () {
+    $gestor = User::factory()->gestor()->create();
+    User::factory()->liderado()->create();
+    Task::factory()->create(['created_by' => $gestor->id, 'status' => 'nao_atribuida']);
+
+    $this->actingAs($gestor)
+        ->get('/assistente')
+        ->assertOk()
+        ->assertSee('Oportunidades de delegação');
+});
