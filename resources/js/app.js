@@ -1,4 +1,5 @@
 import './bootstrap';
+import './theme';
 import './command-palette';
 import './pwa';
 import Sortable from 'sortablejs';

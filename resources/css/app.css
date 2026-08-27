@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -80,6 +82,13 @@
 @keyframes cardEntrance {
     from { opacity: 0; transform: translateY(12px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes dashMove {
+    to { stroke-dashoffset: -28; }
+}
+@keyframes subtleShift {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
 }
 
 /* Glass utilities */
@@ -166,6 +175,11 @@
 }
 .btn-shine:hover::after {
     transform: translateX(100%);
+}
+
+.animate-dash {
+    stroke-dasharray: 6 8;
+    animation: dashMove 1.2s linear infinite;
 }
 
 /* Motion safety */
