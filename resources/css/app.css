@@ -27,4 +27,153 @@
 
     --color-primary: var(--color-brand-500);
     --color-primary-hover: var(--color-brand-600);
+
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-float-slow: float 8s ease-in-out infinite;
+    --animate-float-reverse: floatReverse 7s ease-in-out infinite;
+    --animate-shimmer: shimmer 2.2s ease-in-out infinite;
+    --animate-fade-in: fadeIn 0.6s ease-out both;
+    --animate-fade-in-up: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    --animate-scale-in: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    --animate-aurora: aurora 18s ease-in-out infinite;
+    --animate-glow: glowPulse 3s ease-in-out infinite;
+}
+
+/* MedicalThermo Glass & Motion — Design System */
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+    33% { transform: translateY(-12px) translateX(6px) scale(1.02); }
+    66% { transform: translateY(8px) translateX(-4px) scale(0.98); }
+}
+@keyframes floatReverse {
+    0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+    33% { transform: translateY(10px) translateX(-8px) scale(1.03); }
+    66% { transform: translateY(-10px) translateX(5px) scale(0.97); }
+}
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes aurora {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.6; }
+    25% { transform: translate(20px, -20px) rotate(1deg) scale(1.05); opacity: 0.8; }
+    50% { transform: translate(-15px, 10px) rotate(-1deg) scale(0.98); opacity: 0.5; }
+    75% { transform: translate(10px, 15px) rotate(0.5deg) scale(1.02); opacity: 0.7; }
+}
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+@keyframes cardEntrance {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Glass utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.glass-strong {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+.glass-dark {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.glass-input {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-input:focus {
+    background: rgba(255, 255, 255, 1);
+    border-color: var(--color-brand-400);
+    box-shadow: 0 0 0 3px rgba(24, 128, 192, 0.15), 0 4px 12px rgba(24, 128, 192, 0.1);
+}
+
+/* Aurora mesh */
+.aurora-mesh {
+    background:
+        radial-gradient(ellipse 600px 400px at 20% 10%, rgba(24, 128, 192, 0.22), transparent 60%),
+        radial-gradient(ellipse 800px 500px at 85% 15%, rgba(8, 48, 72, 0.35), transparent 60%),
+        radial-gradient(ellipse 700px 450px at 50% 85%, rgba(24, 128, 192, 0.15), transparent 65%),
+        radial-gradient(ellipse 500px 350px at 10% 85%, rgba(67, 165, 219, 0.12), transparent 60%);
+}
+
+/* Subtle engineering grid */
+.tech-grid {
+    background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+/* Entrance stagger */
+.animate-entrance {
+    animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-1 { animation-delay: 80ms; }
+.stagger-2 { animation-delay: 160ms; }
+.stagger-3 { animation-delay: 240ms; }
+.stagger-4 { animation-delay: 320ms; }
+.stagger-5 { animation-delay: 400ms; }
+.stagger-6 { animation-delay: 480ms; }
+
+/* Hover lift */
+.hover-lift {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(8, 48, 72, 0.12), 0 4px 10px rgba(8, 48, 72, 0.08);
+}
+
+/* Shine effect */
+.btn-shine {
+    position: relative;
+    overflow: hidden;
+}
+.btn-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 45%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-shine:hover::after {
+    transform: translateX(100%);
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .aurora-mesh { opacity: 0.4; }
 }

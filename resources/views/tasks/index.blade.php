@@ -50,7 +50,7 @@ $statusBadges = [
         </div>
     </div>
 
-    <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
+    <form method="GET" action="{{ route('tasks.index') }}" class="mb-6 rounded-2xl bg-white/85 backdrop-blur border border-slate-200/60 p-5 shadow-sm animate-entrance">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label for="status" class="block text-xs font-medium text-slate-500 mb-1">Status</label>
@@ -95,10 +95,10 @@ $statusBadges = [
             @endif
         </div>
         <div class="mt-3 flex gap-3">
-            <button type="submit" class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-colors">
+            <button type="submit" class="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                 Filtrar
             </button>
-            <a href="{{ route('tasks.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            <a href="{{ route('tasks.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:shadow-sm transition-all">
                 Limpar
             </a>
         </div>
@@ -144,7 +144,7 @@ $statusBadges = [
         @endforelse
     </div>
 
-    <div class="hidden lg:block rounded-xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+    <div class="hidden lg:block rounded-2xl bg-white/90 backdrop-blur border border-slate-200/60 shadow-sm overflow-hidden animate-entrance stagger-1">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-slate-200 bg-slate-50">

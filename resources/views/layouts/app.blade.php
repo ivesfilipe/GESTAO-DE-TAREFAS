@@ -14,7 +14,7 @@
     @livewireStyles
     @stack('head')
 </head>
-<body class="h-full bg-slate-50 text-slate-900" @auth data-authenticated="true" data-user-id="{{ Auth::id() }}" data-reverb-key="{{ config('reverb.apps.apps.0.keys.key', config('reverb.apps.0.key')) }}" @endauth>
+<body class="h-full bg-slate-50 text-slate-900 antialiased selection:bg-brand-100 selection:text-brand-900" @auth data-authenticated="true" data-user-id="{{ Auth::id() }}" data-reverb-key="{{ config('reverb.apps.apps.0.keys.key', config('reverb.apps.0.key')) }}" @endauth>
     @hasSection('auth')
         <div class="flex min-h-full flex-col justify-center bg-slate-50">
             <main class="flex-1">
@@ -23,7 +23,7 @@
         </div>
     @else
         @auth
-        <nav class="fixed top-0 z-40 w-full bg-white border-b border-slate-200 h-16 lg:pl-64">
+        <nav class="fixed top-0 z-40 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 h-16 lg:pl-64 supports-[backdrop-filter]:bg-white/70">
             <div class="flex h-full items-center justify-between px-4">
                 <div class="flex items-center gap-3">
                     <a href="{{ route('tasks.index') }}" class="lg:hidden">
@@ -35,7 +35,7 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button type="button" id="palette-trigger" class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500" title="Buscar tarefas (Cmd+K)">
+                    <button type="button" id="palette-trigger" class="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200/70 bg-white/60 backdrop-blur px-3 py-1.5 text-sm text-slate-400 hover:border-brand-200 hover:bg-white hover:text-slate-600 hover:shadow-sm transition-all" title="Buscar tarefas (Cmd+K)">
                         <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -68,7 +68,7 @@
             </div>
         </nav>
 
-        <aside class="fixed top-0 left-0 z-40 hidden h-full w-64 bg-white border-r border-slate-200 lg:block">
+        <aside class="fixed top-0 left-0 z-40 hidden h-full w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 lg:block supports-[backdrop-filter]:bg-white/70">
             <div class="flex h-16 items-center border-b border-slate-200 px-6">
                 <a href="{{ Auth::user()->isGestor() ? url('/painel') : url('/minhas-tarefas') }}">
                     <img src="{{ asset('images/logo-medicalthermo.png') }}" alt="MedicalThermo Engenharia" class="h-9 w-auto">
@@ -77,66 +77,66 @@
             <div class="px-6 pt-4 pb-1">
                 <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Gestão de Tarefas</span>
             </div>
-            <nav class="mt-4 px-3">
+            <nav class="mt-4 px-3 space-y-1">
                 @if(Auth::user()->isGestor())
-                    <a href="{{ url('/painel') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('painel') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ url('/painel') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('painel') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
                         Painel
                     </a>
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('tarefas') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('tasks.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('tarefas') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         Tarefas
                     </a>
-                    <a href="{{ route('tasks.kanban') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('tarefas/quadro') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('tasks.kanban') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('tarefas/quadro') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm9 0a1 1 0 011-1h4a1 1 0 011 1v9a1 1 0 01-1 1h-4a1 1 0 01-1-1V5z"/>
                         </svg>
                         Quadro
                     </a>
-                    <a href="{{ route('team.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('equipe*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('team.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('equipe*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                         Equipe
                     </a>
-                    <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('relatorios*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('reports.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('relatorios*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                         Relatórios
                     </a>
-                    <a href="/pulse" target="_blank" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('pulse*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="/pulse" target="_blank" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('pulse*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                         Monitoramento
                     </a>
-                    <a href="{{ route('assistant.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('assistente*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('assistant.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('assistente*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
                         </svg>
                         Assistente
                     </a>
-                    <a href="{{ route('schedule.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('agenda-inteligente*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('schedule.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('agenda-inteligente*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         Agenda Inteligente
                     </a>
                 @else
-                    <a href="{{ url('/minhas-tarefas') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('minhas-tarefas*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ url('/minhas-tarefas') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('minhas-tarefas*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                        <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         Minhas Tarefas
                     </a>
                 @endif
-                <a href="{{ route('notifications.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ request()->is('notificacoes*') ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('notifications.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {{ request()->is('notificacoes*') ? 'bg-gradient-to-br from-brand-50 to-brand-100/70 text-brand-700 shadow-sm border border-brand-200/50' : 'text-slate-600 hover:bg-white hover:shadow-sm hover:border hover:border-slate-200/60 hover:translate-x-0.5 border border-transparent' }}">
+                    <svg class="size-5 transition-transform group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
                     Notificações
@@ -144,7 +144,7 @@
             </nav>
         </aside>
 
-        <nav class="fixed bottom-0 left-0 z-40 w-full border-t border-slate-200 bg-white lg:hidden">
+        <nav class="fixed bottom-0 left-0 z-40 w-full border-t border-slate-200/60 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75 lg:hidden">
             <div class="flex h-16 items-center justify-around">
                 @if(Auth::user()->isGestor())
                     <a href="{{ url('/painel') }}" class="flex flex-col items-center gap-1 {{ request()->is('painel') ? 'text-brand-700' : 'text-slate-500' }}">
@@ -183,7 +183,13 @@
         </nav>
         @endauth
 
-        <main class="pt-16 pb-20 lg:pl-64">
+        <main class="relative pt-16 pb-20 lg:pl-64 min-h-screen">
+            {{-- subtle page aurora --}}
+            <div class="pointer-events-none absolute inset-0 overflow-hidden">
+                <div class="absolute -top-32 -right-32 size-[560px] rounded-full bg-gradient-to-br from-brand-100/40 via-brand-50/20 to-transparent blur-3xl"></div>
+                <div class="absolute top-96 -left-32 size-[480px] rounded-full bg-gradient-to-br from-slate-100/60 to-transparent blur-3xl"></div>
+            </div>
+            <div class="relative">
             @if(session('success'))
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
                     <div class="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">
@@ -211,6 +217,7 @@
             @endif
 
             @yield('content')
+            </div>
         </main>
     @endif
 
@@ -218,8 +225,8 @@
     @stack('scripts')
 
     @auth
-    <div id="command-palette" class="hidden fixed inset-0 z-[90] bg-slate-900/40 p-4 pt-[15vh]">
-        <div class="mx-auto w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
+    <div id="command-palette" class="hidden fixed inset-0 z-[90] bg-slate-900/45 backdrop-blur-sm p-4 pt-[15vh]">
+        <div class="mx-auto w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200/60 bg-white/90 backdrop-blur-xl shadow-2xl animate-scale-in">
             <div class="border-b border-slate-100">
                 <input id="palette-input" type="text" placeholder="Buscar tarefas por título ou descrição..." autocomplete="off"
                        class="w-full bg-transparent px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400"/>
