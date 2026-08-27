@@ -40,7 +40,15 @@ class MockProvider implements AIProviderInterface
             return "Rascunho de cobrança (modo simulação):\n\nPreciso de uma posição sobre: {$taskTitle}\n\nO prazo registrado está próximo e ainda não há atualização conclusiva na tarefa.\n\nMe retorne com:\n- status atual;\n- eventual pendência;\n- previsão de conclusão.\n\nEste rascunho não foi enviado automaticamente.";
         }
 
-        if (str_contains($lower, 'rascunho') || str_contains($lower, 'delega') || str_contains($lower, 'responsável') || str_contains($lower, 'assignee')) {
+        if (str_contains($lower, 'perfil do colaborador') || str_contains($lower, 'pontos fortes')) {
+            return "Resumo do perfil (modo simulação):\n- Pontos fortes: organização, proatividade e comunicação clara\n- Gaps: documentação de processos e priorização sob pressão\n- Preferências: tarefas bem definidas, prazos realistas e feedback frequente.";
+        }
+
+        if (str_contains($lower, 'gargalo') || str_contains($lower, 'radar') || str_contains($lower, 'principal risco')) {
+            return "Radar de risco (modo simulação):\n- Atenção para tarefas sem movimentação há mais de 3 dias\n- Tarefas atrasadas devem ser revisitadas em reunião de priorização\n- Nenhuma ação automática será tomada.";
+        }
+
+        if (str_contains($lower, 'rascunho completo de tarefa') || str_contains($lower, 'recommended_assignee_id')) {
             return json_encode([
                 'title' => 'Obter retorno sobre a demanda solicitada',
                 'task_type' => 'demanda',
@@ -95,14 +103,6 @@ class MockProvider implements AIProviderInterface
                     ],
                 ],
             ], JSON_UNESCAPED_UNICODE);
-        }
-
-        if (str_contains($lower, 'risco') || str_contains($lower, 'radar') || str_contains($lower, 'atrasada')) {
-            return "Radar de risco (modo simulação):\n- Atenção para tarefas sem movimentação há mais de 3 dias\n- Tarefas atrasadas devem ser revisitadas em reunião de priorização\n- Nenhuma ação automática será tomada.";
-        }
-
-        if (str_contains($lower, 'resumo') || str_contains($lower, 'perfil') || str_contains($lower, 'performance')) {
-            return "Resumo gerencial (modo simulação):\n- Carga atual distribuída entre os liderados\n- Entregas no prazo em nível estável\n- Recomendação: revisar tarefas sem atualização há mais de uma semana.";
         }
 
         if (str_contains($lower, 'descricao') || str_contains($lower, 'descrição') || str_contains($lower, 'briefing')) {
