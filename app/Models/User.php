@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'manager_id',
         'timezone',
         'invited_at',
         'activated_at',
@@ -47,6 +49,18 @@ class User extends Authenticatable
     {
         static::creating(function (self $user) {
             $user->calendar_token ??= (string) Str::uuid();
+
+            if ($user->isLiderado() && $user->manager_id === null) {
+                $gestorIds = self::query()
+                    ->where('role', 'gestor')
+                    ->where('is_active', true)
+                    ->limit(2)
+                    ->pluck('id');
+
+                if ($gestorIds->count() === 1) {
+                    $user->manager_id = $gestorIds->first();
+                }
+            }
         });
     }
 
@@ -63,6 +77,21 @@ class User extends Authenticatable
     public function createdTasks()
     {
         return $this->hasMany(Task::class, 'created_by');
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(self::class, 'manager_id');
+    }
+
+    public function teamMembers()
+    {
+        return $this->hasMany(self::class, 'manager_id');
+    }
+
+    public function scopeManagedBy(Builder $query, self $manager): Builder
+    {
+        return $query->where('manager_id', $manager->id);
     }
 
     public function assignedTasks()

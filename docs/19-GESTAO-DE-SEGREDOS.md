@@ -5,6 +5,7 @@
 - `APP_KEY` do Laravel (chave de criptografia da aplicação)
 - Credenciais SMTP (e-mail de convite)
 - Chave SSH usada para deploy
+- Chaves de providers de IA (`GROQ_API_KEY`, `OPENAI_API_KEY`)
 
 ## Onde os segredos vivem
 - Exclusivamente no arquivo `.env` do servidor de produção
@@ -52,5 +53,14 @@ MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME="${APP_NAME}"
 
 QUEUE_CONNECTION=database
+
+# IA: mantenha ZDR não confirmado até a validação contratual/administrativa.
+GROQ_API_KEY=
+GROQ_ZDR_REQUIRED=true
+GROQ_ZDR_CONFIRMED=false
 ```
 
+## ZDR e auditoria
+- O script de deploy não confirma ZDR nem altera `GROQ_ZDR_CONFIRMED`.
+- Com ZDR obrigatório e não confirmado, providers externos são bloqueados antes do envio de qualquer contexto.
+- `ai_usage_logs` registra apenas metadados técnicos; prompts, respostas, chaves e conteúdo de documentos não são persistidos em logs.

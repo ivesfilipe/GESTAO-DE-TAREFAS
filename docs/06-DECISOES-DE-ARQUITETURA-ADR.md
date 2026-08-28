@@ -112,7 +112,7 @@ expostos se a regra falhar).
 ## ADR-014 — Arquitetura Multi-Provider de IA com Groq como Padrão
 **Status**: Aceito  
 **Contexto**: O assistente de IA estava acoplado à OpenAI; precisávamos de vendor flexibility, custo controlado e conformidade com retenção de dados.  
-**Decisão**: Criar camada de abstração em `app/Services/AI/` com interface, DTOs, manager e providers (Groq padrão, OpenAI e Ollama opcionais). Nenhum fallback pago automático. Modo mock quando chave ausente. Camada `ZeroDataRetention` bloqueia/anonimiza dados reais até confirmação.  
+**Decisão**: Criar camada de abstração em `app/Services/AI/` com interface, DTOs, manager e providers (Groq padrão, OpenAI e Ollama opcionais). Nenhum fallback pago automático. Modo mock quando chave ausente. Enquanto ZDR é obrigatório e não confirmado, qualquer provider externo é bloqueado antes do envio de contexto; apenas mock/Ollama local continuam disponíveis. Logs preservam metadados, nunca prompt ou resposta.  
 **Motivo**: Reduz lock-in, custo e risco de vazamento; permite testes e execução local.  
 **Arquivos**: `docs/adr/ADR-014-ai-multi-provider.md`, `config/ai.php`, `app/Services/AI/`.
 
@@ -131,4 +131,3 @@ durante a construção, o agente deve adicionar uma nova entrada aqui,
 seguindo o mesmo formato (Status / Contexto / Decisão / Motivo /
 Alternativas descartadas), e referenciar o número do ADR no commit
 correspondente.
-

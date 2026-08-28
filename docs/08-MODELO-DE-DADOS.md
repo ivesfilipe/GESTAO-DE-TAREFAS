@@ -9,6 +9,7 @@
 
 ```
 users ──┬───< tasks (created_by)
+        ├───< users (manager_id)
         ├───< tasks (assigned_to)
         ├───< comments (author_id)
         ├───< attachments (uploaded_by)
@@ -32,6 +33,7 @@ comments ───< attachments (comment_id, opcional)
 | email | varchar(255) | obrigatório, único |
 | password | varchar(255) | obrigatório, hash |
 | role | enum('gestor','liderado') | obrigatório |
+| manager_id | bigint unsigned, FK → users.id | nulo para gestor; liderado pertence ao gestor responsável |
 | timezone | varchar(64) | obrigatório, default 'America/Sao_Paulo' |
 | invited_at | timestamp | nulo até convite enviado |
 | activated_at | timestamp | nulo até definir senha |
@@ -49,6 +51,9 @@ comments ───< attachments (comment_id, opcional)
 | assigned_to | bigint unsigned, FK → users.id | nulo = "Não atribuída" |
 | priority | enum('normal','importante','urgente','critica') | obrigatório, default 'normal' |
 | status | enum('nao_atribuida','nova','recebida','em_andamento','aguardando_aprovacao','concluida','bloqueada','reprovada','cancelada') | obrigatório, default 'nao_atribuida' ou 'nova' |
+| task_type | varchar(30) | `demanda`, `compra`, `servico`, `desenvolvimento`, `responsabilidade` ou `outro`; default `demanda` |
+| acceptance_criteria | text JSON | lista normalizada de critérios verificáveis |
+| expected_evidence | text JSON | lista normalizada de evidências esperadas |
 | due_at | datetime | obrigatório (data + hora) |
 | original_due_at | datetime | preenchido na criação, nunca alterado (referência histórica) |
 | completed_at | datetime | nulo até aprovação final |
@@ -120,15 +125,21 @@ Usar a tabela padrão de notifications do Laravel
 type, notifiable_type, notifiable_id, data (json), read_at, created_at,
 updated_at.
 
+## Tabelas de memória e auditoria de IA
+- `team_member_profiles`: `user_id`, função, setor, responsabilidades, objetivos, orientações de delegação, resumo, forças, lacunas, preferências, `ai_summary_sources`, `generated_at`, `summary_invalidated_at` e soft delete.
+- `team_member_documents`: `user_id`, nome, caminho privado, MIME, tamanho, texto extraído, estado (`processando`, `pronto`, `needs_ocr`, `erro`) e metadados. A remoção apaga o arquivo privado e seus chunks de recuperação.
+- `team_member_knowledge_chunks`: `user_id`, `document_id`, conteúdo local e ordem; consultas sempre filtram pelo liderado.
+- `ai_usage_logs`: `user_id` opcional, provider, modelo, tokens, status, duração, erro técnico e metadados. `prompt` e `response` permanecem nulos por política de não retenção.
+
 ## Índices obrigatórios
 - `tasks.assigned_to` + `tasks.status` (consulta de dashboard por pessoa)
 - `tasks.due_at` (consulta de atrasadas/vence hoje)
 - `task_history_events.task_id` (montagem do histórico da tarefa)
 - `comments.task_id`
 - `attachments.task_id`
+- `users.manager_id`, `tasks.task_type`, `team_member_knowledge_chunks.user_id` e `ai_usage_logs.user_id`
 
 ## Regras de integridade
 - Toda FK usa `onDelete('restrict')` — nunca cascade automático, para
   não apagar histórico acidentalmente por engano em cascata.
 - Todo soft delete usa o trait `SoftDeletes` do Eloquent.
-

@@ -82,8 +82,8 @@ test('gestor cria tarefa com novos campos de ia', function () {
     $this->assertDatabaseHas('tasks', [
         'title' => 'Tarefa com critérios',
         'task_type' => 'desenvolvimento',
-        'acceptance_criteria' => 'Código revisado e testado',
-        'expected_evidence' => 'Print dos testes passando',
+        'acceptance_criteria' => json_encode(['Código revisado e testado']),
+        'expected_evidence' => json_encode(['Print dos testes passando']),
     ]);
 });
 

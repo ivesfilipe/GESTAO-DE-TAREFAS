@@ -56,7 +56,7 @@ class TaskSuggestionService
             return [];
         }
 
-        return collect($parsed['suggestions'])
+        $filtered = collect($parsed['suggestions'])
             ->filter(fn ($item) => is_array($item) && ! empty($item['title']))
             ->map(fn (array $item) => [
                 'category' => $item['category'] ?? $category ?? 'demanda',
@@ -70,8 +70,14 @@ class TaskSuggestionService
                 'priority' => in_array($item['priority'] ?? '', ['normal', 'importante', 'urgente', 'critica'])
                     ? $item['priority']
                     : 'normal',
-            ])
-            ->all();
+            ]);
+
+        // Filtrar por categoria se solicitado
+        if ($category) {
+            $filtered = $filtered->filter(fn ($item) => $item['category'] === $category);
+        }
+
+        return $filtered->values()->all();
     }
 
     /**

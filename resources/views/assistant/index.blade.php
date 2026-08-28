@@ -170,6 +170,38 @@
         </div>
     </details>
 
+    <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden mb-6">
+        <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Top 5 ações prioritárias</h2>
+            <span class="text-xs text-slate-400 dark:text-slate-500">Determinístico (não usa IA)</span>
+        </div>
+        <div class="divide-y divide-slate-50 dark:divide-white/5">
+            @forelse($topPriorities as $index => $item)
+                <div class="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div class="min-w-0 flex-1">
+                        <a href="/tarefas/{{ $item['task_id'] }}" class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100 hover:text-brand-600">
+                            {{ $item['title'] }}
+                        </a>
+                        <span class="text-xs text-slate-400 dark:text-slate-500">{{ implode(' · ', $item['reasons']) }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center size-6 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">{{ $index + 1 }}</span>
+                        <span class="inline-flex items-center justify-center size-6 rounded-full
+                            @if($item['priority'] === 'critica') bg-red-50 text-red-600
+                            @elseif($item['priority'] === 'urgente') bg-orange-50 text-orange-600
+                            @elseif($item['priority'] === 'importante') bg-amber-50 text-amber-600
+                            @else bg-slate-50 text-slate-600
+                            @endif text-xs font-bold">
+                            {{ $item['priority'] }}
+                        </span>
+                    </div>
+                </div>
+            @empty
+                <p class="px-5 py-4 text-sm text-slate-400 dark:text-slate-500">Nenhuma ação prioritária identificada.</p>
+            @endforelse
+        </div>
+    </div>
+
     <div class="grid lg:grid-cols-5 gap-4 mb-6">
         <div class="lg:col-span-3 rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[28rem]">
             <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center gap-2">
@@ -276,6 +308,18 @@
                 btn.appendChild(title);
                 btn.appendChild(meta);
                 btn.addEventListener('click', () => openTask(task.id));
+
+                // Botão "Dividir em passos"
+                const breakdownBtn = document.createElement('button');
+                breakdownBtn.type = 'button';
+                breakdownBtn.className = 'mt-2 text-xs font-semibold text-violet-600 hover:text-violet-500';
+                breakdownBtn.textContent = '✨ Dividir em passos';
+                breakdownBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    requestBreakdown(task.id);
+                });
+                btn.appendChild(breakdownBtn);
+
                 wrap.appendChild(btn);
             });
             messages.appendChild(wrap);
@@ -373,6 +417,35 @@
         document.getElementById('task-panel-close').addEventListener('click', () => {
             panelBody.textContent = 'Clique em uma tarefa da conversa para ver os detalhes aqui.';
         });
+
+        function requestBreakdown(taskId) {
+            window.axios.post('{{ route('assistant.breakdown') }}', { task_id: taskId })
+                .then(({ data }) => {
+                    if (data.ok && data.steps) {
+                        panelBody.replaceChildren();
+                        const title = document.createElement('p');
+                        title.className = 'text-base font-semibold text-slate-900 dark:text-white mb-2';
+                        title.textContent = 'Passos sugeridos';
+                        panelBody.appendChild(title);
+                        const ol = document.createElement('ol');
+                        ol.className = 'space-y-2';
+                        data.steps.forEach((step, i) => {
+                            const li = document.createElement('li');
+                            li.className = 'flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300';
+                            const num = document.createElement('span');
+                            num.className = 'inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700';
+                            num.textContent = i + 1;
+                            li.appendChild(num);
+                            li.appendChild(document.createTextNode(step));
+                            ol.appendChild(li);
+                        });
+                        panelBody.appendChild(ol);
+                    }
+                })
+                .catch(() => {
+                    panelBody.textContent = 'Não foi possível gerar os passos.';
+                });
+        }
     })();
 
     (function () {

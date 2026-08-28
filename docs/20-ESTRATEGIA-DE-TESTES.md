@@ -38,9 +38,13 @@ mais legível para revisão futura por não-programadores.
   acessar por URL direta
 - Fase 9: notificação é criada para os eventos corretos
 - Fase 10: tempo bloqueado não conta como atraso
+- Fase 27/Parte 1: Groq deve cobrir HTTP 200/401/403/429/500, timeout, JSON inválido e chave ausente; fallback nunca usa OpenAI pago automaticamente.
+- Fase 27/Parte 1: ZDR não confirmado bloqueia provider externo antes do prompt; logs de IA não persistem prompt/resposta.
+- Fase 27/Parte 1: gestor não acessa perfil, tarefas, métricas, chunks ou tools da equipe de outro gestor.
+- Fase 27/Parte 1: documentos validam allowlist, extração/chunks, remoção e fontes do resumo persistido.
+- Fase 27/Parte 1: `task_type`, critérios/evidências normalizados e métricas de ciclo, atraso e reprovação por `nao_atende`.
 
 ## Definição de cobertura mínima
 Toda regra de negócio listada em `03-REGRAS-DE-NEGOCIO.md` (RN-01 a
 RN-12) deve ter ao menos um teste automatizado correspondente antes da
 fase respectiva ser considerada concluída.
-

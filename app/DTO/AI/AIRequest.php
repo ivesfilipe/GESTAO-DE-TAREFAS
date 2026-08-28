@@ -21,6 +21,7 @@ class AIRequest
         public ?array $responseFormat = null,
         public array $tools = [],
         public array $messages = [],
+        public ?string $model = null,
     ) {}
 
     public function withMetadata(array $metadata): self
@@ -34,6 +35,7 @@ class AIRequest
             $this->responseFormat,
             $this->tools,
             $this->messages,
+            $this->model,
         );
     }
 }

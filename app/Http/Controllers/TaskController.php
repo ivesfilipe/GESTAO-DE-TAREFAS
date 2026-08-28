@@ -30,7 +30,7 @@ class TaskController extends Controller
         $user = auth()->user();
 
         if ($user->isGestor()) {
-            $query = Task::query();
+            $query = Task::query()->forManager($user);
 
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
@@ -49,7 +49,7 @@ class TaskController extends Controller
             }
 
             $tasks = $query->latest()->paginate();
-            $teamMembers = User::where('role', 'liderado')
+            $teamMembers = User::where('role', 'liderado')->managedBy($user)
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get();
@@ -71,7 +71,7 @@ class TaskController extends Controller
     {
         Gate::authorize('create-task');
 
-        $liderados = User::where('role', 'liderado')->where('is_active', true)->get();
+        $liderados = User::where('role', 'liderado')->managedBy(auth()->user())->where('is_active', true)->get();
 
         return view('tasks.create', compact('liderados'));
     }
@@ -123,7 +123,7 @@ class TaskController extends Controller
         ]);
 
         $selectedAssignee = ! empty($data['assigned_to'])
-            ? User::where('role', 'liderado')->where('id', $data['assigned_to'])->first()
+            ? User::where('role', 'liderado')->managedBy($request->user())->where('id', $data['assigned_to'])->first()
             : null;
 
         try {
@@ -174,8 +174,8 @@ class TaskController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
             'recurrence_frequency' => ['nullable', 'in:diaria,semanal,quinzenal,mensal'],
             'task_type' => ['nullable', 'in:'.implode(',', Task::taskTypes())],
-            'acceptance_criteria' => ['nullable'],
-            'expected_evidence' => ['nullable'],
+            'acceptance_criteria' => ['nullable', 'string', 'max:5000'],
+            'expected_evidence' => ['nullable', 'string', 'max:5000'],
         ]);
 
         if (! empty($data['recurrence_frequency'])) {
@@ -195,7 +195,7 @@ class TaskController extends Controller
 
         $task->load(['comments.author', 'attachments', 'historyEvents.actor', 'changeRequests']);
 
-        $liderados = User::where('role', 'liderado')
+        $liderados = User::where('role', 'liderado')->managedBy(auth()->user())
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
@@ -231,12 +231,15 @@ class TaskController extends Controller
     public function assign(Request $request, Task $task)
     {
         Gate::authorize('create-task');
+        Gate::authorize('view-task', $task);
 
         $request->validate([
             'assigned_to' => ['required', 'exists:users,id'],
         ]);
 
-        $newAssignee = User::find($request->assigned_to);
+        $newAssignee = User::where('role', 'liderado')
+            ->managedBy($request->user())
+            ->findOrFail($request->assigned_to);
 
         (new AssignTask)->execute($task, auth()->user(), $newAssignee);
 
@@ -301,6 +304,8 @@ class TaskController extends Controller
 
     public function unblock(Request $request, Task $task)
     {
+        Gate::authorize('view-task', $task);
+
         if (! auth()->user()->isGestor() && auth()->id() !== $task->assigned_to) {
             abort(403);
         }
@@ -377,9 +382,7 @@ class TaskController extends Controller
 
     public function resolveChange(Request $request, Task $task, ChangeRequest $changeRequest)
     {
-        if (! auth()->user()->isGestor()) {
-            abort(403);
-        }
+        Gate::authorize('approve-task', $task);
 
         $request->validate([
             'status' => ['required', 'in:aprovada,recusada'],

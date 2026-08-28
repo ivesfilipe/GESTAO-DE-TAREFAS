@@ -48,7 +48,7 @@ abstract class OpenAICompatibleProvider implements AIProviderInterface
     public function complete(AIRequest $request): AIResponse
     {
         $payload = [
-            'model' => $this->model,
+            'model' => $request->model ?? $this->model,
             'messages' => $request->messages !== []
                 ? $request->messages
                 : [
@@ -95,12 +95,15 @@ abstract class OpenAICompatibleProvider implements AIProviderInterface
             Log::warning('AI provider returned error', [
                 'provider' => $this->name(),
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
             throw new RuntimeException("Provider {$this->name()} retornou erro HTTP {$response->status()}.");
         }
 
         $data = $response->json();
+        if (! is_array($data)) {
+            throw new RuntimeException("Provider {$this->name()} retornou JSON inválido.");
+        }
+
         $message = $data['choices'][0]['message'] ?? [];
         $content = trim((string) ($message['content'] ?? ''));
         $toolCalls = $this->normalizeToolCalls($message['tool_calls'] ?? []);

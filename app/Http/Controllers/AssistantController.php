@@ -23,8 +23,9 @@ class AssistantController extends Controller
         $radarData = $radar->radar($request->user());
 
         $status = $this->aiStatus();
-        $followUps = $this->followUpSuggestions();
-        $opportunities = $this->delegationOpportunities();
+        $followUps = $this->followUpSuggestions($request->user());
+        $opportunities = $this->delegationOpportunities($request->user());
+        $topPriorities = $radar->topPriorities($request->user(), 5);
 
         $breakdown = null;
         if ($request->filled('breakdown')) {
@@ -33,7 +34,7 @@ class AssistantController extends Controller
             $breakdown = ['task' => $task, 'steps' => $assistant->breakdownSuggestions($task)];
         }
 
-        return view('assistant.index', compact('assistant', 'summary', 'suggestions', 'breakdown', 'radarData', 'status', 'followUps', 'opportunities'));
+        return view('assistant.index', compact('assistant', 'summary', 'suggestions', 'breakdown', 'radarData', 'status', 'followUps', 'opportunities', 'topPriorities'));
     }
 
     public function ask(Request $request, CopilotService $copilot)
@@ -113,6 +114,25 @@ class AssistantController extends Controller
         ]);
     }
 
+    public function suggestBreakdown(Request $request, AiAssistantService $assistant)
+    {
+        Gate::authorize('create-task');
+
+        $data = $request->validate([
+            'task_id' => ['required', 'integer', 'exists:tasks,id'],
+        ]);
+
+        $task = Task::findOrFail($data['task_id']);
+        Gate::authorize('view-task', $task);
+
+        $steps = $assistant->breakdownSuggestions($task);
+
+        return response()->json([
+            'ok' => true,
+            'steps' => $steps,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -137,9 +157,10 @@ class AssistantController extends Controller
     /**
      * @return list<array<string, mixed>>
      */
-    private function followUpSuggestions(int $limit = 5): array
+    private function followUpSuggestions(User $gestor, int $limit = 5): array
     {
         return Task::query()
+            ->forManager($gestor)
             ->whereNotIn('status', ['concluida', 'cancelada'])
             ->where(function ($q) {
                 $q->overdue()
@@ -163,9 +184,9 @@ class AssistantController extends Controller
     /**
      * @return list<array<string, mixed>>
      */
-    private function delegationOpportunities(int $limit = 5): array
+    private function delegationOpportunities(User $gestor, int $limit = 5): array
     {
-        $unassigned = Task::where('status', 'nao_atribuida')
+        $unassigned = Task::query()->forManager($gestor)->where('status', 'nao_atribuida')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get()
@@ -178,6 +199,7 @@ class AssistantController extends Controller
             ->toBase();
 
         $lowLoad = User::where('role', 'liderado')
+            ->managedBy($gestor)
             ->where('is_active', true)
             ->get()
             ->filter(fn (User $u) => $u->assignedTasks()->whereNotIn('status', ['concluida', 'cancelada'])->count() === 0)

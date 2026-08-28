@@ -1,25 +1,22 @@
 # STATUS DO PROJETO — Sistema de Gestão de Tarefas para Liderados
 
-Última atualização: 2026-08-26 por OpenCode (agente de IA)
+Última atualização: 2026-08-27 por OpenCode (agente de IA)
 
 ## Fase atual
-**FASE 27 — COPILOTO INTELIGENTE DO GESTOR ENTREGUE EM PRODUÇÃO** —
-https://tarefas.medicalthermo.com no ar com delegação inteligente,
-chat do copiloto e perfil inteligente do liderado.
+**FASE 27 — COPILOTO INTELIGENTE DO GESTOR (PARTE 1 E 2) ENTREGUE** —
+Auditoria e endurecimento de segurança (Parte 1) + UX completa de delegação, copiloto e perfil inteligente (Parte 2). Pronto para deploy em https://tarefas.medicalthermo.com.
 
 ## Progresso da fase atual
-- [x] Parte 1: arquitetura multi-provider, ZDR, memória gerencial e campos de IA
-- [x] Revisão pós-Parte 1: correção de vazamento de chunks, `smalot/pdfparser`,
-      remoção de fallback OpenAI legado, simplificação de policy
+- [x] Parte 1: arquitetura multi-provider, ZDR bloqueante, memória gerencial, campos de IA, logs sem prompt/resposta
+- [x] Parte 1: escopo por gestor (`users.manager_id`), Gates/Policies, fallback pago bloqueado, visão centralizada
 - [x] Parte 2:
-  - [x] `SmartDelegationService` com structured output e UX mobile-first em `/tarefas/nova`
-  - [x] `CopilotService` com radar, chat com tools e rascunho de cobrança em `/assistente`
-  - [x] `ProfileIntelligenceService` e `TaskSuggestionService` em `/equipe/{user}`
-  - [x] Documentos com status de processamento
-  - [x] 230 testes automatizados passando
-  - [x] Pint limpo e build Vite atualizado
-  - [x] Documentação atualizada (`docs/CHANGELOG.md`, `docs/STATUS-DO-PROJETO.md`, `docs/ai/*`)
-  - [x] **Deploy em produção (2026-08-26)**
+  - [x] `SmartDelegationService` com structured output JSON, UX mobile-first, tipos de tarefa, validação de assignee inválido
+  - [x] `CopilotService` com radar determinístico (Top 5), chat com tools, cobrança não-automática, divisão em passos
+  - [x] `ProfileIntelligenceService` com fontes, invalidação, `TaskSuggestionService` com filtro por categoria
+  - [x] Documentos com allowlist, status de processamento, XSS mitigado
+  - [x] 270 testes automatizados passando (incluindo ZDR, fallback, escopo, métricas, prompt injection)
+  - [x] Pint limpo, build Vite, documentação atualizada
+  - [ ] **Deploy em produção**
 - [ ] Preenchimento final do manual do usuário (29-MANUAL-DO-USUARIO.md)
 
 ## Fases concluídas

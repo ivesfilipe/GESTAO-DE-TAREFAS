@@ -10,6 +10,7 @@ use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Gate;
 
 class TaskApiController extends Controller
 {
@@ -19,6 +20,7 @@ class TaskApiController extends Controller
 
         $tasks = Task::query()
             ->with(['assignee:id,name,email', 'creator:id,name,email'])
+            ->when($user->isGestor(), fn ($q) => $q->forManager($user))
             ->when(! $user->isGestor(), fn ($q) => $q->where('assigned_to', $user->id))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
             ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->input('priority')))
@@ -31,6 +33,8 @@ class TaskApiController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        Gate::authorize('create-task');
+
         $data = $request->validate([
             'title' => ['required', 'max:255'],
             'description' => ['nullable'],
@@ -38,6 +42,11 @@ class TaskApiController extends Controller
             'due_at' => ['required', 'date', 'after:now'],
             'assigned_to' => ['nullable', 'exists:users,id'],
             'recurrence_frequency' => ['nullable', 'in:diaria,semanal,quinzenal,mensal'],
+            'task_type' => ['nullable', 'in:'.implode(',', Task::taskTypes())],
+            'acceptance_criteria' => ['nullable', 'array'],
+            'acceptance_criteria.*' => ['string', 'max:1000'],
+            'expected_evidence' => ['nullable', 'array'],
+            'expected_evidence.*' => ['string', 'max:1000'],
         ]);
 
         $task = (new CreateTask)->execute($request->user(), $data);
@@ -88,14 +97,6 @@ class TaskApiController extends Controller
 
     private function authorizeAccess(Request $request, Task $task): void
     {
-        $user = $request->user();
-
-        if ($user->isGestor()) {
-            return;
-        }
-
-        if ((int) $task->assigned_to !== (int) $user->id && (int) $task->created_by !== (int) $user->id) {
-            abort(403, 'Você não tem acesso a esta tarefa.');
-        }
+        abort_unless(Gate::forUser($request->user())->allows('view-task', $task), 403, 'Você não tem acesso a esta tarefa.');
     }
 }

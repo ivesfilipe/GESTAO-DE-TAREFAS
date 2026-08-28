@@ -14,7 +14,7 @@ class TeamController extends Controller
     {
         Gate::authorize('manage-team');
 
-        $liderados = User::where('role', 'liderado')->paginate();
+        $liderados = User::where('role', 'liderado')->managedBy(auth()->user())->paginate();
 
         return view('team.index', compact('liderados'));
     }
@@ -43,6 +43,7 @@ class TeamController extends Controller
     public function regenerateInvite(User $user)
     {
         Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         $token = (new InviteUser)->createToken($user);
 
@@ -59,6 +60,7 @@ class TeamController extends Controller
     public function destroy(User $user)
     {
         Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         if ($user->id === auth()->id()) {
             return redirect()->route('team.index')
@@ -83,6 +85,7 @@ class TeamController extends Controller
     public function toggleActive(User $user)
     {
         Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         $user->update(['is_active' => ! $user->is_active]);
 

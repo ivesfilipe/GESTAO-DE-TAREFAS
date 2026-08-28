@@ -26,7 +26,7 @@ class DelegationRecommendationService
      */
     public function recommend(User $gestor, string $title, ?string $description = null, ?string $priority = null): array
     {
-        $workload = $this->performance->workloadDistribution();
+        $workload = $this->performance->workloadDistribution($gestor);
         $suggestedAssignee = $this->suggestAssignee($workload);
 
         $context = $this->buildPromptContext($title, $description, $priority, $workload);
@@ -95,7 +95,7 @@ class DelegationRecommendationService
     private function entitiesForContext(User $gestor): array
     {
         $entities = [];
-        $liderados = User::where('role', 'liderado')->where('is_active', true)->get();
+        $liderados = User::where('role', 'liderado')->managedBy($gestor)->where('is_active', true)->get();
 
         foreach ($liderados as $liderado) {
             $entities = array_merge($entities, app(Safety\ZeroDataRetention::class)->entitiesFromUser($liderado));

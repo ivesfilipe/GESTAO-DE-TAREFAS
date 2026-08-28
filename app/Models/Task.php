@@ -45,6 +45,8 @@ class Task extends Model
             'completed_at' => 'datetime',
             'recurrence_next_at' => 'datetime',
             'scheduled_start' => 'datetime',
+            'acceptance_criteria' => 'array',
+            'expected_evidence' => 'array',
         ];
     }
 
@@ -87,6 +89,14 @@ class Task extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function scopeForManager(Builder $query, User $manager): Builder
+    {
+        return $query->where(function (Builder $query) use ($manager) {
+            $query->where('created_by', $manager->id)
+                ->orWhereHas('assignee', fn (Builder $assignees) => $assignees->managedBy($manager));
+        });
     }
 
     public function assignee()

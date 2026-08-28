@@ -37,20 +37,6 @@ $PHP $COMPOSER_BIN install --no-dev --optimize-autoloader --ignore-platform-req=
 echo "== Rodando migrations =="
 $PHP artisan migrate --force
 
-echo "== Ativacao do ZDR (one-time) =="
-ZDR_FLAG="storage/app/.zdr_activated_v2"
-if [ ! -f "$ZDR_FLAG" ]; then
-  if grep -q "^GROQ_ZDR_CONFIRMED=" .env; then
-    sed -i 's/^GROQ_ZDR_CONFIRMED=.*/GROQ_ZDR_CONFIRMED=true/' .env
-  else
-    echo "GROQ_ZDR_CONFIRMED=true" >> .env
-  fi
-  touch "$ZDR_FLAG"
-  echo "GROQ_ZDR_CONFIRMED=true aplicado no .env de producao."
-else
-  echo "ZDR ja ativado anteriormente."
-fi
-
 echo "== Configurando envio de e-mail =="
 if ! grep -q "^MAIL_MAILER=" .env || grep -q "^MAIL_MAILER=log" .env || [ -z "$(grep '^MAIL_MAILER=' .env | cut -d= -f2 | tr -d '[:space:]')" ]; then
   sed -i '/^MAIL_MAILER=/d' .env

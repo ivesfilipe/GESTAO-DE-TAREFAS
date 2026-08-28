@@ -18,6 +18,7 @@ class InviteUser
             'email' => $data['email'],
             'password' => Hash::make($password),
             'role' => $data['role'],
+            'manager_id' => $data['role'] === 'liderado' ? $gestor->id : null,
             'invited_at' => now(),
         ]);
 

@@ -12,6 +12,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('manage-team');
+        $gestor = $request->user();
 
         $days = in_array($request->integer('periodo'), [30, 90, 365], true)
             ? $request->integer('periodo')
@@ -20,6 +21,7 @@ class ReportController extends Controller
         $since = now()->subDays($days);
 
         $concluded = Task::query()
+            ->forManager($gestor)
             ->where('status', 'concluida')
             ->whereBetween('completed_at', [$since, now()]);
 
@@ -34,6 +36,7 @@ class ReportController extends Controller
         $approvedCount = (clone $concluded)->count();
 
         $rejectedCount = Task::query()
+            ->forManager($gestor)
             ->where('status', 'reprovada')
             ->whereBetween('updated_at', [$since, now()])
             ->count();
@@ -50,10 +53,12 @@ class ReportController extends Controller
         $lateRate = $approvedCount > 0 ? $lateCount / $approvedCount * 100 : 0.0;
 
         $createdCount = Task::withTrashed()
+            ->forManager($gestor)
             ->whereBetween('created_at', [$since, now()])
             ->count();
 
         $rejectionCategories = Task::query()
+            ->forManager($gestor)
             ->where('status', 'reprovada')
             ->whereBetween('updated_at', [$since, now()])
             ->selectRaw('rejection_category, COUNT(*) as total')
@@ -69,6 +74,7 @@ class ReportController extends Controller
 
         $perUser = User::query()
             ->where('role', 'liderado')
+            ->managedBy($gestor)
             ->where('is_active', true)
             ->get()
             ->map(function (User $liderado) use ($since) {

@@ -54,13 +54,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/equipe/{user}/documentos', [TeamProfileController::class, 'storeDocument'])->name('team.profile.documents.store');
         Route::delete('/equipe/{user}/documentos/{documentId}', [TeamProfileController::class, 'destroyDocument'])->name('team.profile.documents.destroy');
     });
-    Route::get('/equipe/{user}', [TeamProfileController::class, 'show'])->name('team.profile');
-    Route::patch('/equipe/{user}/perfil', [TeamProfileController::class, 'updateProfile'])->name('team.profile.update');
-    Route::post('/equipe/{user}/resumo', [TeamProfileController::class, 'generateSummary'])->name('team.profile.summary');
-    Route::post('/equipe/{user}/sugestoes', [TeamProfileController::class, 'suggestTasks'])->name('team.profile.suggestions');
-    Route::post('/equipe/{user}/documentos', [TeamProfileController::class, 'storeDocument'])->name('team.profile.documents.store');
-    Route::delete('/equipe/{user}/documentos/{documentId}', [TeamProfileController::class, 'destroyDocument'])->name('team.profile.documents.destroy');
-
     Route::get('/tarefas', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tarefas/quadro', [TaskController::class, 'kanban'])->name('tasks.kanban');
     Route::get('/tarefas/nova', [TaskController::class, 'create'])->name('tasks.create');
@@ -97,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('can:create-task')->get('/assistente', [AssistantController::class, 'index'])->name('assistant.index');
     Route::middleware('can:create-task')->post('/assistente/perguntar', [AssistantController::class, 'ask'])->name('assistant.ask');
     Route::middleware('can:create-task')->post('/assistente/cobranca', [AssistantController::class, 'suggestCollection'])->name('assistant.collection');
+    Route::middleware('can:create-task')->post('/assistente/dividir', [AssistantController::class, 'suggestBreakdown'])->name('assistant.breakdown');
     Route::middleware('can:create-task')->post('/assistente/anexos', [AssistantController::class, 'storeAttachment'])->name('assistant.attachments.store');
     Route::get('/agenda-inteligente', [ScheduleController::class, 'index'])->name('schedule.index');
     Route::post('/agenda-inteligente/regenerar', [ScheduleController::class, 'regenerate'])->name('schedule.regenerate');

@@ -7,6 +7,8 @@ conceitualmente.
 Organização (futuro — hoje implícita, única)
    │
    └── Usuário (Gestor | Liderado)
+           ├── Gestor gerencia muitos Liderados
+           ├── Liderado pertence a zero ou um Gestor
           │
           └── Tarefa
                 ├── criada por: Usuário (Gestor)
@@ -17,7 +19,12 @@ Organização (futuro — hoje implícita, única)
                 │        └── possui muitos: Anexo
                 ├── possui muitos: Anexo (direto na tarefa)
                 ├── possui muitos: HistoricoEvento
-                └── possui: SolicitacaoDeAlteracao [0..N]
+                 ├── possui: SolicitacaoDeAlteracao [0..N]
+                 └── define: tipo, critérios de aceitação e evidências
+
+Liderado ── possui um PerfilProfissional
+PerfilProfissional ── possui muitos DocumentoDeEquipe ── possui muitos ChunkDeConhecimento
+UsoDeIA ── referencia opcionalmente Usuário e registra apenas metadados
 
 Notificação
    ├── pertence a: Usuário (destinatário)
@@ -39,11 +46,15 @@ Notificação
 - **SolicitacaoDeAlteracao**: pedido do liderado para mudar prazo ou
   prioridade, sujeito à aprovação do gestor (RN-02).
 - **Notificação**: mensagem in-app gerada por eventos do sistema.
+- **PerfilProfissional**: dados persistentes de função, responsabilidades, objetivos e análise gerada da pessoa liderada.
+- **DocumentoDeEquipe/ChunkDeConhecimento**: arquivo privado do liderado e trechos locais usados para recuperação lexical.
+- **UsoDeIA**: auditoria técnica de provider, modelo, tokens, duração e status, sem conteúdo de prompt ou resposta.
 
 ## Multiplicidades-chave
 - Um Usuário Gestor cria muitas Tarefas.
+- Um Gestor gerencia muitos Liderados; um Liderado só é visível ao seu gestor.
 - Uma Tarefa é atribuída a no máximo um Usuário Liderado por vez.
 - Uma Tarefa tem muitos Comentários, muitos Anexos, muitos
   HistoricoEventos.
 - Um HistoricoEvento pertence a exatamente uma Tarefa e é imutável.
-
+- Um PerfilProfissional pertence a um Liderado; documentos e chunks desse perfil são privados ao gestor responsável.

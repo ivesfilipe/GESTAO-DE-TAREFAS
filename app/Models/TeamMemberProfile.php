@@ -23,20 +23,24 @@ class TeamMemberProfile extends Model
         'strengths',
         'gaps',
         'preferences',
+        'ai_summary_sources',
         'notes',
         'generated_at',
+        'summary_invalidated_at',
     ];
 
     protected function casts(): array
     {
         return [
             'generated_at' => 'datetime',
+            'summary_invalidated_at' => 'datetime',
             'strengths' => 'array',
             'gaps' => 'array',
             'preferences' => 'array',
             'responsibilities' => 'array',
             'recurring_responsibilities' => 'array',
             'professional_objectives' => 'array',
+            'ai_summary_sources' => 'array',
         ];
     }
 

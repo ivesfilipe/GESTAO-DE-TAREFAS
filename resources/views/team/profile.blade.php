@@ -212,12 +212,16 @@
         </div>
 
         <div class="rounded-xl bg-white dark:bg-white/[0.05] backdrop-blur border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between flex-wrap gap-2">
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Sugestões de tarefas</h2>
-                <button type="button" id="suggest-tasks"
-                        class="inline-flex items-center gap-1 rounded-full bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 transition-colors">
-                    ✨ Sugerir
-                </button>
+                <div class="flex flex-wrap gap-1" id="suggestion-categories">
+                    <button type="button" class="suggestion-category-btn active rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white" data-category="">Todas</button>
+                    <button type="button" class="suggestion-category-btn rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200" data-category="demanda">Demandas</button>
+                    <button type="button" class="suggestion-category-btn rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200" data-category="compra">Compras</button>
+                    <button type="button" class="suggestion-category-btn rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200" data-category="servico">Serviços</button>
+                    <button type="button" class="suggestion-category-btn rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200" data-category="desenvolvimento">Desenvolvimento</button>
+                    <button type="button" class="suggestion-category-btn rounded-full bg-slate-100 dark:bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200" data-category="responsabilidade">Responsabilidades</button>
+                </div>
             </div>
             <div id="suggestions-content" class="p-5">
                 <p class="text-sm text-slate-400 dark:text-slate-500 italic">Clique em "Sugerir" para gerar tarefas baseadas exclusivamente nos dados registrados.</p>
@@ -237,7 +241,7 @@
         <div class="p-5">
             <form method="POST" action="{{ route('team.profile.documents.store', $user) }}" enctype="multipart/form-data" class="mb-5 flex flex-col sm:flex-row gap-3">
                 @csrf
-                <input type="file" name="document" accept=".txt,.md,.pdf,.docx" required
+                <input type="file" name="document" accept=".txt,.md,.pdf,.doc,.docx,.csv" required
                        class="flex-1 rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 file:mr-3 file:rounded file:border-0 file:bg-brand-50 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-brand-700"/>
                 <input type="text" name="name" placeholder="Nome opcional" maxlength="255"
                        class="rounded-lg border border-slate-300 dark:border-white/10 px-3 py-2 text-sm text-slate-700 dark:text-slate-300"/>
@@ -310,7 +314,19 @@
 @endsection
 
 @push('scripts')
-<script>
+    <script>
+    const createElement = (tag, classes, text = null) => {
+        const element = document.createElement(tag);
+        element.className = classes;
+        if (text !== null) element.textContent = text;
+        return element;
+    };
+
+    const renderSources = (list, box, sources) => {
+        list.replaceChildren(...sources.map((source) => createElement('li', '', source)));
+        box.classList.toggle('hidden', sources.length === 0);
+    };
+
     (function () {
         const toggle = document.getElementById('edit-profile-toggle');
         const readBox = document.getElementById('profile-read');
@@ -343,25 +359,21 @@
             window.axios.post('{{ route('team.profile.summary', $user) }}')
                 .then(({ data }) => {
                     const p = data.profile;
-                    let html = '';
+                    const nodes = [];
                     if (p.summary) {
-                        html += `<p class="text-sm text-slate-700 dark:text-slate-300 mb-4">${p.summary}</p>`;
+                        nodes.push(createElement('p', 'text-sm text-slate-700 dark:text-slate-300 mb-4', p.summary));
                     }
-                    if (p.strengths && p.strengths.length) {
-                        html += `<div class="mb-3"><p class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Pontos fortes</p><ul class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300">${p.strengths.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
-                    }
-                    if (p.gaps && p.gaps.length) {
-                        html += `<div class="mb-3"><p class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Oportunidades</p><ul class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300">${p.gaps.map(g => `<li>${g}</li>`).join('')}</ul></div>`;
-                    }
-                    if (p.preferences && p.preferences.length) {
-                        html += `<div><p class="text-xs uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Preferências</p><ul class="list-disc list-inside text-sm text-slate-700 dark:text-slate-300">${p.preferences.map(p => `<li>${p}</li>`).join('')}</ul></div>`;
-                    }
-                    content.innerHTML = html || '<p class="text-sm text-slate-600 dark:text-slate-400">Análise gerada.</p>';
-
-                    if (data.sources && data.sources.length) {
-                        sourcesList.innerHTML = data.sources.map(s => `<li>${s}</li>`).join('');
-                        sourcesBox.classList.remove('hidden');
-                    }
+                    [['Pontos fortes', p.strengths], ['Oportunidades', p.gaps], ['Preferências', p.preferences]].forEach(([label, values]) => {
+                        if (!values?.length) return;
+                        const section = createElement('div', label === 'Preferências' ? '' : 'mb-3');
+                        section.append(createElement('p', 'text-xs uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1', label));
+                        const list = createElement('ul', 'list-disc list-inside text-sm text-slate-700 dark:text-slate-300');
+                        list.replaceChildren(...values.map((value) => createElement('li', '', value)));
+                        section.append(list);
+                        nodes.push(section);
+                    });
+                    content.replaceChildren(...(nodes.length ? nodes : [createElement('p', 'text-sm text-slate-600 dark:text-slate-400', 'Análise gerada.')]));
+                    renderSources(sourcesList, sourcesBox, data.sources || []);
                 })
                 .catch((err) => {
                     errorBox.textContent = err.response?.data?.message ?? 'Não foi possível gerar a análise.';
@@ -380,6 +392,8 @@
         const sourcesBox = document.getElementById('suggestions-sources');
         const sourcesList = document.getElementById('suggestions-sources-list');
         const errorBox = document.getElementById('suggestions-error');
+        const categoryBtns = document.querySelectorAll('.suggestion-category-btn');
+        let currentCategory = '';
 
         const categoryLabels = {
             recorrente: 'Recorrente',
@@ -397,57 +411,79 @@
             unica: 'Única',
         };
 
+        categoryBtns.forEach(b => {
+            b.addEventListener('click', () => {
+                categoryBtns.forEach(b2 => b2.classList.toggle('active', b2 === b));
+                currentCategory = b.dataset.category;
+            });
+        });
+
+        const makeHiddenInput = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
+        };
+
+        const createSuggestion = (suggestion) => {
+            const card = createElement('div', 'rounded-lg border border-slate-100 dark:border-white/5 p-3');
+            const header = createElement('div', 'flex items-center justify-between gap-2 mb-1');
+            header.append(
+                createElement('span', 'text-sm font-semibold text-slate-800 dark:text-slate-100', suggestion.title),
+                createElement('span', 'rounded-full bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400', categoryLabels[suggestion.category] || suggestion.category),
+            );
+            card.append(
+                header,
+                createElement('p', 'text-xs text-slate-500 dark:text-slate-400 mb-1', suggestion.objective),
+                createElement('p', 'text-xs text-slate-500 dark:text-slate-400 mb-2', `Por que: ${suggestion.reason}`),
+            );
+            const details = createElement('div', 'flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500');
+            details.append(
+                createElement('span', '', `Tipo: ${suggestion.task_type}`),
+                createElement('span', '', '·'),
+                createElement('span', '', `Periodicidade: ${periodicityLabels[suggestion.periodicity] || suggestion.periodicity}`),
+                createElement('span', '', '·'),
+                createElement('span', '', `Prioridade: ${suggestion.priority}`),
+            );
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = @json(route('tasks.store'));
+            form.className = 'mt-2';
+            form.append(
+                makeHiddenInput('_token', @json(csrf_token())),
+                makeHiddenInput('title', suggestion.title),
+                makeHiddenInput('task_type', suggestion.task_type),
+                makeHiddenInput('priority', suggestion.priority),
+                makeHiddenInput('description', `${suggestion.objective}\n\n${suggestion.reason}`),
+                makeHiddenInput('due_at', @json(now()->addDays(7)->format('Y-m-d H:i:s'))),
+                makeHiddenInput('assigned_to', @json((string) $user->id)),
+            );
+            form.append(createElement('button', 'rounded-lg bg-brand-50 border border-brand-200 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100 transition-colors', 'Transformar em rascunho'));
+            form.lastChild.type = 'submit';
+            card.append(details, form);
+
+            return card;
+        };
+
         btn.addEventListener('click', () => {
             btn.disabled = true;
             btn.textContent = '✨ Gerando...';
             errorBox.classList.add('hidden');
 
-            window.axios.post('{{ route('team.profile.suggestions', $user) }}')
+            window.axios.post('{{ route('team.profile.suggestions', $user) }}', {
+                category: currentCategory || null,
+            })
                 .then(({ data }) => {
                     if (!data.ok || !data.suggestions.length) {
-                        content.innerHTML = '<p class="text-sm text-slate-600 dark:text-slate-400">Nenhuma sugestão encontrada nos dados registrados.</p>';
+                        content.replaceChildren(createElement('p', 'text-sm text-slate-600 dark:text-slate-400', 'Nenhuma sugestão encontrada nos dados registrados.'));
                         return;
                     }
 
-                    let html = '<div class="space-y-3">';
-                    data.suggestions.forEach((s, i) => {
-                        html += `
-                            <div class="rounded-lg border border-slate-100 dark:border-white/5 p-3">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">${s.title}</span>
-                                    <span class="rounded-full bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400">${categoryLabels[s.category] || s.category}</span>
-                                </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">${s.objective}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-2"><strong>Por que:</strong> ${s.reason}</p>
-                                <div class="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
-                                    <span>Tipo: ${s.type}</span>
-                                    <span>·</span>
-                                    <span>Periodicidade: ${periodicityLabels[s.periodicity] || s.periodicity}</span>
-                                    <span>·</span>
-                                    <span>Prioridade: ${s.priority}</span>
-                                </div>
-                                <form method="POST" action="{{ route('tasks.store') }}" class="mt-2">
-                                    @csrf
-                                    <input type="hidden" name="title" value="${s.title.replace(/"/g, '&quot;')}">
-                                    <input type="hidden" name="task_type" value="${s.type}">
-                                    <input type="hidden" name="priority" value="${s.priority}">
-                                    <input type="hidden" name="description" value="${(s.objective + '\n\n' + s.reason).replace(/"/g, '&quot;')}">
-                                    <input type="hidden" name="due_at" value="{{ now()->addDays(7)->format('Y-m-d H:i:s') }}">
-                                    <input type="hidden" name="assigned_to" value="{{ $user->id }}">
-                                    <button type="submit" class="rounded-lg bg-brand-50 border border-brand-200 px-3 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100 transition-colors">
-                                        Transformar em rascunho
-                                    </button>
-                                </form>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                    content.innerHTML = html;
-
-                    if (data.sources && data.sources.length) {
-                        sourcesList.innerHTML = data.sources.map(s => `<li>${s}</li>`).join('');
-                        sourcesBox.classList.remove('hidden');
-                    }
+                    const list = createElement('div', 'space-y-3');
+                    list.replaceChildren(...data.suggestions.map(createSuggestion));
+                    content.replaceChildren(list);
+                    renderSources(sourcesList, sourcesBox, data.sources || []);
                 })
                 .catch((err) => {
                     errorBox.textContent = err.response?.data?.message ?? 'Não foi possível gerar sugestões.';

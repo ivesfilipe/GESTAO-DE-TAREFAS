@@ -11,21 +11,23 @@ class DashboardController extends Controller
     public function index()
     {
         Gate::authorize('manage-team');
+        $gestor = auth()->user();
+        $tasks = Task::query()->forManager($gestor);
 
-        $tarefasAtrasadas = Task::whereNotIn('status', ['concluida', 'cancelada'])
+        $tarefasAtrasadas = (clone $tasks)->whereNotIn('status', ['concluida', 'cancelada'])
             ->where('due_at', '<', now())
             ->where('status', '!=', 'bloqueada')
             ->count();
 
-        $tarefasUrgentes = Task::whereIn('priority', ['urgente', 'critica'])
+        $tarefasUrgentes = (clone $tasks)->whereIn('priority', ['urgente', 'critica'])
             ->whereNotIn('status', ['concluida', 'cancelada'])
             ->count();
 
-        $vencemHoje = Task::whereDate('due_at', now()->toDateString())->count();
+        $vencemHoje = (clone $tasks)->whereDate('due_at', now()->toDateString())->count();
 
-        $aguardandoAprovacao = Task::where('status', 'aguardando_aprovacao')->count();
+        $aguardandoAprovacao = (clone $tasks)->where('status', 'aguardando_aprovacao')->count();
 
-        $liderados = User::where('role', 'liderado')->get();
+        $liderados = User::where('role', 'liderado')->managedBy($gestor)->get();
         $visaoPorPessoa = [];
 
         foreach ($liderados as $liderado) {

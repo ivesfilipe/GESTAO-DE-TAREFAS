@@ -65,7 +65,7 @@ class CopilotService
                 user: $questionWithDocuments,
                 temperature: 0.3,
                 maxTokens: 900,
-                entities: $this->entitiesForContext(),
+                entities: $this->entitiesForContext($gestor),
                 tools: $this->toolDefinitions(),
                 messages: $messages,
             );
@@ -82,7 +82,7 @@ class CopilotService
 
             foreach ($response->toolCalls as $call) {
                 $result = $this->executeTool($gestor, $call['name'], $call['arguments'] ?? []);
-                $collectedTasks = array_merge($collectedTasks, $this->extractTasksFromToolResult($result));
+                $collectedTasks = array_merge($collectedTasks, $this->extractTasksFromToolResult($gestor, $result));
                 $messages[] = [
                     'role' => 'tool',
                     'tool_call_id' => $call['id'] ?? '',
@@ -116,6 +116,7 @@ class CopilotService
 Você é um assistente de gestão. Gere um rascunho de mensagem de cobrança objetiva e respeitosa.
 A mensagem NUNCA deve ser enviada automaticamente; o gestor revisará antes.
 Não inclua dados pessoais sensíveis. Use o nome do responsável apenas se for seguro.
+Tons permitidos: Objetiva, Firme, Colaborativa. Sem agressividade. Sem frases motivacionais genéricas.
 Responda APENAS com o texto do rascunho.
 PROMPT;
 
@@ -263,17 +264,17 @@ PROMPT;
     {
         try {
             return match ($name) {
-                'list_overdue_tasks' => $this->toolOverdueTasks($arguments['limit'] ?? 10),
-                'list_tasks_due_today' => $this->toolTasksDueToday($arguments['limit'] ?? 10),
-                'list_blocked_tasks' => $this->toolBlockedTasks($arguments['limit'] ?? 10),
-                'list_tasks_awaiting_approval' => $this->toolAwaitingApproval($arguments['limit'] ?? 10),
-                'get_team_member_profile' => $this->toolMemberProfile($arguments['name'] ?? ''),
-                'search_team_knowledge' => $this->toolSearchKnowledge(
+                'list_overdue_tasks' => $this->toolOverdueTasks($gestor, $arguments['limit'] ?? 10),
+                'list_tasks_due_today' => $this->toolTasksDueToday($gestor, $arguments['limit'] ?? 10),
+                'list_blocked_tasks' => $this->toolBlockedTasks($gestor, $arguments['limit'] ?? 10),
+                'list_tasks_awaiting_approval' => $this->toolAwaitingApproval($gestor, $arguments['limit'] ?? 10),
+                'get_team_member_profile' => $this->toolMemberProfile($gestor, $arguments['name'] ?? ''),
+                'search_team_knowledge' => $this->toolSearchKnowledge($gestor,
                     $arguments['member_name'] ?? '',
                     $arguments['query'] ?? '',
                     $arguments['limit'] ?? 3,
                 ),
-                'search_tasks' => $this->toolSearchTasks($arguments['query'] ?? '', $arguments['limit'] ?? 10),
+                'search_tasks' => $this->toolSearchTasks($gestor, $arguments['query'] ?? '', $arguments['limit'] ?? 10),
                 'search_company_knowledge' => $this->toolSearchCompanyKnowledge(
                     $arguments['query'] ?? '',
                     $arguments['limit'] ?? 5,
@@ -290,9 +291,9 @@ PROMPT;
     /**
      * @return list<array<string, mixed>>
      */
-    private function toolOverdueTasks(int $limit): array
+    private function toolOverdueTasks(User $gestor, int $limit): array
     {
-        return Task::overdue()->limit($limit)->get()->map(fn (Task $task) => [
+        return Task::query()->forManager($gestor)->overdue()->limit($limit)->get()->map(fn (Task $task) => [
             'id' => $task->id,
             'title' => $task->title,
             'priority' => $task->priority,
@@ -304,9 +305,10 @@ PROMPT;
     /**
      * @return list<array<string, mixed>>
      */
-    private function toolTasksDueToday(int $limit): array
+    private function toolTasksDueToday(User $gestor, int $limit): array
     {
         return Task::query()
+            ->forManager($gestor)
             ->whereDate('due_at', today())
             ->whereNotIn('status', ['concluida', 'cancelada'])
             ->limit($limit)
@@ -322,9 +324,9 @@ PROMPT;
     /**
      * @return list<array<string, mixed>>
      */
-    private function toolBlockedTasks(int $limit): array
+    private function toolBlockedTasks(User $gestor, int $limit): array
     {
-        return Task::where('status', 'bloqueada')->limit($limit)->get()->map(fn (Task $task) => [
+        return Task::query()->forManager($gestor)->where('status', 'bloqueada')->limit($limit)->get()->map(fn (Task $task) => [
             'id' => $task->id,
             'title' => $task->title,
             'assignee_id' => $task->assigned_to,
@@ -335,9 +337,9 @@ PROMPT;
     /**
      * @return list<array<string, mixed>>
      */
-    private function toolAwaitingApproval(int $limit): array
+    private function toolAwaitingApproval(User $gestor, int $limit): array
     {
-        return Task::where('status', 'aguardando_aprovacao')->limit($limit)->get()->map(fn (Task $task) => [
+        return Task::query()->forManager($gestor)->where('status', 'aguardando_aprovacao')->limit($limit)->get()->map(fn (Task $task) => [
             'id' => $task->id,
             'title' => $task->title,
             'assignee_id' => $task->assigned_to,
@@ -347,9 +349,10 @@ PROMPT;
     /**
      * @return array<string, mixed>
      */
-    private function toolMemberProfile(string $name): array
+    private function toolMemberProfile(User $gestor, string $name): array
     {
         $member = User::where('role', 'liderado')
+            ->managedBy($gestor)
             ->where('is_active', true)
             ->where('name', 'like', "%{$name}%")
             ->first();
@@ -375,9 +378,10 @@ PROMPT;
     /**
      * @return array<string, mixed>
      */
-    private function toolSearchKnowledge(string $name, string $query, int $limit): array
+    private function toolSearchKnowledge(User $gestor, string $name, string $query, int $limit): array
     {
         $member = User::where('role', 'liderado')
+            ->managedBy($gestor)
             ->where('is_active', true)
             ->where('name', 'like', "%{$name}%")
             ->first();
@@ -400,7 +404,7 @@ PROMPT;
     /**
      * @return list<array<string, mixed>>
      */
-    private function toolSearchTasks(string $query, int $limit): array
+    private function toolSearchTasks(User $gestor, string $query, int $limit): array
     {
         $query = trim($query);
 
@@ -409,6 +413,7 @@ PROMPT;
         }
 
         return Task::query()
+            ->forManager($gestor)
             ->with('assignee')
             ->whereNotIn('status', ['concluida', 'cancelada'])
             ->where(function ($builder) use ($query) {
@@ -447,25 +452,25 @@ PROMPT;
         $lines = [];
 
         if (str_contains($q, 'atrasad')) {
-            $tasks = $this->hydrateTasks($this->toolOverdueTasks(15));
+            $tasks = $this->hydrateTasks($gestor, $this->toolOverdueTasks($gestor, 15));
             $lines[] = $tasks === [] ? 'Não há tarefas atrasadas.' : 'Tarefas atrasadas:';
         } elseif (str_contains($q, 'bloque')) {
-            $tasks = $this->hydrateTasks($this->toolBlockedTasks(15));
+            $tasks = $this->hydrateTasks($gestor, $this->toolBlockedTasks($gestor, 15));
             $lines[] = $tasks === [] ? 'Não há tarefas bloqueadas.' : 'Tarefas bloqueadas:';
         } elseif (str_contains($q, 'aprov')) {
-            $tasks = $this->hydrateTasks($this->toolAwaitingApproval(15));
+            $tasks = $this->hydrateTasks($gestor, $this->toolAwaitingApproval($gestor, 15));
             $lines[] = $tasks === [] ? 'Nenhuma tarefa aguardando aprovação.' : 'Tarefas aguardando aprovação:';
         } elseif (preg_match('/hoje|vencem hoje|vence hoje/u', $q)) {
-            $tasks = $this->hydrateTasks($this->toolTasksDueToday(15));
+            $tasks = $this->hydrateTasks($gestor, $this->toolTasksDueToday($gestor, 15));
             $lines[] = $tasks === [] ? 'Nenhuma tarefa vence hoje.' : 'Tarefas que vencem hoje:';
         } else {
             $taskQuery = preg_replace('/^(?:abre|abrir|mostra|mostre)(?:\s+a)?\s+tarefa\s+/iu', '', trim($question)) ?? $question;
-            $tasks = $this->toolSearchTasks($taskQuery, 10);
+            $tasks = $this->toolSearchTasks($gestor, $taskQuery, 10);
             if ($tasks !== []) {
                 $lines[] = 'Encontrei estas tarefas:';
             } else {
-                $overdue = $this->hydrateTasks($this->toolOverdueTasks(5));
-                $today = $this->hydrateTasks($this->toolTasksDueToday(5));
+                $overdue = $this->hydrateTasks($gestor, $this->toolOverdueTasks($gestor, 5));
+                $today = $this->hydrateTasks($gestor, $this->toolTasksDueToday($gestor, 5));
                 $tasks = array_values(array_merge($overdue, $today));
                 $lines[] = 'Resumo rápido do time:';
                 if ($tasks === []) {
@@ -525,7 +530,7 @@ PROMPT;
      * @param  list<array<string, mixed>>  $raw
      * @return list<array<string, mixed>>
      */
-    private function hydrateTasks(array $raw): array
+    private function hydrateTasks(User $gestor, array $raw): array
     {
         $ids = collect($raw)->pluck('id')->filter()->all();
 
@@ -534,6 +539,7 @@ PROMPT;
         }
 
         return Task::with('assignee')
+            ->forManager($gestor)
             ->whereIn('id', $ids)
             ->get()
             ->map(fn (Task $task) => $this->presentTask($task))
@@ -560,14 +566,14 @@ PROMPT;
      * @param  array<string, mixed>|list<array<string, mixed>>  $result
      * @return list<array<string, mixed>>
      */
-    private function extractTasksFromToolResult(array $result): array
+    private function extractTasksFromToolResult(User $gestor, array $result): array
     {
         if ($result === [] || isset($result['error'])) {
             return [];
         }
 
         if (isset($result['id'], $result['title'])) {
-            return $this->hydrateTasks([$result]);
+            return $this->hydrateTasks($gestor, [$result]);
         }
 
         $items = $result['tasks'] ?? $result['results'] ?? $result;
@@ -576,7 +582,7 @@ PROMPT;
             return [];
         }
 
-        return $this->hydrateTasks(array_filter($items, fn ($item) => is_array($item) && isset($item['id'])));
+        return $this->hydrateTasks($gestor, array_filter($items, fn ($item) => is_array($item) && isset($item['id'])));
     }
 
     /**
@@ -644,11 +650,11 @@ PROMPT;
     /**
      * @return array<string, string>
      */
-    private function entitiesForContext(): array
+    private function entitiesForContext(User $gestor): array
     {
         $entities = [];
 
-        foreach (User::where('role', 'liderado')->where('is_active', true)->cursor() as $liderado) {
+        foreach (User::where('role', 'liderado')->managedBy($gestor)->where('is_active', true)->cursor() as $liderado) {
             $entities = array_merge($entities, $this->zdr->entitiesFromUser($liderado));
         }
 

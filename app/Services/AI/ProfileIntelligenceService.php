@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\AI\Prompts\ManagementPrompts;
 use App\Services\AI\Safety\ZeroDataRetention;
 use App\Services\AI\Tools\AITools;
+use Illuminate\Support\Collection;
 
 class ProfileIntelligenceService
 {
@@ -37,8 +38,9 @@ class ProfileIntelligenceService
     {
         $profile = TeamMemberProfile::firstOrNew(['user_id' => $member->id]);
         $metrics = $this->performance->memberMetrics($member);
+        $chunks = $this->knowledge->retrieve($member, 'responsabilidades objetivos função competências', 3);
 
-        $context = $this->buildContext($member, $profile, $metrics);
+        $context = $this->buildContext($member, $profile, $metrics, $chunks);
         $entities = $this->zdr->entitiesFromUser($member);
 
         $response = $this->ai->ask(
@@ -56,7 +58,14 @@ class ProfileIntelligenceService
         $profile->strengths = AITools::normalizeItems($parsed['strengths'] ?? [], 5);
         $profile->gaps = AITools::normalizeItems($parsed['gaps'] ?? [], 4);
         $profile->preferences = AITools::normalizeItems($parsed['preferences'] ?? [], 4);
+        $profile->ai_summary_sources = $chunks
+            ->map(fn ($chunk) => $chunk->document?->name)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
         $profile->generated_at = now();
+        $profile->summary_invalidated_at = null;
         $profile->save();
 
         return $profile;
@@ -65,7 +74,7 @@ class ProfileIntelligenceService
     /**
      * @param  array<string, mixed>  $metrics
      */
-    private function buildContext(User $member, TeamMemberProfile $profile, array $metrics): string
+    private function buildContext(User $member, TeamMemberProfile $profile, array $metrics, Collection $chunks): string
     {
         $lines = [
             'Perfil profissional:',
@@ -85,7 +94,6 @@ class ProfileIntelligenceService
             '- Tempo médio de ciclo: '.($metrics['avg_cycle_hours'] ? $metrics['avg_cycle_hours'].'h' : 'n/a'),
         ];
 
-        $chunks = $this->knowledge->retrieve($member, 'responsabilidades objetivos função competências', 3);
         if ($chunks->isNotEmpty()) {
             $lines[] = '';
             $lines[] = 'Documentos relevantes:';

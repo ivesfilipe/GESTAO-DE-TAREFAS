@@ -25,12 +25,30 @@ class CreateTask
             'recurrence_next_at' => $data['recurrence_next_at'] ?? null,
             'recurrence_series_id' => $data['recurrence_series_id'] ?? null,
             'task_type' => $data['task_type'] ?? 'demanda',
-            'acceptance_criteria' => $data['acceptance_criteria'] ?? null,
-            'expected_evidence' => $data['expected_evidence'] ?? null,
+            'acceptance_criteria' => $this->normalizeList($data['acceptance_criteria'] ?? null),
+            'expected_evidence' => $this->normalizeList($data['expected_evidence'] ?? null),
         ]);
 
         TarefaCriada::dispatch($task, $creator);
 
         return $task;
+    }
+
+    private function normalizeList(array|string|null $value): ?array
+    {
+        if (is_array($value)) {
+            $items = $value;
+        } elseif (is_string($value)) {
+            $items = preg_split('/\R/', $value) ?: [];
+        } else {
+            return null;
+        }
+
+        $items = array_values(array_filter(array_map(
+            fn ($item) => preg_replace('/^\s*(?:\d+[.)]|[-*])\s*/u', '', trim((string) $item)) ?? '',
+            $items,
+        )));
+
+        return $items === [] ? null : $items;
     }
 }

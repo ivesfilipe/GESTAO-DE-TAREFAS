@@ -9,6 +9,52 @@ Formato de cada entrada:
 
 ---
 
+## [2026-08-27] — Fase 27 Parte 2: Copiloto Inteligente do Gestor — UX, segurança e testes
+
+### Delegação Inteligente (`/tarefas/nova`)
+- Structured output JSON com: título, tipo (demanda|compra|serviço|desenvolvimento|responsabilidade|outro), prioridade, prazo, responsável sugerido com justificativa, descrição, critérios de aceitação, evidências esperadas, checkpoints, informações faltantes, confiança.
+- UX mobile-first: entrada livre, preview do rascunho, botão "Aplicar ao formulário" (nada criado automaticamente).
+- Validação de assignee inválido (ID não enviado como candidato → descartado).
+- Fallback preserva dados do parser sem descrição heurística genérica.
+
+### Copiloto do Gestor (`/assistente`)
+- Radar determinístico (Top 5) sem depender de LLM: pontuação por atraso, bloqueio, aprovação, prioridade.
+- Chat com tool calling: `list_overdue_tasks`, `list_tasks_due_today`, `list_blocked_tasks`, `list_tasks_awaiting_approval`, `get_team_member_profile`, `search_team_knowledge`, `search_tasks`, `search_company_knowledge`.
+- "Dividir em passos": botão em cada card de tarefa no chat, abre painel lateral com passos contextuais.
+- Cobrança sugerida: rascunho objetivo (tons: Objetiva, Firme, Colaborativa), **nunca enviada automaticamente**.
+- Contexto seletivo: envia apenas perfil + Top-K chunks + dados operacionais específicos, não o banco inteiro.
+
+### Perfil Inteligente do Liderado (`/equipe/{user}`)
+- Filtro de sugestões por categoria (Todas, Demandas, Compras, Serviços, Desenvolvimento, Responsabilidades).
+- Fontes do resumo IA persistidas (`ai_summary_sources`) e invalidadas ao editar perfil/documentos.
+- Desenvolvimento profissional: **apenas** objetivos explicitamente registrados.
+- Documentos: allowlist (pdf,doc,docx,txt,md,csv), status de processamento, remoção com limpeza de chunks.
+- XSS mitigado: substituição de `innerHTML` por `document.createElement`/`textContent`.
+
+### Segurança e qualidade
+- ZDR bloqueante: providers externos (Groq/OpenAI) **não recebem contexto** enquanto não confirmado.
+- Fallback pago para OpenAI bloqueado; logs `AIUsageLog` apenas metadados (provider, modelo, tokens, status, duração, erro, user_id opcional).
+- Escopo por gestor (`users.manager_id`) em tarefas, API, dashboard, relatórios, radar, tools do Copiloto.
+- Prompt injection em documento não quebra autorização (teste dedicado).
+- Métricas corrigidas: ciclo = `created_at → completed_at`, atraso de entrega compara `completed_at` a `due_at`, reprovação de desempenho só `nao_atende`.
+
+### Testes (270 testes / 616 assertions)
+- GroqProvider: HTTP 200/401/403/429/500, timeout, JSON inválido, chave ausente.
+- ZDR não confirmado bloqueia provider externo antes do prompt.
+- Escopo entre gestores: API, dashboard, relatórios, perfil, tools não vazam dados de outra equipe.
+- Métricas, normalização de critérios/evidências, fontes de perfil.
+- Prompt injection, assignee inválido, fallback IA, parser preservado.
+
+### Arquivos principais
+- `app/Services/AI/SmartDelegationService.php`, `app/Services/AI/CopilotService.php`, `app/Services/AI/ProfileIntelligenceService.php`, `app/Services/AI/TaskSuggestionService.php`
+- `app/Services/AI/ManagementRadarService.php`, `app/Services/AI/AIService.php`, `app/Services/AI/Providers/`
+- `app/Http/Controllers/TaskController.php`, `app/Http/Controllers/AssistantController.php`, `app/Http/Controllers/TeamProfileController.php`
+- `resources/views/tasks/create.blade.php`, `resources/views/assistant/index.blade.php`, `resources/views/team/profile.blade.php`
+- `tests/Feature/Part1SecurityTest.php`, `tests/Unit/Services/AI/GroqProviderTest.php`
+- `database/migrations/2026_08_27_*.php`
+
+---
+
 ## [2026-08-26] — Fase 27 Parte 2: Copiloto Inteligente do Gestor — finalização UX e deploy
 
 ### Novos serviços de IA

@@ -40,8 +40,12 @@ class AIService
     /**
      * @param  list<array<string, mixed>>  $messages
      */
-    public function ask(string $system, string $user, ?float $temperature = null, ?int $maxTokens = null, array $entities = [], ?array $responseFormat = null, array $tools = [], array $messages = []): AIResponse
+    public function ask(string $system, string $user, ?float $temperature = null, ?int $maxTokens = null, array $entities = [], ?array $responseFormat = null, array $tools = [], array $messages = [], ?string $model = null): AIResponse
     {
+        if ($this->isExternalProvider() && ! $this->zdr->isConfirmed()) {
+            throw new RuntimeException('ZDR exige confirmação administrativa antes de enviar qualquer contexto a um provider externo.');
+        }
+
         if (! $this->zdr->isConfirmed()) {
             $combined = $system.' '.$user;
             if (! $this->zdr->allow($combined)) {
@@ -68,6 +72,7 @@ class AIService
             responseFormat: $responseFormat,
             tools: $tools,
             messages: $messages,
+            model: $model,
         );
 
         $startedAt = now();
@@ -100,20 +105,24 @@ class AIService
 
         try {
             AIUsageLog::create([
+                'user_id' => auth()->id(),
                 'provider' => $request->metadata['provider'] ?? $this->provider->name(),
-                'model' => config("ai.providers.{$this->provider->name()}.model"),
-                'prompt' => mb_substr($request->system."\n\n".$request->user, 0, 4000),
-                'response' => $response ? mb_substr($response->content, 0, 4000) : null,
+                'model' => $request->model ?? config("ai.providers.{$this->provider->name()}.model"),
                 'prompt_tokens' => $response?->promptTokens,
                 'completion_tokens' => $response?->completionTokens,
                 'total_tokens' => $response?->totalTokens,
                 'status' => $error ? 'error' : 'success',
-                'error_message' => $error ? mb_substr($error->getMessage(), 0, 500) : null,
+                'error_message' => $error ? $error::class : null,
                 'duration_ms' => (int) ($startedAt->diffInMilliseconds(now())),
                 'metadata' => array_diff_key($request->metadata, ['provider' => true]),
             ]);
         } catch (\Throwable $e) {
             Log::warning('Falha ao registrar log de uso de IA', ['error' => $e->getMessage()]);
         }
+    }
+
+    private function isExternalProvider(): bool
+    {
+        return ! in_array($this->provider->name(), ['mock', 'ollama'], true);
     }
 }

@@ -72,6 +72,12 @@ class AIProviderManager
         $chain = config('ai.fallback_chain', []);
 
         foreach ($chain as $name) {
+            if ($name === 'openai') {
+                Log::warning('Fallback pago bloqueado por política', ['provider' => $name]);
+
+                continue;
+            }
+
             try {
                 $candidate = $this->create($name);
                 if ($candidate->isAvailable()) {

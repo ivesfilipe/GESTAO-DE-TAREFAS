@@ -42,7 +42,7 @@ Métricas de performance e carga.
 ```php
 $service = app(TeamPerformanceService::class);
 $metrics = $service->memberMetrics($liderado);
-$workload = $service->workloadDistribution();
+$workload = $service->workloadDistribution($gestor);
 ```
 
 ## TeamKnowledgeService
@@ -61,7 +61,7 @@ Gera rascunho completo de tarefa a partir de texto livre, com structured output 
 
 ```php
 $service = app(SmartDelegationService::class);
-$draft = $service->draft($gestor, $text, $preselectedAssigneeId);
+$draft = $service->draft($gestor, $text, $preselectedAssignee);
 // $draft['title'], $draft['task_type'], $draft['recommended_assignee_id'], ...
 ```
 
@@ -71,7 +71,7 @@ Chat do gestor com ferramentas (tools) para consultar tarefas e perfis, além de
 
 ```php
 $copilot = app(CopilotService::class);
-$answer = $copilot->ask($gestor, 'O que está atrasado?');
+$answer = $copilot->answer($gestor, 'O que está atrasado?');
 $draft = $copilot->suggestCollection($gestor, $task);
 ```
 
@@ -93,6 +93,7 @@ $service = app(TaskSuggestionService::class);
 $suggestions = $service->suggest($liderado, $category);
 ```
 
-## Regra importante
+## Regras importantes
 
-Todos os serviços retornam **rascunhos**. A ação final deve ser executada por controllers/actions existentes com confirmação do gestor.
+- Serviços de sugestão, delegação e cobrança retornam rascunhos; criar, atribuir, aprovar ou enviar mensagem exige controller/action autorizado e confirmação humana.
+- `TeamKnowledgeService` e `ProfileIntelligenceService` persistem documentos, chunks e análise de perfil. Toda chamada externa passa por `AIService`, que aplica ZDR e registra somente metadados de auditoria.

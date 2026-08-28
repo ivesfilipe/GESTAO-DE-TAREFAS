@@ -18,6 +18,10 @@
 | GET | /equipe | gestor | lista de liderados |
 | POST | /equipe | gestor | convida novo liderado |
 | PATCH | /equipe/{user} | gestor | desativa/reativa usuário |
+| GET | /equipe/{user} | gestor responsável | perfil inteligente do liderado |
+| PATCH | /equipe/{user}/perfil | gestor responsável | atualiza perfil profissional |
+| POST | /equipe/{user}/resumo | gestor responsável | gera resumo IA e fontes |
+| POST/DELETE | /equipe/{user}/documentos[/{id}] | gestor responsável | armazena/remove documento privado |
 
 ## Tarefas
 | Método | Rota | Acesso | Descrição |
@@ -25,6 +29,7 @@
 | GET | /tarefas | gestor + liderado (filtrado) | lista de tarefas |
 | GET | /tarefas/nova | gestor | formulário de criação rápida |
 | POST | /tarefas | gestor | cria tarefa |
+| POST | /tarefas/delegar-com-ia | gestor | gera rascunho de tarefa; não cria nem atribui automaticamente |
 | GET | /tarefas/{task} | gestor + liderado (se responsável) | detalhe da tarefa |
 | PATCH | /tarefas/{task}/atribuir | gestor | define/altera responsável |
 | PATCH | /tarefas/{task}/status | gestor + liderado (regras por status) | muda status |
@@ -43,6 +48,7 @@
 |---|---|---|---|
 | GET | /painel | gestor | dashboard do gestor |
 | GET | /minhas-tarefas | liderado | portal "o que eu preciso fazer agora" |
+| GET/POST | /assistente e subrotas | gestor | Copiloto, radar, anexos de conhecimento e rascunhos read-only |
 
 ## Notificações
 | Método | Rota | Acesso | Descrição |
@@ -58,4 +64,3 @@
   Action dedicada (nunca update direto de coluna via controller).
 - Erros de validação retornam mensagens em português, claras, associadas
   ao campo específico.
-

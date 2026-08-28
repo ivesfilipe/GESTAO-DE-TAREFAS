@@ -70,7 +70,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('view-task', function (User $user, Task $task) {
-            return $user->isGestor() || $task->assigned_to === $user->id;
+            return ($user->isGestor() && Task::query()->forManager($user)->whereKey($task->id)->exists())
+                || $task->assigned_to === $user->id;
         });
 
         Gate::define('manage-team', function (User $user) {
@@ -81,12 +82,12 @@ class AppServiceProvider extends ServiceProvider
             return $user->isGestor();
         });
 
-        Gate::define('approve-task', function (User $user) {
-            return $user->isGestor();
+        Gate::define('approve-task', function (User $user, Task $task) {
+            return $user->isGestor() && Task::query()->forManager($user)->whereKey($task->id)->exists();
         });
 
-        Gate::define('reject-task', function (User $user) {
-            return $user->isGestor();
+        Gate::define('reject-task', function (User $user, Task $task) {
+            return $user->isGestor() && Task::query()->forManager($user)->whereKey($task->id)->exists();
         });
 
         Gate::define('viewPulse', function (User $user) {
@@ -97,7 +98,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('view-team-profile', [TeamMemberPolicy::class, 'viewProfile']);
         Gate::define('manage-team-documents', [TeamMemberPolicy::class, 'manageDocuments']);
         Gate::define('delete-team-document', function (User $user, TeamMemberDocument $document) {
-            return $user->isGestor();
+            return $user->isGestor() && (int) $document->user->manager_id === (int) $user->id;
         });
 
         Feature::define('ai-assistant', fn (User $user) => $user->isGestor());

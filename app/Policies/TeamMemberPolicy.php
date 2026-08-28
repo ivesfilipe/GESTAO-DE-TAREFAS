@@ -9,16 +9,21 @@ class TeamMemberPolicy
 {
     public function viewProfile(User $user, User $member): bool
     {
-        return $user->isGestor() && $member->isLiderado();
+        return $this->manages($user, $member);
     }
 
     public function manageDocuments(User $user, User $member): bool
     {
-        return $user->isGestor() && $member->isLiderado();
+        return $this->manages($user, $member);
     }
 
     public function deleteDocument(User $user, TeamMemberDocument $document): bool
     {
-        return $user->isGestor();
+        return $this->manages($user, $document->user);
+    }
+
+    private function manages(User $user, User $member): bool
+    {
+        return $user->isGestor() && $member->isLiderado() && (int) $member->manager_id === (int) $user->id;
     }
 }

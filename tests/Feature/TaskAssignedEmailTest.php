@@ -60,7 +60,11 @@ class TaskAssignedEmailTest extends TestCase
 
         $gestor = User::factory()->gestor()->create();
         $liderado = User::factory()->liderado()->create(['email' => 'novo@liderado.com']);
-        $task = Task::factory()->create(['assigned_to' => null, 'status' => 'nao_atribuida']);
+        $task = Task::factory()->create([
+            'created_by' => $gestor->id,
+            'assigned_to' => null,
+            'status' => 'nao_atribuida',
+        ]);
 
         $this->actingAs($gestor)
             ->patch(route('tasks.assign', $task), ['assigned_to' => $liderado->id])

@@ -77,3 +77,11 @@ do banco — tudo é soft delete, preservando o histórico completo para
 consulta futura ("meses depois, será possível entender exatamente o que
 aconteceu").
 
+## RN-13 — Escopo da equipe
+Cada liderado pertence a um gestor por `manager_id`. Dashboard, relatórios, API, perfil e ferramentas do Copiloto devem filtrar sempre por esse vínculo. Gestores não podem consultar recursos de outra equipe.
+
+## RN-14 — Uso seguro de IA
+Provider externo só recebe contexto após confirmação administrativa de ZDR. Sem confirmação, a chamada externa é bloqueada antes do prompt. Logs registram metadados técnicos, nunca prompts, respostas, anexos ou segredos.
+
+## RN-15 — Métricas gerenciais
+Tempo de ciclo é `completed_at - created_at`. Atraso de entrega compara a conclusão ao prazo. A taxa de reprovação de desempenho considera somente `rejection_category = nao_atende`; demais categorias são mantidas como indicadores operacionais.

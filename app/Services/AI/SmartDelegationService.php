@@ -45,9 +45,9 @@ class SmartDelegationService
     public function draft(User $gestor, string $input, ?User $selectedAssignee = null): array
     {
         $parsed = $this->parseInput($input);
-        $candidates = $this->candidateAssignees();
+        $candidates = $this->candidateAssignees($gestor);
 
-        $context = $this->buildContext($input, $parsed, $candidates, $selectedAssignee);
+        $context = $this->buildContext($gestor, $input, $parsed, $candidates, $selectedAssignee);
         $entities = $this->entitiesForContext($candidates, $selectedAssignee);
 
         $response = $this->ai->ask(
@@ -88,9 +88,10 @@ class SmartDelegationService
     /**
      * @return Collection<int, User>
      */
-    private function candidateAssignees(): Collection
+    private function candidateAssignees(User $gestor): Collection
     {
         return User::where('role', 'liderado')
+            ->managedBy($gestor)
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
@@ -100,7 +101,7 @@ class SmartDelegationService
      * @param  array<string, mixed>  $parsed
      * @param  Collection<int, User>  $candidates
      */
-    private function buildContext(string $input, array $parsed, Collection $candidates, ?User $selectedAssignee): string
+    private function buildContext(User $gestor, string $input, array $parsed, Collection $candidates, ?User $selectedAssignee): string
     {
         $lines = [
             'Texto do gestor:',
@@ -119,7 +120,7 @@ class SmartDelegationService
             $lines[] = $this->profileContext($selectedAssignee);
         } else {
             $lines[] = 'Nenhum responsável selecionado. Candidatos disponíveis (ordem de carga):';
-            foreach ($this->performance->workloadDistribution() as $member) {
+            foreach ($this->performance->workloadDistribution($gestor) as $member) {
                 $lines[] = "- [PESSOA_ANONIMA_{$member['member_id']}]: {$member['active_tasks']} ativas, {$member['overdue_tasks']} atrasadas";
             }
         }
@@ -189,9 +190,14 @@ class SmartDelegationService
         $recommended = $this->resolveRecommendedAssignee($recommendedId, $candidates, $selectedAssignee);
 
         $dueAt = $parsed['due_at'];
-        if (! $dueAt && is_numeric($response['due_at_suggestion'] ?? null)) {
-            $dueAt = CarbonImmutable::now()->addDays((int) $response['due_at_suggestion'])->setTime(17, 0);
-        } elseif (! $dueAt) {
+        if (! $dueAt && ! empty($response['due_at_suggestion'])) {
+            if (is_string($response['due_at_suggestion']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $response['due_at_suggestion'])) {
+                $dueAt = CarbonImmutable::parse($response['due_at_suggestion']);
+            } elseif (is_numeric($response['due_at_suggestion'])) {
+                $dueAt = CarbonImmutable::now()->addDays((int) $response['due_at_suggestion'])->setTime(17, 0);
+            }
+        }
+        if (! $dueAt) {
             $dueAt = CarbonImmutable::now()->addDay()->setTime(17, 0);
         }
 
@@ -243,6 +249,11 @@ class SmartDelegationService
 
         $candidate = $candidates->firstWhere('id', (int) $recommendedId);
 
-        return $candidate ?? $candidates->first();
+        // Descartar ID inválido (não enviado como candidato)
+        if (! $candidate) {
+            return $candidates->first();
+        }
+
+        return $candidate;
     }
 }

@@ -16,7 +16,7 @@ class TeamProfileController extends Controller
 {
     public function show(Request $request, User $user, TeamPerformanceService $performance, TeamKnowledgeService $knowledge)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
@@ -24,7 +24,7 @@ class TeamProfileController extends Controller
 
         $profile = $user->teamProfile ?? new TeamMemberProfile(['user_id' => $user->id]);
         $metrics = $performance->memberMetrics($user);
-        $workload = $performance->workloadDistribution();
+        $workload = $performance->workloadDistribution($request->user());
         $documents = $knowledge->documents($user, 10);
 
         return view('team.profile', compact('user', 'profile', 'metrics', 'workload', 'documents'));
@@ -32,7 +32,7 @@ class TeamProfileController extends Controller
 
     public function updateProfile(Request $request, User $user)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
@@ -55,6 +55,7 @@ class TeamProfileController extends Controller
         $profile = TeamMemberProfile::firstOrNew(['user_id' => $user->id]);
         $profile->fill($data);
         $profile->save();
+        $this->markSummaryOutdated($user);
 
         return redirect()->route('team.profile', $user)
             ->with('success', 'Perfil profissional atualizado.');
@@ -62,7 +63,7 @@ class TeamProfileController extends Controller
 
     public function generateSummary(Request $request, User $user, ProfileIntelligenceService $service)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
@@ -80,6 +81,7 @@ class TeamProfileController extends Controller
                 'preferences' => $profile->preferences,
                 'generated_at' => $profile->generated_at?->format('d/m/Y H:i'),
             ],
+            'sources' => $profile->ai_summary_sources ?? [],
             'provider' => $ai->provider()->name(),
             'mock' => $ai->isMock(),
         ]);
@@ -87,7 +89,7 @@ class TeamProfileController extends Controller
 
     public function suggestTasks(Request $request, User $user, TaskSuggestionService $service)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('view-team-profile', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
@@ -111,18 +113,19 @@ class TeamProfileController extends Controller
 
     public function storeDocument(Request $request, User $user, TeamKnowledgeService $knowledge)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('manage-team-documents', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
         }
 
         $request->validate([
-            'document' => ['required', 'file', 'max:10240'],
+            'document' => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx,txt,md,csv'],
             'name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $document = $knowledge->storeDocument($user, $request->file('document'), $request->input('name'));
+        $this->markSummaryOutdated($user);
 
         return redirect()->route('team.profile', $user)
             ->with('success', 'Documento "'.$document->name.'" adicionado ao perfil.');
@@ -130,7 +133,7 @@ class TeamProfileController extends Controller
 
     public function destroyDocument(Request $request, User $user, int $documentId, TeamKnowledgeService $knowledge)
     {
-        Gate::authorize('manage-team');
+        Gate::authorize('manage-team-documents', $user);
 
         if (! $user->isLiderado()) {
             abort(404);
@@ -138,8 +141,17 @@ class TeamProfileController extends Controller
 
         $document = $user->documents()->findOrFail($documentId);
         $knowledge->deleteDocument($document);
+        $this->markSummaryOutdated($user);
 
         return redirect()->route('team.profile', $user)
             ->with('success', 'Documento removido.');
+    }
+
+    private function markSummaryOutdated(User $user): void
+    {
+        TeamMemberProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            ['summary_invalidated_at' => now()],
+        );
     }
 }

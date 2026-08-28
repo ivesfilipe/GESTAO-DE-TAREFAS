@@ -8,7 +8,7 @@
 
 | Ação | Gestor | Liderado (tarefa própria) | Liderado (tarefa de outro) |
 |---|---|---|---|
-| Ver lista de tarefas | Todas | Somente as suas | Nenhuma |
+| Ver lista de tarefas | Somente a própria equipe | Somente as suas | Nenhuma |
 | Criar tarefa | Sim | Não | Não |
 | Definir/alterar responsável | Sim | Não | Não |
 | Alterar prazo/prioridade diretamente | Sim | Não | Não |
@@ -20,9 +20,11 @@
 | Solicitar conclusão | Não | Sim | Não |
 | Aprovar/Reprovar | Sim | Não | Não |
 | Cancelar tarefa | Sim | Não | Não |
-| Ver histórico completo | Sim (todas) | Sim (só das próprias) | Não |
+| Ver histórico completo | Sim (própria equipe) | Sim (só das próprias) | Não |
 | Convidar/desativar usuário | Sim | Não | Não |
 | Ver dashboard consolidado | Sim | Não | Não |
+| Ver perfil/documentos/chunks de liderado | Somente da própria equipe | Não | Não |
+| Usar Copiloto/Radar/Delegação IA | Sim, em modo read-only | Não | Não |
 
 ## Implementação técnica
 - Usar Laravel Policies para cada Model (`TaskPolicy`,
@@ -36,5 +38,10 @@
 ## Princípio geral
 Autorização é sempre verificada no backend, nunca apenas escondendo
 botões no frontend — esconder um botão não impede uma requisição
-manual à rota.
+ manual à rota.
 
+## Isolamento de equipe e IA
+- `users.manager_id` é a fonte de escopo para liderados. Em uma base legada com exatamente um gestor ativo, a migration associa automaticamente os liderados existentes; com mais gestores, a associação deve ser explícita.
+- Consultas de dashboard, relatórios, radar, perfil, API e tools do Copiloto usam o escopo do gestor autenticado.
+- O Copiloto só possui tools de leitura. Criar, atribuir, aprovar, reprovar ou enviar mensagens sempre exige ação humana em rota protegida.
+- Documentos e chunks de liderados não são expostos publicamente e só podem ser recuperados pelo gestor responsável.

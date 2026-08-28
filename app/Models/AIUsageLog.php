@@ -9,7 +9,10 @@ class AIUsageLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_usage_logs';
+
     protected $fillable = [
+        'user_id',
         'provider',
         'model',
         'prompt',
@@ -29,5 +32,10 @@ class AIUsageLog extends Model
             'metadata' => 'array',
             'duration_ms' => 'integer',
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

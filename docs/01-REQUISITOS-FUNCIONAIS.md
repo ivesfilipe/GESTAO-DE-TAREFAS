@@ -24,6 +24,12 @@ no dicionário de dados para rastreabilidade.
   Importante, Urgente, Crítica.
 - **RF-06**: Tarefa sem responsável definido entra no status
   "Não atribuída" e não conta como carga de trabalho de ninguém.
+- **RF-06A**: Tarefa registra tipo, critérios de aceitação e evidências esperadas como listas normalizadas; a criação manual e assistida usam o mesmo contrato.
+
+## Copiloto e memória gerencial
+- **RF-30**: Apenas o gestor consulta Copiloto, radar, delegação assistida e perfis da própria equipe; sugestões nunca executam mutações automaticamente.
+- **RF-31**: Gestor mantém perfil profissional e documentos privados de cada liderado. Arquivos aceitos são extraídos/chunked localmente e a análise gerada informa os documentos fonte.
+- **RF-32**: A IA suporta Groq, OpenAI, Ollama e mock. Sem chave ou sem confirmação ZDR para provider externo, o comportamento é controlado e sem transmissão de contexto real.
 
 ## Ciclo de Vida da Tarefa
 - **RF-07**: Status principal segue a sequência: Não atribuída → Nova →
@@ -93,4 +99,3 @@ no dicionário de dados para rastreabilidade.
 ## Métricas
 - **RF-29**: Apenas reprovações categorizadas como "não atende ao
   solicitado" contam para métricas de desempenho do liderado.
-

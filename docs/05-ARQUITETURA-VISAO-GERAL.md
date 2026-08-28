@@ -23,8 +23,12 @@
   [ Laravel Queue (driver database) ] → processa notificações
   [ Laravel Scheduler ] → cron único → verifica atrasos, escalonamento,
                                         cobranças automáticas
-  [ Laravel Notifications ] → canal in-app nesta V1 (extensível a
-                                e-mail/WhatsApp depois)
+   [ Laravel Notifications ] → canal in-app nesta V1 (extensível a
+                                 e-mail/WhatsApp depois)
+
+   [ AIService ] → [ AIProviderManager ] → Groq | OpenAI | Ollama | Mock
+          │                 │
+          └── ZDR + AIUsageLog (metadados) + memória/chunks locais
 ```
 
 ## Camadas do sistema
@@ -63,7 +67,8 @@
 - `Notificações` — desacoplado, consome eventos dos outros módulos
 - `Auditoria` — consome eventos, nunca é consumida por eles
 - `Dashboard` — somente leitura dos outros módulos
+- `IA` — `AIService` centraliza provider, ZDR e auditoria; `CopilotService` e serviços de perfil/delegação nunca contornam essa fronteira
+- `Memória gerencial` — perfis, documentos privados e chunks locais, isolados pelo vínculo gestor-liderado
 
 Módulos futuros (CRM, financeiro, etc.) devem se conectar apenas por
 eventos, nunca escrevendo diretamente nas tabelas de outro módulo.
-

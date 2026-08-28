@@ -26,6 +26,7 @@ test('gera descricao heuristica sem api key citando o titulo', function () {
 test('gera descricao via llm quando api key presente', function () {
     config(['ai.default' => 'openai']);
     config(['services.openai.key' => 'chave-teste']);
+    config(['ai.zdr.confirmed' => true]);
     Http::fake([
         'api.openai.com/*' => Http::response([
             'choices' => [['message' => ['content' => "Briefing do diretor:\nObjetivo claro e cena montada.\n- Entrega A\n- Entrega B"]]],
